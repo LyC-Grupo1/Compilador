@@ -31,7 +31,7 @@ NUMERO_REAL		({NUMERO}*){CAR_DECIMAL}({NUMERO}*)
 MINUS			[a-z]
 MAYUS			[A-Z]
 LETRA			({MINUS}|{MAYUS})+
-STRING			{CAR_COMILLA}{CARACTER}{CAR_COMILLA}
+CADENA			{CAR_COMILLA}{CARACTER}{CAR_COMILLA}
 CARACTER		({DIGITO}|{LETRA}|{CARACTER_ESP})+
 CARACTER_ESP	[@#()?¿*´{} [],.:;-+$]
 ID				"$"({MINUS}|{MAYUS})+
@@ -43,12 +43,11 @@ INTEGER			"INTEGER"|"integer"
 STRING			"STRING"|"string"
 FLOAT			"FLOAT"|"float"
 WHILE			"WHILE"|"while"
+ENDWHILE		"ENDWHILE"|"endwhile"
 DO				"DO"|"do"
-IF				"IF" |"if"	
+IF				"IF"|"if"
 THEN			"THEN"|"then"
 ELSE			"ELSE"|"else"
-DECVAR			"DECVAR"|"decvar"
-ENDDEF			"ENDDEF"|"enddef"
 BETWEEN			"BETWEEN"|"between"
 OP_SUM			"+"
 OP_RES			"-"
@@ -79,31 +78,25 @@ CAR_LLC			"}"
 CAR_CA			"["
 CAR_CC			"]"
 CAR_COMILLA		"\""
-
-
 %%
 
 {REAL}			{ return REAL; }
 {INTEGER}		{ return INTEGER; }
+{CADENA}		{ return CADENA; }
 {STRING}		{ return STRING; }
 {FLOAT}			{ return FLOAT; }
 {DO}	        { return DO; }
 {WHILE}			{ return WHILE; }
-{IN}	        { return IN; }
 {ENDWHILE}		{ return ENDWHILE; }
 {IF}			{ return IF; }
-{THEN}			{ return THEN; }
 {ELSE}			{ return ELSE; }
-{ENDIF}			{ return ENDIF; }
-{DECVAR}			{return DECVAR;}
-{ENDDEF}			{return ENDDEF;}
-{BETWEEN}			{return OP_SUM;}
-{OP_SUM}			{return OP_SUM;}
-{OP_RES}			{return OP_RES;}
-{OP_MUL}			{return OP_MUL;}
-{OP_DIV}			{return OP_DIV;}
-{OP_IGU}			{return OP_IGU;}
-{OP_ASIG}			{return OP_ASIG;}
+{BETWEEN}			{ return BETWEEN; }
+{OP_SUM}			{ return OP_SUM; }
+{OP_RES}			{ return OP_RES; }
+{OP_MUL}			{ return OP_MUL; }
+{OP_DIV}			{ return OP_DIV; }
+{OP_IGU}			{ return OP_IGU; }
+{OP_ASIG}			{ return OP_ASIG; }
 {COMP_IGU}		{return COMP_IGU;}
 {COMP_DIS}		{return COMP_DIS;}
 {COMP_MAY}		{return COMP_MAY;}
@@ -125,9 +118,7 @@ CAR_COMILLA		"\""
 {CAR_CA}			{return CAR_CA;}
 {CAR_CC}			{return CAR_CC;}
 {CAR_COMILLA}		{return CAR_COMILLA;}
-{COM_ABRE}		{return COM_ABRE;}
-{COM_CIERRA}		{return COM_CIERRA;}
-{COM_BARRA}		{return COM_BARRA;}
+
 {COM_A}	{  }
 {COM_B}	{  }
 {NUMERO}	{ 

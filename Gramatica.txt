@@ -1,23 +1,24 @@
 a=b=c=d=expresion
 
 
-0) P'-> P
-1) P -> id := SENT
-2) SENT -> SENT + EXP
-3) SENT -> SENT - EXP
-4) EXP -> EXP * FACTOR
-5) EXP -> EXP / FACTOR
-6) EXP -> FACTOR
-7) FACTOR -> id | cte | ( EXP )
+   programa: lista OP_ASIG sentencia | BETWEEN CAR_PA ID CAR_COM CAR_CA sentencia CAR_PYC sentencia CAR_CC CAR_PC
+   lista: lista OP_IGU ID | ID
+   sentencia: sentencia OP_SUM expresion
+   sentencia: sentencia OP_RES expresion
+   sentencia: expresion
+   expresion: expresion OP_MUL factor
+   expresion: expresion OP_DIV factor
+   expresion: factor
+   factor: ID | NUMERO | NUMERO_REAL | CAR_PA expresion CAR_PC
 
 
 BETWEEN(a, expresion1, expresion2)
 
-0) P'-> P
-1) P -> BETWEEN(id, SENT, SENT)
-2) SENT -> SENT + EXP
-3) SENT -> SENT - EXP
-4) EXP -> EXP * FACTOR
-5) EXP -> EXP / FACTOR
-6) EXP -> FACTOR
-7) FACTOR -> id | cte | ( EXP )
+
+1) programa: BETWEEN CAR_PA ID CAR_COM CAR_CA sentencia CAR_PYC sentencia CAR_CC CAR_PC
+2) sentencia: sentencia OP_SUM expresion **
+3) sentencia: sentencia OP_RES expresion***
+4) expresion: expresion OP_MUL factor ***
+5) expresion: expresion OP_DIV factor  ***
+6) expresion: factor  ***
+7) factor: ID | NUMERO | NUMERO_REAL | CA_PA expresion CA_PC ***
