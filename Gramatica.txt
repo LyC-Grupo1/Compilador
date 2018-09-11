@@ -1,0 +1,23 @@
+a=b=c=d=expresion
+
+
+0) P'-> P
+1) P -> id := SENT
+2) SENT -> SENT + EXP
+3) SENT -> SENT - EXP
+4) EXP -> EXP * FACTOR
+5) EXP -> EXP / FACTOR
+6) EXP -> FACTOR
+7) FACTOR -> id | cte | ( EXP )
+
+
+BETWEEN(a, expresion1, expresion2)
+
+0) P'-> P
+1) P -> BETWEEN(id, SENT, SENT)
+2) SENT -> SENT + EXP
+3) SENT -> SENT - EXP
+4) EXP -> EXP * FACTOR
+5) EXP -> EXP / FACTOR
+6) EXP -> FACTOR
+7) FACTOR -> id | cte | ( EXP )
