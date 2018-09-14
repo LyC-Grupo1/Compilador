@@ -1,0 +1,7 @@
+Nombre 	 	 Tipo 	 	 Valor 	 	 Longitud
+n
+a
+b
+i
+cadena
+s
