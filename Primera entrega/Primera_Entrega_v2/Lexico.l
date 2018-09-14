@@ -33,33 +33,25 @@ CONST_REAL              {DIGITO}+"."{DIGITO}+
 CONST_INT               {DIGITO}+
 COMENTARIOS             //({LETRA}|{DIGITO}|.)+//
 ID						{LETRA}({LETRA}|{DIGITO}|_)*
-REAL			"REAL"|"real"
-INTEGER			"INTEGER"|"integer"
-STRING			"STRING"|"string"
-FLOAT			"FLOAT"|"float"
-WHILE			"WHILE"|"while"
-ENDWHILE		"ENDWHILE"|"endwhile"
-DO				"DO"|"do"
-IF				"IF"|"if"
-THEN			"THEN"|"then"
-ELSE			"ELSE"|"else"
-BETWEEN			"BETWEEN"|"between"
+REAL			["REAL"|"real"]
+INTEGER			["INTEGER"|"integer"]
+STRING			["STRING"|"string"]
+WHILE			["WHILE"|"while"]
+ENDWHILE		["ENDWHILE"|"endwhile"]
+DO				["DO"|"do"]
+IF				["IF"|"if"]
+THEN			["THEN"|"then"]
+ELSE			["ELSE"|"else"]
+BETWEEN			["BETWEEN"|"between"]
 OP_SUM			"+"
 OP_RES			"-"
 OP_MUL			"*"
 OP_DIV			"/"
 OP_IGU			"="
 OP_ASIG			":="
-AND				"AND"|"&&"|"and"
-OR				"OR"|"or"|"\|\|"
+AND				["AND"|"&&"|"and"]
+OR				["OR"|"or"|"\|\|"]
 OP_COMPARACION          ["<"|"="|">"|"<="|">="|"><"]
-/* Comento porque se nos puede complicar en las relgas: Usamos OP_COMPARACION
-//COMP_IGU		"=="
-//COMP_DIS		"!="
-//COMP_MAY		">"
-//COMP_MEN		"<"
-//COMP_MAYI		">="
-//COMP_MINI		"<=" */
 CAR_DECIMAL		"."
 CAR_PYC			";"
 CAR_COM			","
@@ -75,15 +67,14 @@ CAR_LLC			"}"
 CAR_CA			"["
 CAR_CC			"]"
 CAR_COMILLA		"\""
-
-
 %%
+
+"float"			{ return FLOAT; }
 {REAL}			{ return REAL; }
 {INTEGER}		{ return INTEGER; }
 {STRING}		{ return STRING; }
-{FLOAT}			{ return FLOAT; }
 {WHILE}			{ return WHILE; }
-{ENDWHILE}		{ return ENDWHILE; }
+"endwhile"		{ return ENDWHILE; }
 {DO}			{ return DO; }
 {IF}			{ return IF; }
 {THEN}			{ return THEN; }
