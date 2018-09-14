@@ -10,7 +10,7 @@ struct struct_tablaSimbolos{
 	char longitud[100];
 };
 
-int guardar_TS(char*, char*);
+int push_TS(char*, char*);
 int crear_TS();
 
 int puntero_array = 0;
@@ -108,7 +108,6 @@ CAR_COMILLAS			   ["\""]
 "READ"		{ return READ; }
 "read"		{ return READ; }
 ":="			{ return OP_ASIG;}
-"="                     { return OP_COMPARACION;}
 "+"			{ return OP_SURES;}
 "-"			{ return OP_SURES;}
 "*"			{ return OP_MULTDIV;}
@@ -135,16 +134,16 @@ CAR_COMILLAS			   ["\""]
 "not"                   { return OP_NOT;}
 "BETWEEN"		{ return BETWEEN;}
 "between"		{ return BETWEEN;}
-{ID}			{ guardar_TS("ID", yytext); return ID; }
+{ID}			{ push_TS("ID", yytext); return ID; }
 {CONST_INT}		{ return CONST_INT;}
-{CONST_STR}		{ guardar_TS("CTE_STR", yytext); return CONST_STR;}
+{CONST_STR}		{ push_TS("CTE_STR", yytext); return CONST_STR;}
 {CONST_REAL}	{ return CONST_REAL;}
 {CAR_COMA}		{ return CAR_COMA;}
 {CAR_PUNTO}		{ return CAR_PUNTO;}
 {NUM_INT}	{ 
 				int num = atoi(yytext); 
 				if(num >= 0 && num <= 65535){
-					guardar_TS("CTE_INT", yytext);
+					push_TS("CTE_INT", yytext);
 					return CONST_INT; 
 				}else{
 					printf("Error. Integer fuera de rango.\n");
@@ -157,7 +156,7 @@ CAR_COMILLAS			   ["\""]
 				n = atof(yytext);
 				cota = (3.4)*(exp(38));
 				if(n >= 0 && n <= cota){
-					guardar_TS("CTE_REAL", yytext);
+					push_TS("CTE_REAL", yytext);
 					return CONST_REAL; 
 				}else{
 					printf("Error. Real fuera de rango.\n");
@@ -170,7 +169,7 @@ CAR_COMILLAS			   ["\""]
 "\t"		
 " "
 %%
-int guardar_TS(char* tipo, char* nombre){
+int push_TS(char* tipo, char* nombre){
 	//printf("tipo: %s   -   nombre: %s\n", tipo, nombre);
 	int i;
 	int retornar;

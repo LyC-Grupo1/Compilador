@@ -28,4 +28,8 @@
 
 *** TEMAS ESPECIALES ***
 	. BETWEEN (OK)
-	. ASIGNACION MULTIPLE (FALTA)
+	. ASIGNACION MULTIPLE (OK)
+
+
+*** DETALLES QUE FALTAN ***
+Los tipos de datos FLOAT/REAL no cumplen con la condicion .9999 

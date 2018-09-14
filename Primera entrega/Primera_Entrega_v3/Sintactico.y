@@ -70,7 +70,7 @@ lista_var:
 	 ID
 	 |ID CAR_COMA lista_var 
  	 ;
-
+	 
 algoritmo: 
          BEGINP{printf("      COMIENZO de BLOQUES\n");} bloque ENDP
          ;
@@ -84,7 +84,8 @@ sentencia:
   	 ciclo
 	 |seleccion  
 	 |asignacion
-     |entrada_salida
+     |asignacion_multiple
+	 |entrada_salida
 	 |between	 
 	 ;
 
@@ -94,9 +95,14 @@ ciclo:
      ;
 
 asignacion: 
-          ID OP_ASIG expresion {printf("    ASIGNACION\n");}
+          ID OP_ASIG expresion {printf("    ASIGNACION\n");} 		  
 	  ;
-
+	  
+asignacion_multiple: 
+        ID OP_ASIG 	asignacion_multiple	{printf("    ASIGNACION MULTIPLE\n");} 
+		| ID OP_ASIG expresion {printf("    ASIGNACION MULTIPLE\n");}
+	  ;
+	  
 entrada_salida: 
 	READ{printf("\t\tREAD\n"); } ID 
 	|WRITE{printf("\t\tWRITE\n");} ID 

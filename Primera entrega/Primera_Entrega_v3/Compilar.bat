@@ -13,6 +13,7 @@ Compilador.exe Prueba3-DEFVAR.txt
 Compilador.exe Prueba4-CONDICIONES.txt
 Compilador.exe Prueba5-WRITE-READ.txt
 Compilador.exe Prueba6-BETWEEN.txt
+Compilador.exe Prueba7-ASIGNACION-MULTIPLE.txt
 
 del lex.yy.c
 del y.tab.c
