@@ -26,12 +26,12 @@ DIGITO			[0-9]
 NUM_INT			({DIGITO})+
 NUM_REAL		({DIGITO})+"."({DIGITO})*|({DIGITO})*"."({DIGITO})+
 LETRA			[a-zA-Z]
-CONST_STR               "({LETRA}|{DIGITO}|.)+"
+CONST_STR               {CAR_COMILLAS}({LETRA}|{DIGITO}|" "|_|@|%|{OP_COMPARACION}|{OP_SURES}|{OP_MULTDIV})+{CAR_COMILLAS}
 COMENTARIO_SIMPLE		"-/"({LETRA}|{DIGITO}|_|" "|":"|"="|".")*"/-"
 COMENTARIO_DOBLE		"-/"({LETRA}|{DIGITO}|_|" "|":"|"="|"."|{COMENTARIO_SIMPLE})*"/-"
 CONST_REAL              {DIGITO}*"."{DIGITO}+
 CONST_INT               {DIGITO}+
-ID					{LETRA}({LETRA}|{DIGITO}|_)*
+ID						{LETRA}({LETRA}|{DIGITO}|_)*
 OP_COMPARACION          ["<"|"="|">"|"<="|">="|"><"]
 OP_SURES                ["+"|"-"]
 OP_MULTDIV              ["*"|"/"]
@@ -40,13 +40,15 @@ OP_DOSP   				[":"]
 OP_AND					["AND"|"and"|"&&"]
 OP_OR					["OR"|"or"|"||"]
 OP_NOT					["NOT"|"not"]
+BETWEEN					["BETWEEN"|"between"]
 CAR_COMA                   [","]
+CAR_PYC                    [";"]
 CAR_PUNTO                  ["."]
 CAR_CA                     ["["]
 CAR_CC                     ["]"]
 CAR_PA                     ["("]
 CAR_PC                     [")"]
-
+CAR_COMILLAS			   ["\""]
 %%
 "program"		{ return PROGRAM;}
 "DEFVAR"		{ return DEFVAR;}
@@ -55,6 +57,11 @@ CAR_PC                     [")"]
 "enddef"		{ return ENDDEF;}
 "beginp"		{ return BEGINP;}
 "endp"			{ 					
+					if (crear_TS() == 0)
+						printf("No se pudo crear el archivo de tabla de símbolos\n");
+					return ENDP; 	
+				}
+"ENDP"			{ 					
 					if (crear_TS() == 0)
 						printf("No se pudo crear el archivo de tabla de símbolos\n");
 					return ENDP; 	
@@ -79,22 +86,38 @@ CAR_PC                     [")"]
 "endif"	      { return ENDIF;}
 "ENDIF"	      { return ENDIF;}
 "for"			{ return FOR;}
+"FOR"			{ return FOR;}
 "to"		      { return TO;}
+"TO"		      { return TO;}
 "do"	         	{ return DO;}
+"DO"	         	{ return DO;}
 "endfor"		{ return ENDFOR;}
+"ENDFOR"		{ return ENDFOR;}
 "while"	      {return WHILE;}
+"WHILE"	      {return WHILE;}
 "in"	         	{return IN;}
+"IN"	         	{return IN;}
 "endw"  		{ return ENDW;}
+"ENDW"  		{ return ENDW;}
 "repeat"		{ return REPEAT;}
+"REPEAT"		{ return REPEAT;}
 "until"		{ return UNTIL;}
+"UNTIL"		{ return UNTIL;}
+"WRITE"		{ return WRITE; }
+"write"		{ return WRITE; }
+"READ"		{ return READ; }
+"read"		{ return READ; }
 ":="			{ return OP_ASIG;}
 "="                     { return OP_COMPARACION;}
 "+"			{ return OP_SURES;}
 "-"			{ return OP_SURES;}
 "*"			{ return OP_MULTDIV;}
 "/"			{ return OP_MULTDIV;}
+"["			{ return CAR_CA;}
+"]"			{ return CAR_CC;}
 "("			{ return CAR_PA;}
 ")"			{ return CAR_PC;}
+";"			{ return CAR_PYC;}
 ">"                     { return OP_COMPARACION;}
 ">="                    { return OP_COMPARACION;}
 "<"                     { return OP_COMPARACION;}
@@ -110,6 +133,8 @@ CAR_PC                     [")"]
 "||"                   { return OP_OR;}
 "NOT"                   { return OP_NOT;}
 "not"                   { return OP_NOT;}
+"BETWEEN"		{ return BETWEEN;}
+"between"		{ return BETWEEN;}
 {ID}			{ guardar_TS("ID", yytext); return ID; }
 {CONST_INT}		{ return CONST_INT;}
 {CONST_STR}		{ guardar_TS("CTE_STR", yytext); return CONST_STR;}
@@ -128,9 +153,10 @@ CAR_PC                     [")"]
 				}
 			}
 {NUM_REAL}	{ 
-				double num = atof(yytext);
-				double cotaMayor = (3.4)*(exp(38));
-				if(num >= 0 && num <= cotaMayor){
+				double n, cota;
+				n = atof(yytext);
+				cota = (3.4)*(exp(38));
+				if(n >= 0 && n <= cota){
 					guardar_TS("CTE_REAL", yytext);
 					return CONST_REAL; 
 				}else{

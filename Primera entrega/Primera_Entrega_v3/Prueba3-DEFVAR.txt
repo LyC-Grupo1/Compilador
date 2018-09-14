@@ -2,7 +2,7 @@ program
 DEFVAR	
  n : FLOAT
  a,b,i : INTEGER
- cadena, s : STRING
+ cadena1, s : STRING
 	a1, b2 : REAL
 enddef
 

@@ -34,10 +34,16 @@ FILE  *yyin;
 %token OP_MULTDIV
 %token CAR_COMA
 %token CAR_PUNTO
-%token CAR_PA CAR_PC
-%token CAR_CA CAR_CC
+%token CAR_PYC
+%token CAR_PA 
+%token CAR_PC
+%token CAR_CA 
+%token CAR_CC 
 %token LONG
+%token BETWEEN
 %token IN
+%token WRITE
+%token READ
 
 
 %%
@@ -56,8 +62,8 @@ declaraciones:
 
 declaracion:  
            lista_var OP_DOSP REAL
-	   | lista_var OP_DOSP STRING
-           | lista_var OP_DOSP INTEGER
+			| lista_var OP_DOSP STRING
+			| lista_var OP_DOSP INTEGER
            ;
 
 lista_var:  
@@ -78,7 +84,8 @@ sentencia:
   	 ciclo
 	 |seleccion  
 	 |asignacion
-         
+     |entrada_salida
+	 |between	 
 	 ;
 
 ciclo:
@@ -90,6 +97,11 @@ asignacion:
           ID OP_ASIG expresion {printf("    ASIGNACION\n");}
 	  ;
 
+entrada_salida: 
+	READ{printf("\t\tREAD\n"); } ID 
+	|WRITE{printf("\t\tWRITE\n");} ID 
+	|WRITE{printf("\t\tWRITE\n");} CONST_STR
+;
 
 seleccion: 
     	 IF  CAR_PA condicion CAR_PC THEN bloque ENDIF{printf("     IF\n");}
@@ -98,8 +110,8 @@ seleccion:
 
 condicion:
          comparacion 
-         |comparacion OP_AND comparacion{printf("     CONDICION DOBLE\n");}
-		 |comparacion OP_OR  comparacion{printf("     CONDICION DOBLE\n");}
+         |comparacion OP_AND comparacion{printf("     CONDICION DOBLE AND\n");}
+		 |comparacion OP_OR  comparacion{printf("     CONDICION DOBLE OR\n");}
 	 ;
 
 comparacion:
@@ -108,9 +120,13 @@ comparacion:
 
 expresion:
          termino
-	 |expresion OP_SURES termino
+		|expresion OP_SURES termino
  	 ;
-
+	 
+between: 
+	BETWEEN CAR_PA ID CAR_COMA CAR_CA expresion CAR_PYC expresion CAR_CC CAR_PC 
+	 ;
+	 
 termino: 
        factor
        |termino OP_MULTDIV factor
@@ -120,7 +136,8 @@ factor:
       ID
       | CONST_INT
       | CONST_REAL
-      | CONST_STR  
+      | CONST_STR 
+	  | CAR_PA expresion CAR_PC 	  
       ;
 
 %%

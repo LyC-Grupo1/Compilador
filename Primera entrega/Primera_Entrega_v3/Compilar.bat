@@ -11,10 +11,13 @@ Compilador.exe Prueba1-WHILE.txt
 Compilador.exe Prueba2-COMENTARIOS.txt
 Compilador.exe Prueba3-DEFVAR.txt
 Compilador.exe Prueba4-CONDICIONES.txt
+Compilador.exe Prueba5-WRITE-READ.txt
+Compilador.exe Prueba6-BETWEEN.txt
+
 del lex.yy.c
 del y.tab.c
 del y.output
 del y.tab.h
-del TPFinal.exe
+del Compilador.exe
 
 pause

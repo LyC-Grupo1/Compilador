@@ -2,6 +2,6 @@ Nombre 	 	 Tipo 	 	 Valor 	 	 Longitud
 n
 a
 b
-i
+i1
 cadena
 s
