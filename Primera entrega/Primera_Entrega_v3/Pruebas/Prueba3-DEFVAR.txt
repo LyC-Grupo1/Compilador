@@ -4,7 +4,7 @@ DEFVAR
  a,b,i : INTEGER
  cadena1, s : STRING
 	a1, b2 : REAL
-enddef
+ENDDEC
 
 
 beginp 

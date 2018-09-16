@@ -3,7 +3,7 @@ DEFVAR
  n : FLOAT
  a,b,i1 : INTEGER
  cadena, s : STRING
-enddef
+ENDDEC
 
 
 beginp 

@@ -2,8 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
+#include <string.h>
 #include "y.tab.h"
-struct struct_tablaSimbolos{
+#define COTA_INT 2147483647
+#define COTA_FLOAT	3.402823E+38
+#define TODO_OK 1
+#define ERROR 0
+
+struct struct_tablaSimbolos
+{
 	char nombre[100];
 	char tipo[100];
 	char valor[50];
@@ -16,7 +23,7 @@ int crear_TS();
 int puntero_array = 0;
 FILE  *yyin;
 int yylval;
-struct struct_tablaSimbolos tablaSimbolos[1000];
+struct struct_tablaSimbolos tablaSimbolos[10000];
 
 %}
 %option noyywrap  
@@ -26,9 +33,9 @@ DIGITO			[0-9]
 NUM_INT			({DIGITO})+
 NUM_REAL		({DIGITO})+"."({DIGITO})*|({DIGITO})*"."({DIGITO})+
 LETRA			[a-zA-Z]
-CONST_STR               {CAR_COMILLAS}({LETRA}|{DIGITO}|" "|_|@|%|{OP_COMPARACION}|{OP_SURES}|{OP_MULTDIV})+{CAR_COMILLAS}
 COMENTARIO_SIMPLE		"-/"({LETRA}|{DIGITO}|_|" "|":"|"="|".")*"/-"
 COMENTARIO_DOBLE		"-/"({LETRA}|{DIGITO}|_|" "|":"|"="|"."|{COMENTARIO_SIMPLE})*"/-"
+CONST_STR               {CAR_COMILLAS}({LETRA}|{DIGITO}|" "|_|@|%|{OP_COMPARACION}|{OP_SURES}|{OP_MULTDIV})+{CAR_COMILLAS}
 CONST_REAL              {DIGITO}*"."{DIGITO}+
 CONST_INT               {DIGITO}+
 ID						{LETRA}({LETRA}|{DIGITO}|_)*
@@ -51,19 +58,23 @@ CAR_PC                     [")"]
 CAR_COMILLAS			   ["\""]
 %%
 "program"		{ return PROGRAM;}
-"DEFVAR"		{ return DEFVAR;}
-"defvar"		{ return DEFVAR;}
-"ENDDEF"		{ return ENDDEF;}
-"enddef"		{ return ENDDEF;}
+"DECVAR"		{ return DECVAR;}
+"decvar"		{ return DECVAR;}
+"ENDDEC"		{ return ENDDEC;}
+"enddec"		{ return ENDDEC;}
 "beginp"		{ return BEGINP;}
 "endp"			{ 					
 					if (crear_TS() == 0)
-						printf("No se pudo crear el archivo de tabla de símbolos\n");
+					{
+						printf("Error al crear tabla de símbolos\n");
+					}
 					return ENDP; 	
 				}
 "ENDP"			{ 					
 					if (crear_TS() == 0)
-						printf("No se pudo crear el archivo de tabla de símbolos\n");
+					{
+						printf("Error al crear tabla de símbolos\n");
+					}
 					return ENDP; 	
 				}
 {COMENTARIO_DOBLE}	{  }
@@ -136,30 +147,30 @@ CAR_COMILLAS			   ["\""]
 "between"		{ return BETWEEN;}
 {ID}			{ push_TS("ID", yytext); return ID; }
 {CONST_INT}		{ return CONST_INT;}
-{CONST_STR}		{ push_TS("CTE_STR", yytext); return CONST_STR;}
+{CONST_STR}		{ push_TS("CONST_STR", yytext); return CONST_STR;}
 {CONST_REAL}	{ return CONST_REAL;}
 {CAR_COMA}		{ return CAR_COMA;}
 {CAR_PUNTO}		{ return CAR_PUNTO;}
 {NUM_INT}	{ 
 				int num = atoi(yytext); 
-				if(num >= 0 && num <= 65535){
-					push_TS("CTE_INT", yytext);
+				if(num >= 0 && num <= COTA_INT){
+					push_TS("CONST_INT", yytext);
 					return CONST_INT; 
 				}else{
-					printf("Error. Integer fuera de rango.\n");
+					printf("ERROR - Int fuera de rango.\n");
 					system ("Pause");
 					exit(1);
 				}
 			}
 {NUM_REAL}	{ 
-				double n, cota;
+				double n;
 				n = atof(yytext);
-				cota = (3.4)*(exp(38));
-				if(n >= 0 && n <= cota){
-					push_TS("CTE_REAL", yytext);
+				
+				if(n >= 0 && n <= COTA_FLOAT){
+					push_TS("CONST_REAL", yytext);
 					return CONST_REAL; 
 				}else{
-					printf("Error. Real fuera de rango.\n");
+					printf("ERROR - Real fuera de rango.\n");
 					system ("Pause");
 					exit(2);
 				}
@@ -168,41 +179,49 @@ CAR_COMILLAS			   ["\""]
 "\n"      		
 "\t"		
 " "
+
 %%
-int push_TS(char* tipo, char* nombre){
-	//printf("tipo: %s   -   nombre: %s\n", tipo, nombre);
-	int i;
-	int retornar;
-	for(i = 0; i < puntero_array; i++){
-		if(strcmp(tablaSimbolos[i].nombre, nombre) == 0){
-			//printf("lex: %s   -   tipo: %s   -   pos: %d\n", nombre, tipo, i);
+int push_TS(char* tipo, char* nombre)
+{
+	int i, posicion;
+	
+	for(i = 0; i < puntero_array; i++)
+	{
+		if(strcmp(tablaSimbolos[i].nombre, nombre) == 0)
+		{
 			return i;
 		}
 	}
 	strcpy(tablaSimbolos[puntero_array].tipo, tipo);
 	strcpy(tablaSimbolos[puntero_array].nombre, nombre);
-	retornar = puntero_array;
+	posicion = puntero_array;
 	puntero_array++;
-	//printf("lex: %s   -   tipo: %s   -   pos: %d\n", nombre, tipo, i);
-	return retornar;
+	return posicion;
 }
 
-int crear_TS(){
-	FILE *pf; 
+int crear_TS()
+{
+	FILE *archivo; 
 	int i;
-	pf = fopen("ts.txt","w"); 
+	archivo = fopen("ts.txt","w"); 
 
-	if (!pf)
-		return 0;
+	if (!archivo){	return ERROR; }
 
-	fprintf(pf, "Nombre \t \t Tipo \t \t Valor \t \t Longitud\n");
+	fprintf(archivo, "Nombre \t \t Tipo \t \t Valor \t \t Longitud\n");
+	
 	for (i = 0; i < puntero_array; i++)
-		if (strcmp(tablaSimbolos[i].tipo, "ID") == 0 )  
-			fprintf(pf,"%s\n", tablaSimbolos[i].nombre);
+	{
+		if (strcmp(tablaSimbolos[i].tipo, "ID") == 0 )
+		{  
+			fprintf(archivo,"%s\n", tablaSimbolos[i].nombre);
+		}
 		else
-			fprintf(pf,"_%s\n", tablaSimbolos[i].nombre);
-	fclose(pf); 
+		{
+			fprintf(archivo,"_%s\n", tablaSimbolos[i].nombre);
+		}
+	}
+	fclose(archivo); 
 
-	return 1;
+	return TODO_OK;
 }
 

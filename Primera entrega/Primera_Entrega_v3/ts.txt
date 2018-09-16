@@ -2,9 +2,13 @@ Nombre 	 	 Tipo 	 	 Valor 	 	 Longitud
 n
 a
 b
-c
-i1
-e
+i
 cadena
 s
+c
 i11
+e
+_"ewr"
+i1
+_"@%asdr"
+_"@% > = FA <asdr"

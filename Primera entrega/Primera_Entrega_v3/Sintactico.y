@@ -9,8 +9,8 @@ FILE  *yyin;
 %}
 
 %token PROGRAM
-%token DEFVAR
-%token ENDDEF
+%token DECVAR
+%token ENDDEC
 %token CONST_INT
 %token CONST_REAL
 %token CONST_STR
@@ -48,11 +48,11 @@ FILE  *yyin;
 
 %%
 programa:  	   
-	PROGRAM {printf(" Inicia COMPILADOR\n");} est_declaracion algoritmo    
-	{printf(" Fin COMPILADOR ok\n");};
+	PROGRAM {printf("\tInicia el COMPILADOR\n");} est_declaracion algoritmo    
+	{printf("\tFin COMPILADOR ok\n");};
 
 est_declaracion:
-	DEFVAR {printf("     DECLARACIONES\n");} declaraciones ENDDEF {printf(" Fin de las Declaraciones\n");}
+	DECVAR {printf("\t\tDECLARACIONES\n");} declaraciones ENDDEC {printf("\tFin de las Declaraciones\n");}
         ;
 
 declaraciones:         	        	
@@ -72,7 +72,7 @@ lista_var:
  	 ;
 	 
 algoritmo: 
-         BEGINP{printf("      COMIENZO de BLOQUES\n");} bloque ENDP
+         BEGINP{printf("\tCOMIENZO de BLOQUES\n");} bloque ENDP
          ;
 
 bloque:  
@@ -90,17 +90,17 @@ sentencia:
 	 ;
 
 ciclo:
-     REPEAT { printf("     REPEAT\n");}bloque UNTIL condicion | 
-	 WHILE { printf("	WHILE\n");}CAR_PA condicion CAR_PC bloque ENDW 
+     REPEAT { printf("\t\tREPEAT\n");}bloque UNTIL condicion | { printf("\t\tFIN DEL REPEAT\n");}
+	 WHILE { printf("\t\tWHILE\n");}CAR_PA condicion CAR_PC bloque ENDW{ printf("\t\tFIN DEL WHILE\n");}
      ;
 
 asignacion: 
-          ID OP_ASIG expresion {printf("    ASIGNACION\n");} 		  
+          ID OP_ASIG expresion {printf("\t\tASIGNACION\n");} 		  
 	  ;
 	  
 asignacion_multiple: 
-        ID OP_ASIG 	asignacion_multiple	{printf("    ASIGNACION MULTIPLE\n");} 
-		| ID OP_ASIG expresion {printf("    ASIGNACION MULTIPLE\n");}
+        ID OP_ASIG 	asignacion_multiple	{printf("\t\tASIGNACION MULTIPLE\n");} 
+		| ID OP_ASIG expresion {printf("\t\tASIGNACION MULTIPLE\n");}
 	  ;
 	  
 entrada_salida: 
@@ -110,14 +110,14 @@ entrada_salida:
 ;
 
 seleccion: 
-    	 IF  CAR_PA condicion CAR_PC THEN bloque ENDIF{printf("     IF\n");}
-		| IF  CAR_PA condicion CAR_PC THEN bloque ELSE bloque ENDIF {printf("     IF con ELSE\n");}	 
+    	 IF CAR_PA condicion CAR_PC THEN bloque ENDIF{printf("\t\tIF\n");}
+		| IF CAR_PA condicion CAR_PC THEN bloque ELSE bloque ENDIF {printf("\t\t IF CON ELSE\n");}	 
 ;
 
 condicion:
          comparacion 
-         |comparacion OP_AND comparacion{printf("     CONDICION DOBLE AND\n");}
-		 |comparacion OP_OR  comparacion{printf("     CONDICION DOBLE OR\n");}
+         |comparacion OP_AND comparacion{printf("\t\tCONDICION DOBLE AND\n");}
+		 |comparacion OP_OR  comparacion{printf("\t\tCONDICION DOBLE OR\n");}
 	 ;
 
 comparacion:
@@ -130,7 +130,7 @@ expresion:
  	 ;
 	 
 between: 
-	BETWEEN CAR_PA ID CAR_COMA CAR_CA expresion CAR_PYC expresion CAR_CC CAR_PC 
+	BETWEEN CAR_PA ID CAR_COMA CAR_CA expresion CAR_PYC expresion CAR_CC CAR_PC {printf("\t\tBETWEEN\n");}
 	 ;
 	 
 termino: 
