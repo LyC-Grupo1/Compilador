@@ -8,6 +8,7 @@ FILE  *yyin;
 
 %}
 
+%start programa
 %token PROGRAM
 %token DECVAR
 %token ENDDEC
@@ -90,8 +91,8 @@ sentencia:
 	 ;
 
 ciclo:
-     REPEAT { printf("\t\tREPEAT\n");}bloque UNTIL condicion | { printf("\t\tFIN DEL REPEAT\n");}
-	 WHILE { printf("\t\tWHILE\n");}CAR_PA condicion CAR_PC bloque ENDW{ printf("\t\tFIN DEL WHILE\n");}
+     REPEAT { printf("\t\tREPEAT\n");}bloque UNTIL condicion { printf("\t\tFIN DEL REPEAT\n");}
+	 | WHILE { printf("\t\tWHILE\n");}CAR_PA condicion CAR_PC bloque ENDW{ printf("\t\tFIN DEL WHILE\n");}
      ;
 
 asignacion: 
