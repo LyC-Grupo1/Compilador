@@ -6,8 +6,6 @@ i
 cadena
 s
 c
-i11
-e
 _"ewr"
 i1
 _"@%asdr"
