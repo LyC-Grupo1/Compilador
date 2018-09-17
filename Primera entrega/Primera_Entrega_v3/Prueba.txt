@@ -7,11 +7,11 @@
 -/ TROTTA, MAURO /-
 
 program  
-DECVAR	
+DEFVAR	
  n : FLOAT
  a,b,i : INTEGER
  cadena, s : STRING
-enddec
+enddef
 
 
 beginp 

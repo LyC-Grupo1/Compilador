@@ -12,6 +12,8 @@ FILE  *yyin;
 %token PROGRAM
 %token DECVAR
 %token ENDDEC
+%token DEFVAR
+%token ENDDEF
 %token CONST_INT
 %token CONST_REAL
 %token CONST_STR
@@ -55,6 +57,10 @@ programa:
 est_declaracion:
 	DECVAR {printf("\t\tDECLARACIONES\n");} declaraciones ENDDEC {printf("\tFin de las Declaraciones\n");}
         ;
+		
+est_declaracion:
+	DEFVAR {printf("\t\tDECLARACIONES DEF\n");} declaraciones ENDDEF {printf("\tFin de las Declaraciones DEF\n");}
+        ;
 
 declaraciones:         	        	
              declaracion
@@ -69,7 +75,7 @@ declaracion:
 
 lista_var:  
 	 ID
-	 |ID CAR_COMA lista_var 
+	 | lista_var CAR_COMA ID   
  	 ;
 	 
 algoritmo: 
@@ -85,7 +91,7 @@ sentencia:
   	 ciclo
 	 |seleccion  
 	 |asignacion
-     |asignacion_multiple
+     /*|asignacion_multiple*/
 	 |entrada_salida
 	 |between	 
 	 ;
@@ -94,7 +100,7 @@ ciclo:
      REPEAT { printf("\t\tREPEAT\n");}bloque UNTIL condicion { printf("\t\tFIN DEL REPEAT\n");}
 	 | WHILE { printf("\t\tWHILE\n");}CAR_PA condicion CAR_PC bloque ENDW{ printf("\t\tFIN DEL WHILE\n");}
      ;
-
+/*
 asignacion: 
           ID OP_ASIG expresion {printf("\t\tASIGNACION\n");} 		  
 	  ;
@@ -103,6 +109,15 @@ asignacion_multiple:
         ID OP_ASIG 	asignacion_multiple	{printf("\t\tASIGNACION MULTIPLE\n");} 
 		| ID OP_ASIG expresion {printf("\t\tASIGNACION MULTIPLE\n");}
 	  ;
+*/
+asignacion:
+			lista_id OP_ASIG expresion {printf("\t\tFIN LINEA ASIGNACION\n");}
+	  ;
+
+lista_id:
+			lista_id OP_ASIG ID 
+			| ID 
+		;
 	  
 entrada_salida: 
 	READ{printf("\t\tREAD\n"); } ID 

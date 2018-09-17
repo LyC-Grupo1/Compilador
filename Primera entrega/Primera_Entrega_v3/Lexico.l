@@ -62,6 +62,10 @@ CAR_COMILLAS			   ["\""]
 "decvar"		{ return DECVAR;}
 "ENDDEC"		{ return ENDDEC;}
 "enddec"		{ return ENDDEC;}
+"DEFVAR"		{ return DEFVAR;}
+"defvar"		{ return DEFVAR;}
+"ENDDEF"		{ return ENDDEF;}
+"enddef"		{ return ENDDEF;}
 "beginp"		{ return BEGINP;}
 "endp"			{ 					
 					if (crear_TS() == 0)
