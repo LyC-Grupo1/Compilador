@@ -87,7 +87,7 @@ declaracion:
            ;
 
 lista_var:  
-	 ID {fprintf(fIntermedia,"%i-ID | ",&pos_actual);}
+	 ID {fprintf(fIntermedia,"%i-ID | ",pos_actual);}
 	 | lista_var CAR_COMA ID   
  	 ;
 	 
