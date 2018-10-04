@@ -30,8 +30,8 @@ struct struct_tablaSimbolos tablaSimbolos[10000];
 %option yylineno 
 
 DIGITO			[0-9]
-NUM_INT			({DIGITO})+
-NUM_REAL		({DIGITO})+"."({DIGITO})*|({DIGITO})*"."({DIGITO})+
+NUM_INT			"-"?({DIGITO})+
+NUM_REAL		"-"?({DIGITO})+"."({DIGITO})*|({DIGITO})*"."({DIGITO})+
 LETRA			[a-zA-Z]
 COMENTARIO_SIMPLE		"-/"({LETRA}|{DIGITO}|_|" "|":"|"="|"."|"-"|",")*"/-"
 COMENTARIO_DOBLE		"-/"({LETRA}|{DIGITO}|_|" "|":"|"="|"."|"-"|","|{COMENTARIO_SIMPLE})*"/-"
@@ -167,7 +167,7 @@ CAR_COMILLAS			   ["\""]
 {CAR_PUNTO}		{ return CAR_PUNTO;}
 {NUM_INT}	{ 
 				int num = atoi(yytext); 
-				if(num >= 0 && num <= COTA_INT){
+				if(num >= COTA_INT*(-1) && num <= COTA_INT){
 					push_TS("CONST_INT", yytext);
 					return CONST_INT; 
 				}else{
@@ -180,7 +180,7 @@ CAR_COMILLAS			   ["\""]
 				double n;
 				n = atof(yytext);
 				
-				if(n >= 0 && n <= COTA_FLOAT){
+				if(n >= COTA_FLOAT*(-1) && n <= COTA_FLOAT){
 					push_TS("CONST_REAL", yytext);
 					return CONST_REAL; 
 				}else{
