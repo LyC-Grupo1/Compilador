@@ -151,7 +151,17 @@ CAR_COMILLAS			   ["\""]
 "between"		{ return BETWEEN;}
 {ID}			{ push_TS("ID", yytext); return ID; }
 {CONST_INT}		{ return CONST_INT;}
-{CONST_STR}		{ push_TS("CONST_STR", yytext); return CONST_STR;}
+{CONST_STR}		{ 
+					int cantCaracteres = strlen(yytext);
+					if(cantCaracteres <= 200) {
+						push_TS("CONST_STR", yytext);
+						return CONST_STR;
+					} else {
+						printf("ERROR - String muy largo. Maximo 200 caracteres\n");
+						system ("Pause");
+						exit(3);
+					}
+				}
 {CONST_REAL}	{ return CONST_REAL;}
 {CAR_COMA}		{ return CAR_COMA;}
 {CAR_PUNTO}		{ return CAR_PUNTO;}
