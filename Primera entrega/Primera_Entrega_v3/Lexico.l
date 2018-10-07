@@ -33,8 +33,8 @@ DIGITO			[0-9]
 NUM_INT			"-"?({DIGITO})+
 NUM_REAL		"-"?({DIGITO})+"."({DIGITO})*|({DIGITO})*"."({DIGITO})+
 LETRA			[a-zA-Z]
-COMENTARIO_SIMPLE		"-/"({LETRA}|{DIGITO}|_|" "|":"|"="|"."|"-"|",")*"/-"
-COMENTARIO_DOBLE		"-/"({LETRA}|{DIGITO}|_|" "|":"|"="|"."|"-"|","|{COMENTARIO_SIMPLE})*"/-"
+COMENTARIO_SIMPLE		"-/"(.|\s)*?"/-"
+COMENTARIO_DOBLE		"-/"({LETRA}|{DIGITO}|_|" "|":"|"="|"."|"-"|","|"\n"|{COMENTARIO_SIMPLE})*"/-"
 CONST_STR               {CAR_COMILLAS}({LETRA}|{DIGITO}|" "|_|@|%|{OP_COMPARACION}|{OP_SURES}|{OP_MULTDIV})*{CAR_COMILLAS}
 CONST_REAL              ({DIGITO}*"."{DIGITO}+)|({DIGITO}+"."{DIGITO}*)
 CONST_INT               {DIGITO}+
@@ -149,7 +149,17 @@ CAR_COMILLAS			   ["\""]
 "not"                   { return OP_NOT;}
 "BETWEEN"		{ return BETWEEN;}
 "between"		{ return BETWEEN;}
-{ID}			{ push_TS("ID", yytext); return ID; }
+{ID}			{
+					int cantCaracteres = strlen(yytext);
+					if(cantCaracteres <= 20) {
+						push_TS("ID", yytext); 
+						return ID; 
+					} else {
+						printf("ERROR - Nombre de variable muy largo. Maximo 20 caracteres\n");
+						system ("Pause");
+						exit(5);
+					}
+				}
 {CONST_INT}		{ return CONST_INT;}
 {CONST_STR}		{ 
 					int cantCaracteres = strlen(yytext);
@@ -193,7 +203,8 @@ CAR_COMILLAS			   ["\""]
 "\n"      		
 "\t"		
 " "
-
+"\r\n"
+.    { printf("Caracter invalido!");  exit(6);}
 %%
 int push_TS(char* tipo, char* nombre)
 {

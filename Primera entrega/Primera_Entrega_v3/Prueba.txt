@@ -20,14 +20,25 @@ a:=15
 n:= 99.99
 n:= .99
 n:= 99.
+n:=-542.43
+s:=""
 
 while (a<7)
 	i:=5 + b
 endw
 
--/ COMENTARIOS/-
--/ COMENTARIOS -/ANIDADOS /-/-
+-/ COMENTARIO
+SIMPLE MAS DE UNA LINEA
+/-
 
+
+-/ COMENTARIOS
+CON MAS DE UNA LINEA 
+-/ANIDADOS /-
+Y ANIDADOS
+/-
+
+-/COMENTARIOS CON CARACTER ESPECIAL "·$"% /-
 
 -/ CONDICION 1 /-
 if (i=15 && a=4) THEN
@@ -81,4 +92,5 @@ write i1
 write "@%asdr"
 write "@% > = FA <asdr"
 
+?
 endp
