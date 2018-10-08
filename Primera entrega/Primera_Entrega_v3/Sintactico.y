@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <conio.h>
 #include "y.tab.h"
+int yyerror();
+int yylex();
 int yystopparser=0;
 FILE  *yyin;
 
@@ -33,8 +35,10 @@ FILE  *yyin;
 %token OP_COMPARACION
 %token OP_ASIG 
 %token OP_DOSP
-%token OP_SURES
-%token OP_MULTDIV
+%token OP_SUM
+%token OP_RES
+%token OP_MUL
+%token OP_DIV
 %token CAR_COMA
 %token CAR_PUNTO
 %token CAR_PYC
@@ -126,14 +130,15 @@ entrada_salida:
 ;
 
 seleccion: 
-    	 IF CAR_PA condicion CAR_PC THEN bloque ENDIF{printf("\t\tIF\n");}
-		| IF CAR_PA condicion CAR_PC THEN bloque ELSE bloque ENDIF {printf("\t\t IF CON ELSE\n");}	 
+    	 IF{printf("\t\tIF\n");} CAR_PA condicion CAR_PC THEN bloque ENDIF{printf("\t\tENDIF\n");}
+		| IF{printf("\t\tIF\n");} CAR_PA condicion CAR_PC THEN bloque ELSE bloque ENDIF {printf("\t\t IF CON ELSE\n");}	 
 ;
 
 condicion:
          comparacion 
          |comparacion OP_AND comparacion{printf("\t\tCONDICION DOBLE AND\n");}
 		 |comparacion OP_OR  comparacion{printf("\t\tCONDICION DOBLE OR\n");}
+		 |between
 	 ;
 
 comparacion:
@@ -142,7 +147,8 @@ comparacion:
 
 expresion:
          termino
-		|expresion OP_SURES termino
+		|expresion OP_SUM termino
+		|expresion OP_RES termino
  	 ;
 	 
 between: 
@@ -151,7 +157,8 @@ between:
 	 
 termino: 
        factor
-       |termino OP_MULTDIV factor
+       |termino OP_MUL factor
+	   |termino OP_DIV factor
        ;
 
 factor: 
@@ -176,7 +183,7 @@ int main(int argc,char *argv[])
 	fclose(yyin);
 	return 0;
 }
-int yyerror(void)
+int yyerror()
 {
 	printf("ERROR - Syntax error\n");
 	system ("Pause");

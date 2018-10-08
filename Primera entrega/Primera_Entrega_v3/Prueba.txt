@@ -1,4 +1,4 @@
-
+-/Lenguajes y Compiladores /-
 
 program  
 DEFVAR	
@@ -21,24 +21,15 @@ while (a<7)
 	i:=5 + b
 endw
 
--/ COMENTARIO 
-SIMPLE MAS DE UNA LINEA
+-/ COMENTARIO SIMPLE MAS DE UNA LINEA
+-//-
 /-
 
 -/COMENTARIOS CON CARACTER ESPECIAL "·$"% /-
 
 -//-
 
--/COMENTARIO DOBLE -/ UNA /- LINEA /-
 
--/ COMENTARIO -/DOBLE
-DOS LINEAS /- PRUEBA /-
-
--/COMENTARIO -/
-TRIPLE /-
-LINEA /-
-
--/COMENTARIO -/ -/ TRIPLE SIN CERRAR /- 
 
 -/ CONDICION 1 /-
 if (i=15 && a=4) THEN
@@ -79,6 +70,18 @@ a:=b:=c:=8
 a:=15
 b:=30
 BETWEEN (a,[2;a*(b+4)])
+
+-/ BETWEEN EN SELECCION /-
+if(BETWEEN (a,[2;a*(b+4)])) then
+	i:=i+2
+endif
+
+-/ BETWEEN EN CICLO /-
+while(BETWEEN (a,[2;a*(b+4)]))
+	i:=n-1
+	n:=3
+endw
+
 
 
 -/ WRITE Y READ /-

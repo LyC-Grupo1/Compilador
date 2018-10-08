@@ -30,17 +30,18 @@ struct struct_tablaSimbolos tablaSimbolos[10000];
 %option yylineno 
 
 DIGITO			[0-9]
-NUM_INT			"-"?({DIGITO})+
-NUM_REAL		"-"?({DIGITO})+"."({DIGITO})*|({DIGITO})*"."({DIGITO})+
+CONST_INT			"-"?({DIGITO})+
+CONST_REAL		"-"?({DIGITO})+"."({DIGITO})*|({DIGITO})*"."({DIGITO})+
 LETRA			[a-zA-Z]
-COMENTARIOS		"-/"(.*\n?)*"/-"
-CONST_STR               {CAR_COMILLAS}({LETRA}|{DIGITO}|" "|_|@|%|{OP_COMPARACION}|{OP_SURES}|{OP_MULTDIV})*{CAR_COMILLAS}
-CONST_REAL              ({DIGITO}*"."{DIGITO}+)|({DIGITO}+"."{DIGITO}*)
-CONST_INT               {DIGITO}+
+COMENTARIO_SIMPLE		"-/"([^-/]|\n)*?"/-"
+COMENTARIO_DOBLE		"-/"([^-/]|\n|{COMENTARIO_SIMPLE})*?"/-"
+CONST_STR               {CAR_COMILLAS}({LETRA}|{DIGITO}|" "|_|@|%|{OP_COMPARACION}|{OP_SUM}|{OP_RES}|{OP_MUL}|{OP_DIV})*{CAR_COMILLAS}
 ID						{LETRA}({LETRA}|{DIGITO}|_)*
 OP_COMPARACION          ["<"|"="|">"|"<="|">="|"><"]
-OP_SURES                ["+"|"-"]
-OP_MULTDIV              ["*"|"/"]
+OP_SUM                  ["+"]
+OP_RES					["-"]
+OP_MUL                  ["*"]
+OP_DIV					["/"]
 OP_ASIG   				[":="]
 OP_DOSP   				[":"]
 OP_AND					["AND"|"and"|"&&"]
@@ -80,7 +81,8 @@ CAR_COMILLAS			   ["\""]
 					}
 					return ENDP; 	
 				}
-{COMENTARIOS}	{  }
+{COMENTARIO_SIMPLE}	{  }
+{COMENTARIO_DOBLE}	{  }
 "real"			{ return REAL;}
 "REAL"			{ return REAL;}
 "float"			{ return REAL;}
@@ -120,11 +122,11 @@ CAR_COMILLAS			   ["\""]
 "write"		{ return WRITE; }
 "READ"		{ return READ; }
 "read"		{ return READ; }
-":="			{ return OP_ASIG;}
-"+"			{ return OP_SURES;}
-"-"			{ return OP_SURES;}
-"*"			{ return OP_MULTDIV;}
-"/"			{ return OP_MULTDIV;}
+":="		{ return OP_ASIG;}
+"+"			{ return OP_SUM;}
+"-"			{ return OP_RES;}
+"*"			{ return OP_MUL;}
+"/"			{ return OP_DIV;}
 "["			{ return CAR_CA;}
 "]"			{ return CAR_CC;}
 "("			{ return CAR_PA;}
@@ -158,7 +160,6 @@ CAR_COMILLAS			   ["\""]
 						exit(5);
 					}
 				}
-{CONST_INT}		{ return CONST_INT;}
 {CONST_STR}		{ 
 					int cantCaracteres = strlen(yytext);
 					if(cantCaracteres <= 202) { //Cuenta las commillas tambien
@@ -170,10 +171,9 @@ CAR_COMILLAS			   ["\""]
 						exit(3);
 					}
 				}
-{CONST_REAL}	{ return CONST_REAL;}
 {CAR_COMA}		{ return CAR_COMA;}
 {CAR_PUNTO}		{ return CAR_PUNTO;}
-{NUM_INT}	{ 
+{CONST_INT}	{ 
 				int num = atoi(yytext); 
 				if(num >= COTA_INT*(-1) && num <= COTA_INT){
 					push_TS("CONST_INT", yytext);
@@ -184,7 +184,7 @@ CAR_COMILLAS			   ["\""]
 					exit(1);
 				}
 			}
-{NUM_REAL}	{ 
+{CONST_REAL}	{ 
 				double n;
 				n = atof(yytext);
 				
