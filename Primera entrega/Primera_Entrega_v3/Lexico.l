@@ -33,8 +33,7 @@ DIGITO			[0-9]
 NUM_INT			"-"?({DIGITO})+
 NUM_REAL		"-"?({DIGITO})+"."({DIGITO})*|({DIGITO})*"."({DIGITO})+
 LETRA			[a-zA-Z]
-COMENTARIO_SIMPLE		"-/"(.|\s)*?"/-"
-COMENTARIO_DOBLE		"-/"({LETRA}|{DIGITO}|_|" "|":"|"="|"."|"-"|","|"\n"|{COMENTARIO_SIMPLE})*"/-"
+COMENTARIOS		"-/"(.*\n?)*"/-"
 CONST_STR               {CAR_COMILLAS}({LETRA}|{DIGITO}|" "|_|@|%|{OP_COMPARACION}|{OP_SURES}|{OP_MULTDIV})*{CAR_COMILLAS}
 CONST_REAL              ({DIGITO}*"."{DIGITO}+)|({DIGITO}+"."{DIGITO}*)
 CONST_INT               {DIGITO}+
@@ -81,8 +80,7 @@ CAR_COMILLAS			   ["\""]
 					}
 					return ENDP; 	
 				}
-{COMENTARIO_DOBLE}	{  }
-{COMENTARIO_SIMPLE}	{  }
+{COMENTARIOS}	{  }
 "real"			{ return REAL;}
 "REAL"			{ return REAL;}
 "float"			{ return REAL;}
