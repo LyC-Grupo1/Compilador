@@ -61,6 +61,21 @@ if (i=15 or a=4) THEN
 	i:=16
 ENDIF
 
+-/ CONDICION 7 /-
+if (NOT(i=15 or a=4)) THEN
+	i:=16
+ENDIF
+
+-/ CONDICION 7 /-
+if (NOT BETWEEN (a,[2;a*(b+4)])) THEN
+	i:=n
+ENDIF
+
+-/ CONDICION 7 /-
+if (NOT i=15) THEN
+	i:=n
+ENDIF
+
 -/ ASIGNACION MULTIPLE /-
 
 a:=b:=c:=8
@@ -78,7 +93,7 @@ endif
 
 -/ BETWEEN EN CICLO /-
 while(BETWEEN (a,[2;a*(b+4)]))
-	i:=n-1
+	i:=n+1
 	n:=3
 endw
 

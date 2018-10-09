@@ -230,17 +230,17 @@ int crear_TS()
 
 	if (!archivo){	return ERROR; }
 
-	fprintf(archivo, "Nombre \t \t Tipo \t \t Valor \t \t Longitud\n");
+	fprintf(archivo, "Nombre                        Tipo      Valor     Longitud\n");
 	
 	for (i = 0; i < puntero_array; i++)
 	{
 		if (strcmp(tablaSimbolos[i].tipo, "ID") == 0 )
 		{  
-			fprintf(archivo,"%s\n", tablaSimbolos[i].nombre);
+			fprintf(archivo,"%-30s%-10s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo);
 		}
 		else
 		{
-			fprintf(archivo,"_%s\n", tablaSimbolos[i].nombre);
+			fprintf(archivo,"_%-29s%-10s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo);
 		}
 	}
 	fclose(archivo); 

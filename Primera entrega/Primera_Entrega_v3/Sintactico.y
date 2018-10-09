@@ -130,15 +130,19 @@ entrada_salida:
 ;
 
 seleccion: 
-    	 IF{printf("\t\tIF\n");} CAR_PA condicion CAR_PC THEN bloque ENDIF{printf("\t\tENDIF\n");}
-		| IF{printf("\t\tIF\n");} CAR_PA condicion CAR_PC THEN bloque ELSE bloque ENDIF {printf("\t\t IF CON ELSE\n");}	 
+    	 IF CAR_PA condicion CAR_PC THEN bloque ENDIF{printf("\t\tENDIF\n");}
+		| IF CAR_PA condicion CAR_PC THEN bloque ELSE bloque ENDIF {printf("\t\t IF CON ELSE\n");}	 
 ;
 
 condicion:
          comparacion 
+		 |OP_NOT comparacion{printf("\t\tNOT CONDICION\n");}
          |comparacion OP_AND comparacion{printf("\t\tCONDICION DOBLE AND\n");}
 		 |comparacion OP_OR  comparacion{printf("\t\tCONDICION DOBLE OR\n");}
+		 |OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC{printf("\t\tNOT CONDICION DOBLE AND\n");}
+		 |OP_NOT CAR_PA comparacion OP_OR  comparacion CAR_PC{printf("\t\tNOT CONDICION DOBLE OR\n");}
 		 |between
+		 |OP_NOT between
 	 ;
 
 comparacion:
