@@ -19,13 +19,12 @@ struct struct_tablaSimbolos
 
 int push_TS(char*, char*);
 int crearArchivoTS();
-
 int puntero_array = 0;
-FILE  *yyin;
-int yylval;
 struct struct_tablaSimbolos tablaSimbolos[10000];
-
+FILE  *yyin;
 %}
+
+
 %option noyywrap  
 %option yylineno 
 
@@ -150,6 +149,8 @@ CAR_COMILLAS			   ["\""]
 "BETWEEN"		{ return BETWEEN;}
 "between"		{ return BETWEEN;}
 {ID}			{
+					yylval.str_val = yytext;
+					
 					int cantCaracteres = strlen(yytext);
 					if(cantCaracteres <= 20) {
 						push_TS("ID", yytext); 
@@ -161,6 +162,7 @@ CAR_COMILLAS			   ["\""]
 					}
 				}
 {CONST_STR}		{ 
+					yylval.str_val = yytext;
 					int cantCaracteres = strlen(yytext);
 					if(cantCaracteres <= 202) { //Cuenta las commillas tambien
 						push_TS("CONST_STR", yytext);
@@ -174,6 +176,8 @@ CAR_COMILLAS			   ["\""]
 {CAR_COMA}		{ return CAR_COMA;}
 {CAR_PUNTO}		{ return CAR_PUNTO;}
 {CONST_INT}	{ 
+				yylval.str_val = yytext;
+				
 				int num = atoi(yytext); 
 				if(num >= COTA_INT*(-1) && num <= COTA_INT){
 					push_TS("CONST_INT", yytext);
@@ -185,17 +189,20 @@ CAR_COMILLAS			   ["\""]
 				}
 			}
 {CONST_REAL}	{ 
-				double n;
-				n = atof(yytext);
 				
-				if(n >= COTA_FLOAT*(-1) && n <= COTA_FLOAT){
-					push_TS("CONST_REAL", yytext);
-					return CONST_REAL; 
-				}else{
-					printf("ERROR - Real fuera de rango.\n");
-					system ("Pause");
-					exit(2);
-				}
+					yylval.str_val = yytext;
+
+					double n;
+					n = atof(yytext);
+					
+					if(n >= COTA_FLOAT*(-1) && n <= COTA_FLOAT){
+						push_TS("CONST_REAL", yytext);
+						return CONST_REAL; 
+					}else{
+						printf("ERROR - Real fuera de rango.\n");
+						system ("Pause");
+						exit(2);
+					}
 			}
 
 "\n"      		

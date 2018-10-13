@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <conio.h>
 #include "y.tab.h"
 #define TAM_PILA 100
@@ -12,10 +13,15 @@ int yylex();
 int yyparse();
 //int yyerror(void);
 int apilar(int);
+char *aux;
+int cont = 0;
+void insertarEnLista(char*);
 
 //DECLARACION VARIABLES
 int pila[TAM_PILA];
+//char * listaTokens[1000];
 int puntero_pila;
+// puntero_tokens=0;
 int pos_actual=0;
 int yystopparser=0;
 FILE  *yyin;
@@ -23,15 +29,21 @@ FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 
 %}
 
+%union {
+int intval;
+char *str_val;
+}
+
 %start programa
+%token <str_val>ID
+%token <str_val>CONST_INT
+%token <str_val>CONST_STR
+%token <str_val>CONST_REAL
 %token PROGRAM
 %token DECVAR
 %token ENDDEC
 %token DEFVAR
 %token ENDDEF
-%token CONST_INT
-%token CONST_REAL
-%token CONST_STR
 %token REAL
 %token INTEGER
 %token STRING
@@ -44,7 +56,6 @@ FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 %token OP_AND
 %token OP_OR
 %token OP_NOT
-%token ID
 %token OP_COMPARACION
 %token OP_ASIG 
 %token OP_DOSP
@@ -92,7 +103,7 @@ declaracion:
 
 lista_var:  
 	ID {fprintf(fIntermedia,"%i-ID | ",pos_actual);}
-	 | lista_var CAR_COMA ID   
+	 | lista_var CAR_COMA ID {fprintf(fIntermedia,"%i-ID | ",pos_actual);}  
  	 ;
 	 
 algoritmo: 
@@ -170,10 +181,10 @@ termino:
        ;
 
 factor: 
-      ID
-      | CONST_INT
-      | CONST_REAL
-      | CONST_STR 
+      ID {insertarEnLista(yylval.str_val);}
+      | CONST_INT {insertarEnLista(yylval.str_val);}
+      | CONST_REAL {insertarEnLista(yylval.str_val);}
+      | CONST_STR  {insertarEnLista(yylval.str_val);}
 	  | CAR_PA expresion CAR_PC 	  
       ;
 
@@ -189,6 +200,15 @@ int apilar(int pos)
 	}
 	pila[puntero_pila]=pos;
 }
+
+void insertarEnLista(char * val)
+{
+	aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
+    strcpy(aux, val);
+    printf("insertar_en_polaca(%s)\n", aux);
+	//puntero_tokens++;
+}
+
 
 int yyerror()
 {
