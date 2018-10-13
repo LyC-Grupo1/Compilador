@@ -18,7 +18,7 @@ struct struct_tablaSimbolos
 };
 
 int push_TS(char*, char*);
-int crear_TS();
+int crearArchivoTS();
 
 int puntero_array = 0;
 FILE  *yyin;
@@ -30,18 +30,18 @@ struct struct_tablaSimbolos tablaSimbolos[10000];
 %option yylineno 
 
 DIGITO			[0-9]
-NUM_INT			({DIGITO})+
-NUM_REAL		({DIGITO})+"."({DIGITO})*|({DIGITO})*"."({DIGITO})+
+CONST_INT			"-"?({DIGITO})+
+CONST_REAL		"-"?({DIGITO})+"."({DIGITO})*|({DIGITO})*"."({DIGITO})+
 LETRA			[a-zA-Z]
-COMENTARIO_SIMPLE		"-/"({LETRA}|{DIGITO}|_|" "|":"|"="|"."|"-"|",")*"/-"
-COMENTARIO_DOBLE		"-/"({LETRA}|{DIGITO}|_|" "|":"|"="|"."|"-"|","|{COMENTARIO_SIMPLE})*"/-"
-CONST_STR               {CAR_COMILLAS}({LETRA}|{DIGITO}|" "|_|@|%|{OP_COMPARACION}|{OP_SURES}|{OP_MULTDIV})+{CAR_COMILLAS}
-CONST_REAL              ({DIGITO}*"."{DIGITO}+)|({DIGITO}+"."{DIGITO}*)
-CONST_INT               {DIGITO}+
+COMENTARIO_SIMPLE		"-/"([^-/]|\n)*?"/-"
+COMENTARIO_DOBLE		"-/"([^-/]|\n|{COMENTARIO_SIMPLE})*?"/-"
+CONST_STR               {CAR_COMILLAS}({LETRA}|{DIGITO}|" "|_|@|%|{OP_COMPARACION}|{OP_SUM}|{OP_RES}|{OP_MUL}|{OP_DIV})*{CAR_COMILLAS}
 ID						{LETRA}({LETRA}|{DIGITO}|_)*
 OP_COMPARACION          ["<"|"="|">"|"<="|">="|"><"]
-OP_SURES                ["+"|"-"]
-OP_MULTDIV              ["*"|"/"]
+OP_SUM                  ["+"]
+OP_RES					["-"]
+OP_MUL                  ["*"]
+OP_DIV					["/"]
 OP_ASIG   				[":="]
 OP_DOSP   				[":"]
 OP_AND					["AND"|"and"|"&&"]
@@ -68,21 +68,21 @@ CAR_COMILLAS			   ["\""]
 "enddef"		{ return ENDDEF;}
 "beginp"		{ return BEGINP;}
 "endp"			{ 					
-					if (crear_TS() == 0)
+					if (crearArchivoTS() == 0)
 					{
 						printf("Error al crear tabla de símbolos\n");
 					}
 					return ENDP; 	
 				}
 "ENDP"			{ 					
-					if (crear_TS() == 0)
+					if (crearArchivoTS() == 0)
 					{
 						printf("Error al crear tabla de símbolos\n");
 					}
 					return ENDP; 	
 				}
-{COMENTARIO_DOBLE}	{  }
 {COMENTARIO_SIMPLE}	{  }
+{COMENTARIO_DOBLE}	{  }
 "real"			{ return REAL;}
 "REAL"			{ return REAL;}
 "float"			{ return REAL;}
@@ -122,11 +122,11 @@ CAR_COMILLAS			   ["\""]
 "write"		{ return WRITE; }
 "READ"		{ return READ; }
 "read"		{ return READ; }
-":="			{ return OP_ASIG;}
-"+"			{ return OP_SURES;}
-"-"			{ return OP_SURES;}
-"*"			{ return OP_MULTDIV;}
-"/"			{ return OP_MULTDIV;}
+":="		{ return OP_ASIG;}
+"+"			{ return OP_SUM;}
+"-"			{ return OP_RES;}
+"*"			{ return OP_MUL;}
+"/"			{ return OP_DIV;}
 "["			{ return CAR_CA;}
 "]"			{ return CAR_CC;}
 "("			{ return CAR_PA;}
@@ -149,15 +149,33 @@ CAR_COMILLAS			   ["\""]
 "not"                   { return OP_NOT;}
 "BETWEEN"		{ return BETWEEN;}
 "between"		{ return BETWEEN;}
-{ID}			{ push_TS("ID", yytext); return ID; }
-{CONST_INT}		{ return CONST_INT;}
-{CONST_STR}		{ push_TS("CONST_STR", yytext); return CONST_STR;}
-{CONST_REAL}	{ return CONST_REAL;}
+{ID}			{
+					int cantCaracteres = strlen(yytext);
+					if(cantCaracteres <= 20) {
+						push_TS("ID", yytext); 
+						return ID; 
+					} else {
+						printf("ERROR - Nombre de variable muy largo. Maximo 20 caracteres\n");
+						system ("Pause");
+						exit(5);
+					}
+				}
+{CONST_STR}		{ 
+					int cantCaracteres = strlen(yytext);
+					if(cantCaracteres <= 202) { //Cuenta las commillas tambien
+						push_TS("CONST_STR", yytext);
+						return CONST_STR;
+					} else {
+						printf("ERROR - String muy largo. Maximo 200 caracteres\n");
+						system ("Pause");
+						exit(3);
+					}
+				}
 {CAR_COMA}		{ return CAR_COMA;}
 {CAR_PUNTO}		{ return CAR_PUNTO;}
-{NUM_INT}	{ 
+{CONST_INT}	{ 
 				int num = atoi(yytext); 
-				if(num >= 0 && num <= COTA_INT){
+				if(num >= COTA_INT*(-1) && num <= COTA_INT){
 					push_TS("CONST_INT", yytext);
 					return CONST_INT; 
 				}else{
@@ -166,11 +184,11 @@ CAR_COMILLAS			   ["\""]
 					exit(1);
 				}
 			}
-{NUM_REAL}	{ 
+{CONST_REAL}	{ 
 				double n;
 				n = atof(yytext);
 				
-				if(n >= 0 && n <= COTA_FLOAT){
+				if(n >= COTA_FLOAT*(-1) && n <= COTA_FLOAT){
 					push_TS("CONST_REAL", yytext);
 					return CONST_REAL; 
 				}else{
@@ -183,7 +201,8 @@ CAR_COMILLAS			   ["\""]
 "\n"      		
 "\t"		
 " "
-
+"\r\n"
+.    { printf("Caracter invalido!");  exit(6);}
 %%
 int push_TS(char* tipo, char* nombre)
 {
@@ -203,7 +222,7 @@ int push_TS(char* tipo, char* nombre)
 	return posicion;
 }
 
-int crear_TS()
+int crearArchivoTS()
 {
 	FILE *archivo; 
 	int i;
@@ -211,17 +230,21 @@ int crear_TS()
 
 	if (!archivo){	return ERROR; }
 
-	fprintf(archivo, "Nombre \t \t Tipo \t \t Valor \t \t Longitud\n");
+	fprintf(archivo, "Nombre                        Tipo                  Valor                Longitud\n");
 	
 	for (i = 0; i < puntero_array; i++)
 	{
 		if (strcmp(tablaSimbolos[i].tipo, "ID") == 0 )
 		{  
-			fprintf(archivo,"%s\n", tablaSimbolos[i].nombre);
+			fprintf(archivo,"%-30s%-10s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo);
 		}
-		else
+		else if(strcmp(tablaSimbolos[i].tipo, "CONST_STR") == 0 )
 		{
-			fprintf(archivo,"_%s\n", tablaSimbolos[i].nombre);
+			fprintf(archivo,"_%-29s%-10s                                    %-30d\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,strlen(tablaSimbolos[i].nombre));
+		}
+		else 
+		{
+			fprintf(archivo,"%-30s%-10s               %s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].nombre);
 		}
 	}
 	fclose(archivo); 

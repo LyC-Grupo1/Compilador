@@ -3,21 +3,10 @@
 #include <stdlib.h>
 #include <conio.h>
 #include "y.tab.h"
-#define TAM_PILA 100
-
-//DECLARACION FUNCIONES
+int yyerror();
 int yylex();
-int yyparse();
-//int yyerror(void);
-int apilar(int);
-
-//DECLARACION VARIABLES
-int pila[TAM_PILA];
-int puntero_pila;
-int pos_actual=0;
 int yystopparser=0;
 FILE  *yyin;
-FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 
 %}
 
@@ -46,8 +35,10 @@ FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 %token OP_COMPARACION
 %token OP_ASIG 
 %token OP_DOSP
-%token OP_SURES
-%token OP_MULTDIV
+%token OP_SUM
+%token OP_RES
+%token OP_MUL
+%token OP_DIV
 %token CAR_COMA
 %token CAR_PUNTO
 %token CAR_PYC
@@ -87,7 +78,7 @@ declaracion:
            ;
 
 lista_var:  
-	 ID {fprintf(fIntermedia,"%i-ID | ",pos_actual);}
+	 ID
 	 | lista_var CAR_COMA ID   
  	 ;
 	 
@@ -113,7 +104,16 @@ ciclo:
      REPEAT { printf("\t\tREPEAT\n");}bloque UNTIL condicion { printf("\t\tFIN DEL REPEAT\n");}
 	 | WHILE { printf("\t\tWHILE\n");}CAR_PA condicion CAR_PC bloque ENDW{ printf("\t\tFIN DEL WHILE\n");}
      ;
-
+/*
+asignacion: 
+          ID OP_ASIG expresion {printf("\t\tASIGNACION\n");} 		  
+	  ;
+	  
+asignacion_multiple: 
+        ID OP_ASIG 	asignacion_multiple	{printf("\t\tASIGNACION MULTIPLE\n");} 
+		| ID OP_ASIG expresion {printf("\t\tASIGNACION MULTIPLE\n");}
+	  ;
+*/
 asignacion:
 			lista_id OP_ASIG expresion {printf("\t\tFIN LINEA ASIGNACION\n");}
 	  ;
@@ -130,14 +130,19 @@ entrada_salida:
 ;
 
 seleccion: 
-    	 IF CAR_PA condicion CAR_PC THEN bloque ENDIF{printf("\t\tIF\n");}
+    	 IF CAR_PA condicion CAR_PC THEN bloque ENDIF{printf("\t\tENDIF\n");}
 		| IF CAR_PA condicion CAR_PC THEN bloque ELSE bloque ENDIF {printf("\t\t IF CON ELSE\n");}	 
 ;
 
 condicion:
          comparacion 
+		 |OP_NOT comparacion{printf("\t\tNOT CONDICION\n");}
          |comparacion OP_AND comparacion{printf("\t\tCONDICION DOBLE AND\n");}
 		 |comparacion OP_OR  comparacion{printf("\t\tCONDICION DOBLE OR\n");}
+		 |OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC{printf("\t\tNOT CONDICION DOBLE AND\n");}
+		 |OP_NOT CAR_PA comparacion OP_OR  comparacion CAR_PC{printf("\t\tNOT CONDICION DOBLE OR\n");}
+		 |between
+		 |OP_NOT between
 	 ;
 
 comparacion:
@@ -146,7 +151,8 @@ comparacion:
 
 expresion:
          termino
-		|expresion OP_SURES termino
+		|expresion OP_SUM termino
+		|expresion OP_RES termino
  	 ;
 	 
 between: 
@@ -155,7 +161,8 @@ between:
 	 
 termino: 
        factor
-       |termino OP_MULTDIV factor
+       |termino OP_MUL factor
+	   |termino OP_DIV factor
        ;
 
 factor: 
@@ -167,51 +174,23 @@ factor:
       ;
 
 %%
-
-int apilar(int pos)
+int main(int argc,char *argv[])
 {
-	puntero_pila++;
-	if(puntero_pila > TAM_PILA){
-		printf("Error: Se exedio el tamano de la pila.\n");
-		system ("Pause");
-		exit (1);
+	if ((yyin = fopen(argv[1], "rt")) == NULL)
+	{
+		printf("\nError al abrir archivo: %s\n", argv[1]);
 	}
-	pila[puntero_pila]=pos;
+	else
+	{
+		yyparse();
+	}
+	fclose(yyin);
+	return 0;
 }
-
-int yyerror(void)
+int yyerror()
 {
 	printf("ERROR - Syntax error\n");
 	system ("Pause");
 	exit (1);
 }
-
-int main(int argc,char *argv[])
-{
-	puntero_pila = -1;
-	// Si no abro el archivo antes de leer prueba no escribe
-	//printf("Abriendo archivo intermedia.txt ------------------------------------------");
-	fIntermedia=fopen("intermedia.txt", "wt");
-	if(fIntermedia==NULL)
-	{
-		printf("Error al crear archivo intermedia.txt \n");
-		system("PAUSE");
-		return 0;
-	}
-	
-	if ((yyin = fopen(argv[1], "rt")) == NULL)
-	{	
-		printf("\nError al abrir archivo: %s\n", argv[1]); 
-	} 
-	else
-	{ 
-		yyparse();
-	}
-			
-	fclose(yyin);
-	fclose(fIntermedia);
-	return 0;
-}
-
-
 
