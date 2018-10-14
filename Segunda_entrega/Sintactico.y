@@ -5,6 +5,8 @@
 #include <conio.h>
 #include "y.tab.h"
 #define TAM_PILA 100
+#define TODO_OK 1
+#define ERROR 0
 
 //DECLARACION FUNCIONES
 
@@ -21,9 +23,11 @@ char * valorComparacion(char * );
 //DECLARACION VARIABLES
 int pila[TAM_PILA];
 int puntero_pila;
+int puntero_tokens=0;
 int pos_actual=0;
 int yystopparser=0;
-FILE  *yyin;
+char * listaTokens[10000];
+FILE *yyin;
 FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 
 %}
@@ -79,7 +83,7 @@ FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 %%
 programa:  	   
 	PROGRAM {printf("\tInicia el COMPILADOR\n");} est_declaracion algoritmo    
-	{printf("\tFin COMPILADOR ok\n");};
+	{printf("\tFin COMPILADOR ok\n"); if(crearArchivoIntermedia()==TODO_OK){printf("Archivo con intermedia generado");}else{printf("Hubo un error al generar el archivo de intermedia");}};
 
 est_declaracion:
 	DECVAR {printf("\t\tDECLARACIONES\n");} declaraciones ENDDEC {printf("\tFin de las Declaraciones\n");}
@@ -206,10 +210,16 @@ char * desapilar()
 
 void insertarEnLista(char * val)
 {
+	// Convierto en CHAR *
 	aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
     strcpy(aux, val);
+	
+	// Agrego al array de tokens
+	listaTokens[puntero_tokens] = aux;
+	puntero_tokens++;
+	
+	// DEBUG por consola
     printf("insertar_en_polaca(%s)\n", aux);
-	//puntero_tokens++;
 }
 
 char * valorComparacion(char * val){
@@ -226,6 +236,7 @@ char * valorComparacion(char * val){
 	} else if(strcmp("><", val) == 0){
 		return "BEQ";
 	} else {
+		// NUNCA DEBERIA CAER ACA
 		return val;
 	}
 }
@@ -242,13 +253,13 @@ int main(int argc,char *argv[])
 	puntero_pila = -1;
 	// Si no abro el archivo antes de leer prueba no escribe
 	//printf("Abriendo archivo intermedia.txt ------------------------------------------");
-	fIntermedia=fopen("intermedia.txt", "wt");
-	if(fIntermedia==NULL)
-	{
-		printf("Error al crear archivo intermedia.txt \n");
-		system("PAUSE");
-		return 0;
-	}
+	//fIntermedia=fopen("intermedia.txt", "wt");
+	//if(fIntermedia==NULL)
+	//{
+	//	printf("Error al crear archivo intermedia.txt \n");
+//		system("PAUSE");
+//		return 0;
+//	}
 	
 	if ((yyin = fopen(argv[1], "rt")) == NULL)
 	{	
@@ -260,8 +271,24 @@ int main(int argc,char *argv[])
 	}
 			
 	fclose(yyin);
-	fclose(fIntermedia);
+//	fclose(fIntermedia);
 	return 0;
 }
 
+int crearArchivoIntermedia()
+{
+	FILE * archivo; 
+	int i;
+	archivo = fopen("intermedia.txt", "wt");
 
+	if (!archivo){	return ERROR; }
+
+	for (i = 0; i < puntero_tokens; i++)
+	{
+		fprintf(archivo,"%s\n", listaTokens[i]);
+		
+	}
+	fclose(archivo); 
+
+	return TODO_OK;
+}
