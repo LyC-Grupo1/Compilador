@@ -152,10 +152,10 @@ seleccion:
 ;
 
 condicion:
-         comparacion {insertarEnLista(yylval.str_val);}
+         comparacion 
          |OP_NOT comparacion{insertarEnLista(yylval.str_val); printf("\t\tNOT CONDICION\n");}
          |comparacion OP_AND comparacion{insertarEnLista(yylval.str_val); printf("\t\tCONDICION DOBLE AND\n");}
-		 |comparacion OP_OR  comparacion{insertarEnLista(yylval.str_val); printf("\t\tCONDICION DOBLE OR\n");}
+		 |comparacion OP_OR comparacion{insertarEnLista(yylval.str_val); printf("\t\tCONDICION DOBLE OR\n");}
 		 |OP_NOT CAR_PA comparacion {insertarEnLista(yylval.str_val);} OP_AND comparacion CAR_PC{printf("\t\tNOT CONDICION DOBLE AND\n");}
 		 |OP_NOT CAR_PA comparacion {insertarEnLista(yylval.str_val);} OP_OR  comparacion CAR_PC{printf("\t\tNOT CONDICION DOBLE OR\n");}
 		 |between
@@ -167,7 +167,7 @@ comparacion:
 	   ;
 
 expresion:
-         termino
+        termino
 		|expresion OP_SUM {insertarEnLista("+");} termino
 		|expresion OP_RES {insertarEnLista("-");} termino
  	 ;
