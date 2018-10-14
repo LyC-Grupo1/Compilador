@@ -11,17 +11,16 @@
 int yyerror();
 int yylex();
 int yyparse();
-//int yyerror(void);
 int apilar(int);
-char *aux;
+
+char * aux;
 int cont = 0;
 void insertarEnLista(char*);
+char * valorComparacion(char * );
 
 //DECLARACION VARIABLES
 int pila[TAM_PILA];
-//char * listaTokens[1000];
 int puntero_pila;
-// puntero_tokens=0;
 int pos_actual=0;
 int yystopparser=0;
 FILE  *yyin;
@@ -30,8 +29,8 @@ FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 %}
 
 %union {
-int intval;
-char *str_val;
+	int intval;
+	char *str_val;
 }
 
 %start programa
@@ -56,7 +55,7 @@ char *str_val;
 %token OP_AND
 %token OP_OR
 %token OP_NOT
-%token OP_COMPARACION
+%token <str_val>OP_COMPARACION
 %token OP_ASIG 
 %token OP_DOSP
 %token OP_SUM
@@ -119,7 +118,6 @@ sentencia:
   	 ciclo
 	 |seleccion  
 	 |asignacion
-     /*|asignacion_multiple*/
 	 |entrada_salida
 	 |between	 
 	 ;
@@ -130,12 +128,12 @@ ciclo:
      ;
 
 asignacion:
-			lista_id OP_ASIG expresion {printf("\t\tFIN LINEA ASIGNACION\n");}
+			lista_id OP_ASIG {insertarEnLista(":=");} expresion {printf("\t\tFIN LINEA ASIGNACION\n");}
 	  ;
 
 lista_id:
-			lista_id OP_ASIG ID 
-			| ID 
+			lista_id OP_ASIG ID {insertarEnLista(":="); insertarEnLista(yylval.str_val);}
+			| ID {insertarEnLista(yylval.str_val);}
 		;
 	  
 entrada_salida: 
@@ -150,24 +148,24 @@ seleccion:
 ;
 
 condicion:
-         comparacion 
-         |OP_NOT comparacion{printf("\t\tNOT CONDICION\n");}
-         |comparacion OP_AND comparacion{printf("\t\tCONDICION DOBLE AND\n");}
-		 |comparacion OP_OR  comparacion{printf("\t\tCONDICION DOBLE OR\n");}
-		 |OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC{printf("\t\tNOT CONDICION DOBLE AND\n");}
-		 |OP_NOT CAR_PA comparacion OP_OR  comparacion CAR_PC{printf("\t\tNOT CONDICION DOBLE OR\n");}
+         comparacion {insertarEnLista(yylval.str_val);}
+         |OP_NOT comparacion{insertarEnLista(yylval.str_val); printf("\t\tNOT CONDICION\n");}
+         |comparacion OP_AND comparacion{insertarEnLista(yylval.str_val); printf("\t\tCONDICION DOBLE AND\n");}
+		 |comparacion OP_OR  comparacion{insertarEnLista(yylval.str_val); printf("\t\tCONDICION DOBLE OR\n");}
+		 |OP_NOT CAR_PA comparacion {insertarEnLista(yylval.str_val);} OP_AND comparacion CAR_PC{printf("\t\tNOT CONDICION DOBLE AND\n");}
+		 |OP_NOT CAR_PA comparacion {insertarEnLista(yylval.str_val);} OP_OR  comparacion CAR_PC{printf("\t\tNOT CONDICION DOBLE OR\n");}
 		 |between
 		 |OP_NOT between
 	 ;
 
 comparacion:
-	   expresion OP_COMPARACION expresion
+	   expresion OP_COMPARACION {insertarEnLista("CMP"); insertarEnLista(valorComparacion(yylval.str_val));} expresion
 	   ;
 
 expresion:
          termino
-		|expresion OP_SUM termino
-		|expresion OP_RES termino
+		|expresion OP_SUM {insertarEnLista("+");} termino
+		|expresion OP_RES {insertarEnLista("-");} termino
  	 ;
 	 
 between: 
@@ -176,8 +174,8 @@ between:
 	 
 termino: 
        factor
-       |termino OP_MUL factor
-	   |termino OP_DIV factor
+       |termino OP_MUL {insertarEnLista("*");}factor
+	   |termino OP_DIV {insertarEnLista("/");}factor
        ;
 
 factor: 
@@ -201,6 +199,11 @@ int apilar(int pos)
 	pila[puntero_pila]=pos;
 }
 
+char * desapilar()
+{
+	
+}
+
 void insertarEnLista(char * val)
 {
 	aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
@@ -209,6 +212,23 @@ void insertarEnLista(char * val)
 	//puntero_tokens++;
 }
 
+char * valorComparacion(char * val){
+	if(strcmp("=", val) == 0){
+		return "BNE";
+	} else if(strcmp(">=", val) == 0){
+		return "BLT";
+	} else if(strcmp(">", val) == 0){
+		return "BLE";
+	} else if(strcmp("<=", val) == 0){
+		return "BGT";
+	} else if(strcmp("<", val) == 0){
+		return "BGE";
+	} else if(strcmp("><", val) == 0){
+		return "BEQ";
+	} else {
+		return val;
+	}
+}
 
 int yyerror()
 {

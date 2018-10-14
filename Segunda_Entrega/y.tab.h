@@ -147,7 +147,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 32 "Sintactico.y"
+#line 33 "Sintactico.y"
 
 int intval;
 char *str_val;

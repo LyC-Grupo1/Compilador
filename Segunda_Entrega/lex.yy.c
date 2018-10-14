@@ -1180,32 +1180,32 @@ YY_RULE_SETUP
 case 64:
 YY_RULE_SETUP
 #line 134 "Lexico.l"
-{ return OP_COMPARACION;}
+{ yylval.str_val = yytext; return OP_COMPARACION;}
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
 #line 135 "Lexico.l"
-{ return OP_COMPARACION;}
+{ yylval.str_val = yytext; return OP_COMPARACION;}
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
 #line 136 "Lexico.l"
-{ return OP_COMPARACION;}
+{ yylval.str_val = yytext; return OP_COMPARACION;}
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
 #line 137 "Lexico.l"
-{ return OP_COMPARACION;}
+{ yylval.str_val = yytext; return OP_COMPARACION;}
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
 #line 138 "Lexico.l"
-{ return OP_COMPARACION;}
+{ yylval.str_val = yytext; return OP_COMPARACION;}
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
 #line 139 "Lexico.l"
-{ return OP_COMPARACION;}
+{ yylval.str_val = yytext; return OP_COMPARACION;}
 	YY_BREAK
 case 70:
 YY_RULE_SETUP

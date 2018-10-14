@@ -131,12 +131,12 @@ CAR_COMILLAS			   ["\""]
 "("			{ return CAR_PA;}
 ")"			{ return CAR_PC;}
 ";"			{ return CAR_PYC;}
-">"                     { return OP_COMPARACION;}
-">="                    { return OP_COMPARACION;}
-"<"                     { return OP_COMPARACION;}
-"<="                    { return OP_COMPARACION;}
-"><"                    { return OP_COMPARACION;}
-"="                     { return OP_COMPARACION;}
+">"                     { yylval.str_val = yytext; return OP_COMPARACION;}
+">="                    { yylval.str_val = yytext; return OP_COMPARACION;}
+"<"                     { yylval.str_val = yytext; return OP_COMPARACION;}
+"<="                    { yylval.str_val = yytext; return OP_COMPARACION;}
+"><"                    { yylval.str_val = yytext; return OP_COMPARACION;}
+"="                     { yylval.str_val = yytext; return OP_COMPARACION;}
 ":"                     { return OP_DOSP;}
 "&&"                   { return OP_AND;}
 "AND"                   { return OP_AND;}
