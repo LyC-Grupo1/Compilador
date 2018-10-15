@@ -186,7 +186,7 @@ else_: ELSE {
 				x=desapilar();
 				char sPosActual[5];
 				itoa(puntero_tokens,sPosActual,10);
-				escribirEnLista(x,sPosActual);
+				//escribirEnLista(x,sPosActual);
 				sprintf(listaTokens[x],"CELDA %s",sPosActual);	
 		}
 ;
@@ -195,12 +195,17 @@ condicion:
          comparacion 
          |OP_NOT comparacion{printf("\t\tNOT CONDICION\n");}
          |comparacion op_and_ comparacion{	
-											int x;
-											x=desapilar();
-											char sPosActual[5];
-											itoa(puntero_tokens,sPosActual,10);
-											escribirEnLista(x,sPosActual);
-											sprintf(listaTokens[x],"CELDA %s",sPosActual);
+											int i;
+											for(i=0; i < (tope_pila);i++){
+												int x;
+												x=desapilar();
+												printf("DESAPILE LA CELDA %d\n",x);
+												char sPosActual[5];
+												itoa(puntero_tokens,sPosActual,10);
+												escribirEnLista(x,sPosActual);
+												sprintf(listaTokens[x],"CELDA %s",sPosActual);	
+											}
+											
 											printf("\t\tCONDICION DOBLE AND\n");
 										}
 		 |comparacion OP_OR comparacion{printf("\t\tCONDICION DOBLE OR\n");}

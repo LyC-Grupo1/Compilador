@@ -15,10 +15,6 @@ if (i=15) THEN
 ENDIF
 
 -/ IF doble /-
--/ CONDICION 1 /-
-if (i=15 && a=4) THEN
-	i:=16
-ENDIF
 
 -/ CONDICION 2 /-
 if (i=15 AND a=4) THEN
