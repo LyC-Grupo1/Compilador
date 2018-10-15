@@ -158,8 +158,15 @@ entrada_salida:
 ;
 
 seleccion: 
-    	IF CAR_PA condicion CAR_PC then_ bloque ENDIF{printf("\t\tENDIF\n"); }
-		| IF CAR_PA condicion CAR_PC then_ bloque else_ bloque ENDIF {printf("\t\t IF CON ELSE\n");}	
+    	IF CAR_PA condicion CAR_PC then_ bloque  ENDIF {
+				int x;
+				x=desapilar();
+				char sPosActual[5];
+				itoa(puntero_tokens,sPosActual,10);
+				sprintf(listaTokens[x],"CELDA %s",sPosActual);
+				printf("\t\tFIN DEL IF\n"); 
+			}
+		| IF CAR_PA condicion CAR_PC then_ bloque else_ bloque ENDIF {printf("\t\tFIN DEL IF\n");}	
 ;
 
 then_: THEN {
@@ -167,9 +174,11 @@ then_: THEN {
 				insertarEnLista(valorComparacion(comparador_usado));
 				int iPosActual;
 				char sPosActual[5];
-				iPosActual = insertarEnLista("###"); // no inserta nada, pero avanza el puntero y devuelve en que celda estaba
+				iPosActual = insertarEnLista("###"); // ACA estoy aumentando el tope de pila (avanzo) no inserta nada, pero avanza el puntero y devuelve en que celda estaba
 				itoa(iPosActual,sPosActual,10);
 				apilar(sPosActual);
+				
+				
 			}
 ;			
 else_: ELSE {
@@ -177,8 +186,9 @@ else_: ELSE {
 				x=desapilar();
 				char sPosActual[5];
 				itoa(puntero_tokens,sPosActual,10);
-				escribirEnLista(x,sPosActual);				
-}
+				escribirEnLista(x,sPosActual);
+				sprintf(listaTokens[x],"CELDA %s",sPosActual);	
+		}
 ;
 
 condicion:
@@ -190,6 +200,7 @@ condicion:
 											char sPosActual[5];
 											itoa(puntero_tokens,sPosActual,10);
 											escribirEnLista(x,sPosActual);
+											sprintf(listaTokens[x],"CELDA %s",sPosActual);
 											printf("\t\tCONDICION DOBLE AND\n");
 										}
 		 |comparacion OP_OR comparacion{printf("\t\tCONDICION DOBLE OR\n");}
@@ -210,7 +221,7 @@ op_and_: OP_AND{
 			}	 
 ;	 
 comparacion:
-	   expresion OP_COMPARACION {/*printf("Lei comp: %s\n",yylval.str_val);*/strcpy(comparador_usado,yylval.str_val);}  expresion
+	   expresion OP_COMPARACION {strcpy(comparador_usado,yylval.str_val);}  expresion
 	   ;
 
 expresion:
@@ -301,7 +312,7 @@ int insertarEnLista(char * val)
 	if(strcmp(aux,"###")!=0){
 		printf("insertar_en_polaca(%s)\n", aux);
 	}
-	return puntero_tokens-1; // devuelvo posicion
+	return (puntero_tokens-1); // devuelvo posicion
 	
 }
 
@@ -314,7 +325,7 @@ void escribirEnLista(int pos, char * val)
 	// escribo en vector
 	listaTokens[pos] = aux;
 	
-	printf("Escrbio en %i el valor %s\n",pos,aux);
+	printf("Escribio en %i el valor %s\n",pos,aux);
 	
 }
 
@@ -346,16 +357,6 @@ int yyerror()
 
 int main(int argc,char *argv[])
 {
-	//puntero_pila = -1;
-	// Si no abro el archivo antes de leer prueba no escribe
-	//printf("Abriendo archivo intermedia.txt ------------------------------------------");
-	//fIntermedia=fopen("intermedia.txt", "wt");
-	//if(fIntermedia==NULL)
-	//{
-	//	printf("Error al crear archivo intermedia.txt \n");
-	//	system("PAUSE");
-	//	return 0;
-	//}
 	
 	if ((yyin = fopen(argv[1], "rt")) == NULL)
 	{	
@@ -367,7 +368,6 @@ int main(int argc,char *argv[])
 	}
 			
 	fclose(yyin);
-	//fclose(fIntermedia);
 	return 0;
 }
 

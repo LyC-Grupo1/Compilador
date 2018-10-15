@@ -9,12 +9,29 @@ beginp
 i:=1	
 b:=10
 
-
+-/ IF SIMPLE /-
 if (i=15) THEN
 	i:=16
-ELSE
-	i:=b		
 ENDIF
+
+-/ IF doble /-
+-/ CONDICION 1 /-
+if (i=15 && a=4) THEN
+	i:=16
+ENDIF
+
+-/ CONDICION 2 /-
+if (i=15 AND a=4) THEN
+	i:=16
+ENDIF
+
+-/ CONDICION 3 /-
+if (i=15 and a=4) THEN
+	i:=16
+ENDIF
+
+
+
 
 endp
 

@@ -7,3 +7,5 @@ s                             ID
 10                            CONST_INT                10
 15                            CONST_INT                15
 16                            CONST_INT                16
+a                             ID        
+4                             CONST_INT                4

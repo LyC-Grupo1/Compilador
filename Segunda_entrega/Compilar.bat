@@ -1,8 +1,8 @@
-c:\GnuWin32\bin\flex Lexico.l
+d:\GnuWin32\bin\flex Lexico.l
 pause
-c:\GnuWin32\bin\bison -dyv Sintactico.y
+d:\GnuWin32\bin\bison -dyv Sintactico.y
 pause
-c:\MinGW\bin\gcc.exe lex.yy.c y.tab.c -o Compilador.exe
+d:\MinGW\bin\gcc.exe lex.yy.c y.tab.c -o Compilador.exe
 pause
 cls
 Compilador.exe Prueba_IF.txt
