@@ -13,16 +13,22 @@
 int yyerror();
 int yylex();
 int yyparse();
-int apilar(int);
+
 
 char * aux;
 int cont = 0;
 void insertarEnLista(char*);
 char * valorComparacion(char * );
 
+//DECLARACION PILA
+char * pila[TAM_PILA];
+int tope_pila=0;
+//int puntero_pila;
+void apilar(char * val);
+int pilaVacia();
+int pilaLlena();
+
 //DECLARACION VARIABLES
-int pila[TAM_PILA];
-int puntero_pila;
 int puntero_tokens=0;
 int pos_actual=0;
 int yystopparser=0;
@@ -132,7 +138,7 @@ ciclo:
      ;
 
 asignacion:
-			lista_id OP_ASIG {insertarEnLista(":=");} expresion {printf("\t\tFIN LINEA ASIGNACION\n");}
+			lista_id OP_ASIG expresion {printf("\t\tFIN LINEA ASIGNACION\n");}
 	  ;
 
 lista_id:
@@ -173,7 +179,7 @@ expresion:
  	 ;
 	 
 between: 
-	BETWEEN CAR_PA ID CAR_COMA CAR_CA expresion CAR_PYC expresion CAR_CC CAR_PC {printf("\t\tBETWEEN\n");}
+	{printf("\t\tINICIO BETWEEN\n");}BETWEEN CAR_PA ID CAR_COMA CAR_CA expresion CAR_PYC expresion CAR_CC CAR_PC {printf("\t\tFIN BETWEEN\n");}
 	 ;
 	 
 termino: 
@@ -191,22 +197,50 @@ factor:
       ;
 
 %%
-
-int apilar(int pos)
+// FUNCIONES DE PILA
+void apilar(char * val)
 {
-	puntero_pila++;
-	if(puntero_pila > TAM_PILA){
+	tope_pila++;
+	if(pilaLlena() == 1){
 		printf("Error: Se exedio el tamano de la pila.\n");
 		system ("Pause");
 		exit (1);
 	}
-	pila[puntero_pila]=pos;
+	pila[tope_pila]=val;
 }
 
 char * desapilar()
 {
+	if(pilaVacia() == 0)
+	{
+		char * dato = pila[tope_pila];
+		tope_pila--;
+		return dato;
+	} else {
+		printf("Error: La pila esta vacia.\n");
+		system ("Pause");
+		exit (1);
+	}
+	
 	
 }
+
+int pilaVacia()
+{
+	if (tope_pila == -1){
+		return 1;
+	} 
+	return 0;
+}
+
+int pilaLlena()
+{
+	if (tope_pila == TAM_PILA-1){
+		return 1;
+	} 
+	return 0;
+}
+
 
 void insertarEnLista(char * val)
 {
@@ -250,7 +284,7 @@ int yyerror()
 
 int main(int argc,char *argv[])
 {
-	puntero_pila = -1;
+	//puntero_pila = -1;
 	// Si no abro el archivo antes de leer prueba no escribe
 	//printf("Abriendo archivo intermedia.txt ------------------------------------------");
 	//fIntermedia=fopen("intermedia.txt", "wt");
