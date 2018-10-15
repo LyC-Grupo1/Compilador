@@ -139,7 +139,7 @@ sentencia:
 
 ciclo:
      REPEAT { printf("\t\tREPEAT\n");}bloque UNTIL condicion { printf("\t\tFIN DEL REPEAT\n");}
-	 | WHILE { printf("\t\tWHILE\n");}CAR_PA condicion CAR_PC bloque ENDW{ printf("\t\tFIN DEL WHILE\n");}
+	 | WHILE {printf("\t\tWHILE\n");} CAR_PA condicion CAR_PC bloque ENDW{ printf("\t\tFIN DEL WHILE\n");}
      ;
 
 asignacion:
@@ -265,8 +265,6 @@ int desapilar()
 		exit (1);
 	}
 	
-	
-	
 }
 
 int pilaVacia()
@@ -383,7 +381,7 @@ int crearArchivoIntermedia()
 
 	for (i = 1; i < puntero_tokens; i++)
 	{
-		fprintf(archivo,"%s\n", listaTokens[i]);
+		fprintf(archivo,"CELDA %d: %s\n", i, listaTokens[i]);
 		
 	}
 	fclose(archivo); 
