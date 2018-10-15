@@ -11,10 +11,9 @@ b:=10
 
 
 if (i=15) THEN
-
 	i:=16
 ELSE
-	i:=i+b		
+	i:=b		
 ENDIF
 
 endp

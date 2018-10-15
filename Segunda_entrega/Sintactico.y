@@ -14,7 +14,7 @@ int yyerror();
 int yylex();
 int yyparse();
 
-
+int crearArchivoIntermedia();
 char * aux;
 int cont = 0;
 int insertarEnLista(char*);
@@ -32,7 +32,7 @@ int pilaVacia();
 int pilaLlena();
 
 //DECLARACION VARIABLES
-int puntero_tokens=0;
+int puntero_tokens=1; // arranca en uno para comparar en notepad++
 int pos_actual=0;
 int yystopparser=0;
 char * listaTokens[10000];
@@ -93,7 +93,7 @@ FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 %%
 programa:  	   
 	PROGRAM {printf("\tInicia el COMPILADOR\n");} est_declaracion algoritmo    
-	{printf("\tFin COMPILADOR ok\n"); /*if(crearArchivoIntermedia()==TODO_OK){printf("Archivo con intermedia generado");}else{printf("Hubo un error al generar el archivo de intermedia");}*/}
+	{printf("\tFin COMPILADOR ok\n"); if(crearArchivoIntermedia()==TODO_OK){printf("Archivo con intermedia generado");}else{printf("Hubo un error al generar el archivo de intermedia");}}
 	;
 
 est_declaracion:
@@ -125,8 +125,8 @@ algoritmo:
          ;
 
 bloque:  
-      sentencia
-      |bloque sentencia
+      bloque sentencia
+      |sentencia
       ;
 
 sentencia:
@@ -171,7 +171,7 @@ then_: THEN {
 				itoa(iPosActual,sPosActual,10);
 				apilar(sPosActual);
 			}
-			
+;			
 else_: ELSE {
 				int x;
 				x=desapilar();
@@ -179,11 +179,19 @@ else_: ELSE {
 				itoa(puntero_tokens,sPosActual,10);
 				escribirEnLista(x,sPosActual);				
 }
+;
 
 condicion:
          comparacion 
          |OP_NOT comparacion{printf("\t\tNOT CONDICION\n");}
-         |comparacion OP_AND comparacion{printf("\t\tCONDICION DOBLE AND\n");}
+         |comparacion op_and_ comparacion{	
+											int x;
+											x=desapilar();
+											char sPosActual[5];
+											itoa(puntero_tokens,sPosActual,10);
+											escribirEnLista(x,sPosActual);
+											printf("\t\tCONDICION DOBLE AND\n");
+										}
 		 |comparacion OP_OR comparacion{printf("\t\tCONDICION DOBLE OR\n");}
 		 |OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC {printf("\t\tNOT CONDICION DOBLE AND\n");}
 		 |OP_NOT CAR_PA comparacion OP_OR  comparacion CAR_PC{printf("\t\tNOT CONDICION DOBLE OR\n");}
@@ -191,14 +199,24 @@ condicion:
 		 |OP_NOT between
 	 ;
 
+op_and_: OP_AND{
+				insertarEnLista("CMP");
+				insertarEnLista(valorComparacion(comparador_usado));
+				int iPosActual;
+				char sPosActual[5];
+				iPosActual = insertarEnLista("###"); // no inserta nada, pero avanza el puntero y devuelve en que celda estaba
+				itoa(iPosActual,sPosActual,10);
+				apilar(sPosActual);
+			}	 
+;	 
 comparacion:
 	   expresion OP_COMPARACION {/*printf("Lei comp: %s\n",yylval.str_val);*/strcpy(comparador_usado,yylval.str_val);}  expresion
 	   ;
 
 expresion:
-        termino
-		|expresion OP_SUM {insertarEnLista(yylval.str_val);} termino
-		|expresion OP_RES {insertarEnLista("-");} termino
+		expresion OP_SUM termino {insertarEnLista("+");}
+		|expresion OP_RES  termino {insertarEnLista("-");}
+        | termino
  	 ;
 	 
 between: 
@@ -206,10 +224,10 @@ between:
 	 ;
 	 
 termino: 
-       factor
-       |termino OP_MUL {insertarEnLista("*");}factor
-	   |termino OP_DIV {insertarEnLista("/");}factor
-       ;
+	   termino OP_MUL factor {insertarEnLista("*");}
+	   |termino OP_DIV factor {insertarEnLista("/");}
+       |factor
+	   ;
 
 factor: 
       ID {insertarEnLista(yylval.str_val);}
@@ -333,13 +351,13 @@ int main(int argc,char *argv[])
 	//puntero_pila = -1;
 	// Si no abro el archivo antes de leer prueba no escribe
 	//printf("Abriendo archivo intermedia.txt ------------------------------------------");
-	fIntermedia=fopen("intermedia.txt", "wt");
-	if(fIntermedia==NULL)
-	{
-		printf("Error al crear archivo intermedia.txt \n");
-		system("PAUSE");
-		return 0;
-	}
+	//fIntermedia=fopen("intermedia.txt", "wt");
+	//if(fIntermedia==NULL)
+	//{
+	//	printf("Error al crear archivo intermedia.txt \n");
+	//	system("PAUSE");
+	//	return 0;
+	//}
 	
 	if ((yyin = fopen(argv[1], "rt")) == NULL)
 	{	
@@ -351,7 +369,7 @@ int main(int argc,char *argv[])
 	}
 			
 	fclose(yyin);
-	fclose(fIntermedia);
+	//fclose(fIntermedia);
 	return 0;
 }
 
@@ -363,7 +381,7 @@ int crearArchivoIntermedia()
 
 	if (!archivo){	return ERROR; }
 
-	for (i = 0; i < puntero_tokens; i++)
+	for (i = 1; i < puntero_tokens; i++)
 	{
 		fprintf(archivo,"%s\n", listaTokens[i]);
 		
