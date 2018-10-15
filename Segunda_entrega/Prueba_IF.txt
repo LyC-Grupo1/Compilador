@@ -1,0 +1,21 @@
+program  
+DECVAR	
+ i,b : INTEGER
+ cadena, s : STRING
+ENDDEC
+
+
+beginp 
+i:=1	
+b:=10
+
+
+if (i=15) THEN
+
+	i:=16
+ELSE
+	i:=i+b		
+ENDIF
+
+endp
+

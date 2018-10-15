@@ -17,14 +17,17 @@ int yyparse();
 
 char * aux;
 int cont = 0;
-void insertarEnLista(char*);
+int insertarEnLista(char*);
+void escribirEnLista(int, char*);
 char * valorComparacion(char * );
+char comparador_usado[2];
 
 //DECLARACION PILA
 char * pila[TAM_PILA];
 int tope_pila=0;
 //int puntero_pila;
 void apilar(char * val);
+int desapilar();
 int pilaVacia();
 int pilaLlena();
 
@@ -35,6 +38,7 @@ int yystopparser=0;
 char * listaTokens[10000];
 FILE *yyin;
 FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
+
 
 %}
 
@@ -89,7 +93,8 @@ FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 %%
 programa:  	   
 	PROGRAM {printf("\tInicia el COMPILADOR\n");} est_declaracion algoritmo    
-	{printf("\tFin COMPILADOR ok\n"); if(crearArchivoIntermedia()==TODO_OK){printf("Archivo con intermedia generado");}else{printf("Hubo un error al generar el archivo de intermedia");}};
+	{printf("\tFin COMPILADOR ok\n"); /*if(crearArchivoIntermedia()==TODO_OK){printf("Archivo con intermedia generado");}else{printf("Hubo un error al generar el archivo de intermedia");}*/}
+	;
 
 est_declaracion:
 	DECVAR {printf("\t\tDECLARACIONES\n");} declaraciones ENDDEC {printf("\tFin de las Declaraciones\n");}
@@ -111,8 +116,8 @@ declaracion:
            ;
 
 lista_var:  
-	ID {fprintf(fIntermedia,"%i-ID | ",pos_actual);}
-	 | lista_var CAR_COMA ID {fprintf(fIntermedia,"%i-ID | ",pos_actual);}  
+	ID 
+	 | lista_var CAR_COMA ID  
  	 ;
 	 
 algoritmo: 
@@ -138,7 +143,7 @@ ciclo:
      ;
 
 asignacion:
-			lista_id OP_ASIG expresion {printf("\t\tFIN LINEA ASIGNACION\n");}
+			lista_id OP_ASIG expresion {insertarEnLista(":="); printf("\t\tFIN LINEA ASIGNACION\n");}
 	  ;
 
 lista_id:
@@ -153,28 +158,46 @@ entrada_salida:
 ;
 
 seleccion: 
-    	IF CAR_PA condicion CAR_PC THEN bloque ENDIF{printf("\t\tENDIF\n");}
-		| IF CAR_PA condicion CAR_PC THEN bloque ELSE bloque ENDIF {printf("\t\t IF CON ELSE\n");}	
+    	IF CAR_PA condicion CAR_PC then_ bloque ENDIF{printf("\t\tENDIF\n"); }
+		| IF CAR_PA condicion CAR_PC then_ bloque else_ bloque ENDIF {printf("\t\t IF CON ELSE\n");}	
 ;
+
+then_: THEN {
+				insertarEnLista("CMP");
+				insertarEnLista(valorComparacion(comparador_usado));
+				int iPosActual;
+				char sPosActual[5];
+				iPosActual = insertarEnLista("###"); // no inserta nada, pero avanza el puntero y devuelve en que celda estaba
+				itoa(iPosActual,sPosActual,10);
+				apilar(sPosActual);
+			}
+			
+else_: ELSE {
+				int x;
+				x=desapilar();
+				char sPosActual[5];
+				itoa(puntero_tokens,sPosActual,10);
+				escribirEnLista(x,sPosActual);				
+}
 
 condicion:
          comparacion 
-         |OP_NOT comparacion{insertarEnLista(yylval.str_val); printf("\t\tNOT CONDICION\n");}
-         |comparacion OP_AND comparacion{insertarEnLista(yylval.str_val); printf("\t\tCONDICION DOBLE AND\n");}
-		 |comparacion OP_OR comparacion{insertarEnLista(yylval.str_val); printf("\t\tCONDICION DOBLE OR\n");}
-		 |OP_NOT CAR_PA comparacion {insertarEnLista(yylval.str_val);} OP_AND comparacion CAR_PC{printf("\t\tNOT CONDICION DOBLE AND\n");}
-		 |OP_NOT CAR_PA comparacion {insertarEnLista(yylval.str_val);} OP_OR  comparacion CAR_PC{printf("\t\tNOT CONDICION DOBLE OR\n");}
+         |OP_NOT comparacion{printf("\t\tNOT CONDICION\n");}
+         |comparacion OP_AND comparacion{printf("\t\tCONDICION DOBLE AND\n");}
+		 |comparacion OP_OR comparacion{printf("\t\tCONDICION DOBLE OR\n");}
+		 |OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC {printf("\t\tNOT CONDICION DOBLE AND\n");}
+		 |OP_NOT CAR_PA comparacion OP_OR  comparacion CAR_PC{printf("\t\tNOT CONDICION DOBLE OR\n");}
 		 |between
 		 |OP_NOT between
 	 ;
 
 comparacion:
-	   expresion OP_COMPARACION {insertarEnLista("CMP"); insertarEnLista(valorComparacion(yylval.str_val));} expresion
+	   expresion OP_COMPARACION {/*printf("Lei comp: %s\n",yylval.str_val);*/strcpy(comparador_usado,yylval.str_val);}  expresion
 	   ;
 
 expresion:
         termino
-		|expresion OP_SUM {insertarEnLista("+");} termino
+		|expresion OP_SUM {insertarEnLista(yylval.str_val);} termino
 		|expresion OP_RES {insertarEnLista("-");} termino
  	 ;
 	 
@@ -207,20 +230,23 @@ void apilar(char * val)
 		exit (1);
 	}
 	pila[tope_pila]=val;
+	printf("APILAR #CELDA ACTUAL -> %s\n",val);
 }
 
-char * desapilar()
+int desapilar()
 {
 	if(pilaVacia() == 0)
 	{
 		char * dato = pila[tope_pila];
-		tope_pila--;
-		return dato;
+		tope_pila--;	
+		printf("DESAPILAR #CELDA -> %s\n",dato);
+		return atoi(dato);		
 	} else {
 		printf("Error: La pila esta vacia.\n");
 		system ("Pause");
 		exit (1);
 	}
+	
 	
 	
 }
@@ -242,7 +268,7 @@ int pilaLlena()
 }
 
 
-void insertarEnLista(char * val)
+int insertarEnLista(char * val)
 {
 	// Convierto en CHAR *
 	aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
@@ -252,8 +278,28 @@ void insertarEnLista(char * val)
 	listaTokens[puntero_tokens] = aux;
 	puntero_tokens++;
 	
+	//escribo en archivo
+	//fprintf(fintermedia,"%s\n",aux);
+	
 	// DEBUG por consola
-    printf("insertar_en_polaca(%s)\n", aux);
+	if(strcmp(aux,"###")!=0){
+		printf("insertar_en_polaca(%s)\n", aux);
+	}
+	return puntero_tokens-1; // devuelvo posicion
+	
+}
+
+void escribirEnLista(int pos, char * val)
+{
+	// Convierto en CHAR *
+	aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
+    strcpy(aux, val);
+	
+	// escribo en vector
+	listaTokens[pos] = aux;
+	
+	printf("Escrbio en %i el valor %s\n",pos,aux);
+	
 }
 
 char * valorComparacion(char * val){
@@ -287,13 +333,13 @@ int main(int argc,char *argv[])
 	//puntero_pila = -1;
 	// Si no abro el archivo antes de leer prueba no escribe
 	//printf("Abriendo archivo intermedia.txt ------------------------------------------");
-	//fIntermedia=fopen("intermedia.txt", "wt");
-	//if(fIntermedia==NULL)
-	//{
-	//	printf("Error al crear archivo intermedia.txt \n");
-//		system("PAUSE");
-//		return 0;
-//	}
+	fIntermedia=fopen("intermedia.txt", "wt");
+	if(fIntermedia==NULL)
+	{
+		printf("Error al crear archivo intermedia.txt \n");
+		system("PAUSE");
+		return 0;
+	}
 	
 	if ((yyin = fopen(argv[1], "rt")) == NULL)
 	{	
@@ -305,7 +351,7 @@ int main(int argc,char *argv[])
 	}
 			
 	fclose(yyin);
-//	fclose(fIntermedia);
+	fclose(fIntermedia);
 	return 0;
 }
 
