@@ -139,7 +139,36 @@ sentencia:
 
 ciclo:
      REPEAT { printf("\t\tREPEAT\n");}bloque UNTIL condicion { printf("\t\tFIN DEL REPEAT\n");}
-	 | WHILE {printf("\t\tWHILE\n");} CAR_PA condicion CAR_PC bloque ENDW{ printf("\t\tFIN DEL WHILE\n");}
+	 | WHILE {printf("\t\tWHILE\n");} CAR_PA {
+												int iPosActual;
+												char sPosActual[5];
+												itoa(puntero_tokens,sPosActual,10);	// paso a char * la posicion actual representada por el puntero de la lista de tokens
+												apilar(sPosActual);
+											} condicion CAR_PC {
+																insertarEnLista("CMP");
+																insertarEnLista(valorComparacion(comparador_usado));
+																int iPosActual;
+																char sPosActual[5];
+																iPosActual = insertarEnLista("###"); // ACA estoy aumentando el tope de pila (avanzo) no inserta nada, pero avanza el puntero y devuelve en que celda estaba
+																itoa(iPosActual,sPosActual,10);
+																apilar(sPosActual);
+															}
+	 bloque ENDW{ 
+					insertarEnLista("BI");
+					int x,y;
+					char * val;
+								
+					x=desapilar();
+					printf("DESAPILE TOPE PILA: %d\n",x);
+					sprintf(listaTokens[x],"CELDA %d",(puntero_tokens));
+					y=desapilar();
+					printf("DESAPILE TOPE PILA: %d\n",x);
+					sprintf(val,"CELDA %d",(y));
+					insertarEnLista(val);
+
+					printf("\t\tFIN DEL WHILE\n");
+	 
+		}
      ;
 
 asignacion:
@@ -177,8 +206,6 @@ then_: THEN {
 				iPosActual = insertarEnLista("###"); // ACA estoy aumentando el tope de pila (avanzo) no inserta nada, pero avanza el puntero y devuelve en que celda estaba
 				itoa(iPosActual,sPosActual,10);
 				apilar(sPosActual);
-				
-				
 			}
 ;			
 else_: ELSE {
