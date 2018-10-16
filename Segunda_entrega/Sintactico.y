@@ -160,7 +160,7 @@ ciclo:
 								
 					x=desapilar();
 					printf("DESAPILE TOPE PILA: %d\n",x);
-					sprintf(listaTokens[x],"CELDA %d",(puntero_tokens));
+					sprintf(listaTokens[x],"CELDA %d",(puntero_tokens+1));
 					y=desapilar();
 					printf("DESAPILE TOPE PILA: %d\n",x);
 					sprintf(val,"CELDA %d",(y));
