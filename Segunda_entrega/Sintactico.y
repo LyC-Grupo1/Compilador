@@ -121,7 +121,7 @@ lista_var:
  	 ;
 	 
 algoritmo: 
-         BEGINP{printf("\tCOMIENZO de BLOQUES\n");} bloque ENDP
+         BEGINP{printf("COMIENZO de BLOQUES\n");} bloque ENDP
          ;
 
 bloque:  
@@ -138,8 +138,8 @@ sentencia:
 	 ;
 
 ciclo:
-     REPEAT { printf("\t\tREPEAT\n");}bloque UNTIL condicion { printf("\t\tFIN DEL REPEAT\n");}
-	 | WHILE {printf("\t\tWHILE\n");} CAR_PA {
+     REPEAT { printf("REPEAT\n");}bloque UNTIL condicion { printf("FIN DEL REPEAT\n");}
+	 | WHILE {printf("WHILE\n");} CAR_PA {
 												int iPosActual;
 												char sPosActual[5];
 												itoa(puntero_tokens,sPosActual,10);	// paso a char * la posicion actual representada por el puntero de la lista de tokens
@@ -166,13 +166,13 @@ ciclo:
 					sprintf(val,"CELDA %d",(y));
 					insertarEnLista(val);
 
-					printf("\t\tFIN DEL WHILE\n");
+					printf("FIN DEL WHILE\n");
 	 
 		}
      ;
 
 asignacion:
-			lista_id OP_ASIG expresion {insertarEnLista(":="); printf("\t\tFIN LINEA ASIGNACION\n");}
+			lista_id OP_ASIG expresion {insertarEnLista(":="); printf("FIN LINEA ASIGNACION\n");}
 	  ;
 
 lista_id:
@@ -193,9 +193,9 @@ seleccion:
 				char sPosActual[5];
 				itoa(puntero_tokens,sPosActual,10);
 				sprintf(listaTokens[x],"CELDA %s",sPosActual);
-				printf("\t\tFIN DEL IF\n"); 
+				printf("FIN DEL IF\n"); 
 			}
-		| IF CAR_PA condicion CAR_PC then_ bloque else_ bloque ENDIF {printf("\t\tFIN DEL IF\n");}	
+		| IF CAR_PA condicion CAR_PC then_ bloque else_ bloque ENDIF {printf("FIN DEL IF\n");}	
 ;
 
 then_: THEN {
@@ -220,24 +220,22 @@ else_: ELSE {
 
 condicion:
          comparacion 
-         |OP_NOT comparacion{printf("\t\tNOT CONDICION\n");}
-         |comparacion op_and_ comparacion{	
-											int i;
+         |OP_NOT comparacion{printf("NOT CONDICION\n");}
+         |comparacion op_and_ {	printf("CONDICION CON AND\n");
+											int i, x;
 											for(i=0; i < (tope_pila);i++){
-												int x;
 												x=desapilar();
-												printf("DESAPILE LA CELDA %d\n",x);
 												char sPosActual[5];
 												itoa(puntero_tokens,sPosActual,10);
 												escribirEnLista(x,sPosActual);
 												sprintf(listaTokens[x],"CELDA %s",sPosActual);	
+												
 											}
-											
-											printf("\t\tCONDICION DOBLE AND\n");
-										}
-		 |comparacion OP_OR comparacion{printf("\t\tCONDICION DOBLE OR\n");}
-		 |OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC {printf("\t\tNOT CONDICION DOBLE AND\n");}
-		 |OP_NOT CAR_PA comparacion OP_OR  comparacion CAR_PC{printf("\t\tNOT CONDICION DOBLE OR\n");}
+											printf("FIN CONDICION DOBLE AND\n");
+										} comparacion 
+		 |comparacion OP_OR comparacion{printf("CONDICION DOBLE OR\n");}
+		 |OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC {printf("NOT CONDICION DOBLE AND\n");}
+		 |OP_NOT CAR_PA comparacion OP_OR  comparacion CAR_PC{printf("NOT CONDICION DOBLE OR\n");}
 		 |between
 		 |OP_NOT between
 	 ;
@@ -249,9 +247,10 @@ op_and_: OP_AND{
 				char sPosActual[5];
 				iPosActual = insertarEnLista("###"); // no inserta nada, pero avanza el puntero y devuelve en que celda estaba
 				itoa(iPosActual,sPosActual,10);
-				apilar(sPosActual);
+				apilar(sPosActual);				
 			}	 
-;	 
+;
+	 
 comparacion:
 	   expresion OP_COMPARACION {strcpy(comparador_usado,yylval.str_val);}  expresion
 	   ;
@@ -263,7 +262,7 @@ expresion:
  	 ;
 	 
 between: 
-	{printf("\t\tINICIO BETWEEN\n");}BETWEEN CAR_PA ID CAR_COMA CAR_CA expresion CAR_PYC expresion CAR_CC CAR_PC {printf("\t\tFIN BETWEEN\n");}
+	{printf("INICIO BETWEEN\n");}BETWEEN CAR_PA ID CAR_COMA CAR_CA expresion CAR_PYC expresion CAR_CC CAR_PC {printf("\t\tFIN BETWEEN\n");}
 	 ;
 	 
 termino: 
@@ -291,7 +290,7 @@ void apilar(char * val)
 		exit (1);
 	}
 	pila[tope_pila]=val;
-	printf("APILAR #CELDA ACTUAL -> %s\n",val);
+	printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
 }
 
 int desapilar()
@@ -300,7 +299,7 @@ int desapilar()
 	{
 		char * dato = pila[tope_pila];
 		tope_pila--;	
-		printf("DESAPILAR #CELDA -> %s\n",dato);
+		printf("\tDESAPILAR #CELDA -> %s\n",dato);
 		return atoi(dato);		
 	} else {
 		printf("Error: La pila esta vacia.\n");
@@ -342,7 +341,7 @@ int insertarEnLista(char * val)
 	
 	// DEBUG por consola
 	if(strcmp(aux,"###")!=0){
-		printf("insertar_en_polaca(%s)\n", aux);
+		printf("\tinsertar_en_polaca(%s)\n", aux);
 	}
 	return (puntero_tokens-1); // devuelvo posicion
 	
@@ -357,7 +356,7 @@ void escribirEnLista(int pos, char * val)
 	// escribo en vector
 	listaTokens[pos] = aux;
 	
-	printf("Escribio en %i el valor %s\n",pos,aux);
+	printf("\tEscribio en %i el valor %s\n",pos,aux);
 	
 }
 
