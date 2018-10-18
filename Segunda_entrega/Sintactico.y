@@ -365,12 +365,14 @@ op_or_: OP_OR{
 				insertarEnLista("CMP");
 				insertarEnLista(valorComparacion(comparador_usado));
 				int iPosActual;
+				
 				char sPosActual[5];
 				iPosActual = insertarEnLista("###"); // no inserta nada, pero avanza el puntero y devuelve en que celda estaba
 				sprintf(sPosActual, "%d", iPosActual );
 				apilar(PILA_IF,sPosActual);	
 				debugPila(PILA_IF,tope_pila_if);
 				insertarEnLista("BI");
+				
 				char sPosActualB[5];
 				iPosActual = insertarEnLista("###"); // no inserta nada, pero avanza el puntero y devuelve en que celda estaba
 				sprintf(sPosActualB, "%d", iPosActual );
