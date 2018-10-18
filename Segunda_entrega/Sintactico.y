@@ -162,12 +162,12 @@ lista_var:
 	ID  {
 		//  printf("Lei el ID: %s\n",yylval.str_val);
 		  insertarEnListaDeclaracion(yylval.str_val);
-		  debugListaDeclaracion();
+		  //debugListaDeclaracion();
 		}
 	 | lista_var CAR_COMA ID { 
 		//  printf("Lei el ID: %s\n",yylval.str_val);
 		  insertarEnListaDeclaracion(yylval.str_val);
-		  debugListaDeclaracion();
+		  //debugListaDeclaracion();
 		} 
  	 ;
 	 
@@ -231,7 +231,7 @@ asignacion:
 
 lista_id:
 			lista_id OP_ASIG ID {
-				printf("Voy a leer el ID %s  \n",$3);
+			//	printf("Voy a leer el ID %s  \n",$3);
 				
 				if(verificarExistencia($3) == EXISTE)
 				{
@@ -243,7 +243,7 @@ lista_id:
 			}
 			| ID {
 				
-				printf("Lei primer ID %s\n",$1);
+			//	printf("Lei primer ID %s\n",$1);
 				
 				if(verificarExistencia($1) == EXISTE)
 				{
@@ -266,8 +266,9 @@ seleccion:
     	IF CAR_PA condicion CAR_PC then_ bloque  ENDIF {
 				int x, i;
 				printf("\nTOPE DE PILA EN ENDIF %d\n", tope_pila_if);
-				//int limit = tope_pila_if;
-				for(i=0; i < tope_pila_if; i++)
+				int limit = tope_pila_if;
+				debugPila(PILA_IF,tope_pila_if);
+				for(i=0; i < limit; i++)
 				{
 					printf("\nFor %d\n", i);
 					x=desapilar(PILA_IF);
@@ -327,7 +328,7 @@ op_and_: OP_AND{
 	 
 comparacion:
 	   expresion OP_COMPARACION {
-		   printf("Voy a convertir el comparador \n");
+		  
 		   strcpy(comparador_usado,yylval.cmp_val);
 		   }  expresion
 	   ;
@@ -349,10 +350,12 @@ termino:
 	   ;
 
 factor: 
-      ID { if(verificarExistencia(yylval.str_val) == NO_EXISTE)
+      ID { 
+			if(verificarExistencia(yylval.str_val) == NO_EXISTE)
 			{ 
 				finAnormal("Syntax Error","Variable no declarada"); 
 			} 
+			insertarEnLista(yylval.str_val);
 		}
       | CONST_INT {
 					  if(verificarExistencia(yylval.str_val) == NO_EXISTE)
@@ -440,13 +443,13 @@ int crearArchivoTS()
 		{  
 			fprintf(archivo,"%-30s%-10s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo);
 		}
-		else if(strcmp(tablaSimbolos[i].tipo, "CONST_STRING") == 0 )
+		else if(strcmp(tablaSimbolos[i].tipo, "CONST_STR") == 0 )
 		{
-			fprintf(archivo,"%-30s%-10s                                    %-30d\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,strlen(tablaSimbolos[i].nombre));
+			fprintf(archivo,"%-29s%-10s                                    %-30d\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,strlen(tablaSimbolos[i].nombre));
 		}
 		else if(strcmp(tablaSimbolos[i].tipo, "CONST_INT") == 0 || strcmp(tablaSimbolos[i].tipo, "CONST_REAL") == 0)
 		{
-			fprintf(archivo,"_%-30s%-10s           %-30s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
+			fprintf(archivo,"_%-29s%-10s           %-30s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
 		}
 		else 
 		{
@@ -706,8 +709,8 @@ int crearArchivoIntermedia()
 
 	for (i = 1; i < puntero_tokens; i++)
 	{
-		fprintf(archivo,"CELDA %d: %s\n", i, listaTokens[i]);
-		
+		fprintf(archivo,"%s\n", listaTokens[i]);
+		//fprintf(archivo,"CELDA %d: %s\n", i, listaTokens[i]);
 	}
 	fclose(archivo); 
 
