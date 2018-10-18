@@ -81,3 +81,21 @@ CELDA 84
 i
 17
 :=
+i
+15
+CMP
+BNE
+CELDA 102
+a
+4
+CMP
+BNE
+CELDA 102
+i
+16
+:=
+BI
+CELDA 102
+i
+17
+:=

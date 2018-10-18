@@ -273,7 +273,7 @@ seleccion:
 				if (flagIFOR == TRUE){
 					int x;
 					printf("\nTOPE DE PILA EN ENDIF %d\n", tope_pila_if);
-					debugPila(PILA_IF,tope_pila_if);
+					//debugPila(PILA_IF,tope_pila_if);
 					
 					// el primero
 					x=desapilar(PILA_IF);
@@ -295,16 +295,16 @@ seleccion:
 					int x, i;
 					printf("\nTOPE DE PILA EN ENDIF %d\n", tope_pila_if);
 					int limit = tope_pila_if;
-					debugPila(PILA_IF,tope_pila_if);
+					//debugPila(PILA_IF,tope_pila_if);
 					for(i=0; i < limit; i++)
 					{
-						printf("\nFor %d\n", i);
+						//printf("\nFor %d\n", i);
 						x=desapilar(PILA_IF);
 						char sPosActual[5];
 						sprintf(sPosActual, "%d", puntero_tokens );
 						escribirEnLista(x,sPosActual);
 						sprintf(listaTokens[x],"CELDA %s",sPosActual);	
-						printf("\nEND For %d\n", i);
+						//printf("\nEND For %d\n", i);
 					}
 				} 
 				
@@ -316,13 +316,13 @@ seleccion:
 				int limit = tope_pila_if;
 				for(i=0; i < limit; i++)
 				{
-					printf("\nFor %d\n", i);
+					//printf("\nFor %d\n", i);
 					x=desapilar(PILA_IF);
 					char sPosActual[5];
 					sprintf(sPosActual, "%d", puntero_tokens );
 					escribirEnLista(x,sPosActual);
 					sprintf(listaTokens[x],"CELDA %s",sPosActual);	
-					printf("\nEND For %d\n", i);
+					//printf("\nEND For %d\n", i);
 				}
 			printf("FIN DEL IF CON ELSE\n");
 		}	
@@ -350,7 +350,8 @@ else_: ELSE {
 				iPosActual = insertarEnLista("###"); // no inserta nada, pero avanza el puntero y devuelve en que celda estaba
 				sprintf(sPosActualB, "%d", iPosActual );
 				apilar(PILA_IF,sPosActualB);	
-				debugPila(PILA_IF,tope_pila_if);
+					
+				//debugPila(PILA_IF,tope_pila_if);
 				
 		}
 ;
@@ -391,14 +392,14 @@ op_or_: OP_OR{
 				iPosActual = insertarEnLista("###"); // no inserta nada, pero avanza el puntero y devuelve en que celda estaba
 				sprintf(sPosActual, "%d", iPosActual );
 				apilar(PILA_IF,sPosActual);	
-				debugPila(PILA_IF,tope_pila_if);
+				//debugPila(PILA_IF,tope_pila_if);
 				insertarEnLista("BI");
 				
 				char sPosActualB[5];
 				iPosActual = insertarEnLista("###"); // no inserta nada, pero avanza el puntero y devuelve en que celda estaba
 				sprintf(sPosActualB, "%d", iPosActual );
 				apilar(PILA_IF,sPosActualB);	
-				debugPila(PILA_IF,tope_pila_if);				
+				//debugPila(PILA_IF,tope_pila_if);				
 			}	 
 ;
 
