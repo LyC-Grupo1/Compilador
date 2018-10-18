@@ -19,7 +19,12 @@ int yyerror();
 int yylex();
 int yyparse();
 
+void finAnormal(char * tipo, char * mensaje);
+void validarDeclaracionTipoDato(char * tipo);
+
+
 // TABLA DE SIMBOLOS
+
 struct struct_tablaSimbolos
 {
 	char nombre[100];
@@ -27,10 +32,13 @@ struct struct_tablaSimbolos
 	char valor[50];
 	char longitud[100];
 };
-int push_TS(char*, char*);
-int crearArchivoTS();
+
 int puntero_ts = 0;
 struct struct_tablaSimbolos tablaSimbolos[10000];
+////////////////////////////
+int insertar_TS(char*, char*);
+int crearArchivoTS();
+void debugTS();
 
 
 int crearArchivoIntermedia();
@@ -41,33 +49,34 @@ void escribirEnLista(int, char*);
 char * valorComparacion(char * );
 char comparador_usado[2];
 
-//DECLARACION PILA
+// PILAS 
 char * pilaIF[TAM_PILA];			// pila 0
-char * pilaWhile[TAM_PILA];			// pila 2
-
+char * pilaWhile[TAM_PILA];			// pila 1
 int tope_pila_if=0;				// pila 0
 int tope_pila_while=0;			// pila 1
 
-char * listaDeclaracion[100];	// lista para declaraciones
-int puntero_declaracion = 0;
-
-
+////////////////////
 void apilar(int nroPila, char * val);
 int desapilar(int nroPila);
 int pilaVacia(int tope);
 int pilaLlena(int tope);
 void debugPila(int nroPila, int tope);
+
+// LISTAS
+
+char * listaDeclaracion[100];	// lista para declaraciones
+char * listaTokens[10000];		// lista de tokens para gci polaca inversa
+int puntero_declaracion = 0;
+int puntero_tokens=1; // arranca en uno para comparar en notepad++
+// DECLARACION DE VARIABLES - FUNCIONES
 void debugListaDeclaracion();
-void debugTS();
-void finAnormal(char * tipo, char * mensaje);
-// VALIDACIONES
-void validarDeclaracionTipoDato(char * tipo);
+
 
 //DECLARACION VARIABLES
-int puntero_tokens=1; // arranca en uno para comparar en notepad++
+
 int pos_actual=0;
 int yystopparser=0;
-char * listaTokens[10000];
+
 FILE *yyin;
 FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 
@@ -347,15 +356,15 @@ termino:
 
 factor: 
       ID 
-      | CONST_INT 
-      | CONST_REAL 
-      | CONST_STR  
+      | CONST_INT {insertarEnLista(yylval.int_val); }
+      | CONST_REAL {insertarEnLista(yylval.real_val); }
+      | CONST_STR  {insertarEnLista(yylval.str_val); }
 	  | CAR_PA expresion CAR_PC 	  
       ;
 
 %%
 // FUNCIONES DE TABLA DE SIMBOLOS
-int push_TS(char* tipo, char* nombre)
+int insertar_TS(char* tipo, char* nombre)
 {
 	int i, posicion;
 	
@@ -694,7 +703,7 @@ void validarDeclaracionTipoDato(char * tipo)
 		if(verificarExistencia(listaDeclaracion[i]) == NO_EXISTE)
 		{
 		//printf("No existe, la inserto en tabla de simbolos \n");
-		push_TS(tipo,listaDeclaracion[i]);
+		insertar_TS(tipo,listaDeclaracion[i]);
 		//debugListaDeclaracion();
 		//debugTS();
 		}
