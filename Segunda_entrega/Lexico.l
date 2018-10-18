@@ -8,18 +8,6 @@
 #define TODO_OK 1
 #define ERROR 0
 
-struct struct_tablaSimbolos
-{
-	char nombre[100];
-	char tipo[100];
-	char valor[50];
-	char longitud[100];
-};
-
-int push_TS(char*, char*);
-int crearArchivoTS();
-int puntero_array = 0;
-struct struct_tablaSimbolos tablaSimbolos[10000];
 FILE  *yyin;
 %}
 
@@ -65,20 +53,8 @@ CAR_COMILLAS			   ["\""]
 "ENDDEF"		{ return ENDDEF;}
 "enddef"		{ return ENDDEF;}
 "beginp"		{ return BEGINP;}
-"endp"			{ 					
-					if (crearArchivoTS() == 0)
-					{
-						printf("Error al crear tabla de símbolos\n");
-					}
-					return ENDP; 	
-				}
-"ENDP"			{ 					
-					if (crearArchivoTS() == 0)
-					{
-						printf("Error al crear tabla de símbolos\n");
-					}
-					return ENDP; 	
-				}
+"endp"			{ return ENDP; 	}
+"ENDP"			{ return ENDP; 	}
 {COMENTARIO_SIMPLE}	{  }
 {COMENTARIO_DOBLE}	{  }
 "real"			{ return REAL;}
@@ -130,12 +106,12 @@ CAR_COMILLAS			   ["\""]
 "("			{ return CAR_PA;}
 ")"			{ return CAR_PC;}
 ";"			{ return CAR_PYC;}
-">"                     { yylval.str_val = yytext; return OP_COMPARACION;}
-">="                    { yylval.str_val = yytext; return OP_COMPARACION;}
-"<"                     { yylval.str_val = yytext; return OP_COMPARACION;}
-"<="                    { yylval.str_val = yytext; return OP_COMPARACION;}
-"><"                    { yylval.str_val = yytext; return OP_COMPARACION;}
-"="                     { yylval.str_val = yytext; return OP_COMPARACION;}
+">"                     { yylval.cmp_val = strdup(yytext); return OP_COMPARACION;}
+">="                    { yylval.cmp_val = strdup(yytext); return OP_COMPARACION;}
+"<"                     { yylval.cmp_val = strdup(yytext); return OP_COMPARACION;}
+"<="                    { yylval.cmp_val = strdup(yytext); return OP_COMPARACION;}
+"><"                    { yylval.cmp_val = strdup(yytext); return OP_COMPARACION;}
+"="                     { yylval.cmp_val = strdup(yytext); return OP_COMPARACION;}
 ":"                     { return OP_DOSP;}
 "&&"                   { return OP_AND;}
 "AND"                   { return OP_AND;}
@@ -148,11 +124,11 @@ CAR_COMILLAS			   ["\""]
 "BETWEEN"		{ return BETWEEN;}
 "between"		{ return BETWEEN;}
 {ID}			{
-					yylval.str_val = yytext;
+					yylval.str_val = strdup(yytext);
 					
 					int cantCaracteres = strlen(yytext);
 					if(cantCaracteres <= 20) {
-						push_TS("ID", yytext); 
+						// push_TS("ID", yytext); 
 						return ID; 
 					} else {
 						printf("ERROR - Nombre de variable muy largo. Maximo 20 caracteres\n");
@@ -161,10 +137,10 @@ CAR_COMILLAS			   ["\""]
 					}
 				}
 {CONST_STR}		{ 
-					yylval.str_val = yytext;
+					yylval.str_val = strdup(yytext);
 					int cantCaracteres = strlen(yytext);
 					if(cantCaracteres <= 202) { //Cuenta las commillas tambien
-						push_TS("CONST_STR", yytext);
+						//push_TS("CONST_STR", yytext);
 						return CONST_STR;
 					} else {
 						printf("ERROR - String muy largo. Maximo 200 caracteres\n");
@@ -175,11 +151,11 @@ CAR_COMILLAS			   ["\""]
 {CAR_COMA}		{ return CAR_COMA;}
 {CAR_PUNTO}		{ return CAR_PUNTO;}
 {CONST_INT}	{ 
-				yylval.str_val = yytext;
+				yylval.int_val = yytext;
 				
 				int num = atoi(yytext); 
 				if(num >= COTA_INT*(-1) && num <= COTA_INT){
-					push_TS("CONST_INT", yytext);
+					//push_TS("CONST_INT", yytext);
 					return CONST_INT; 
 				}else{
 					printf("ERROR - Int fuera de rango.\n");
@@ -189,13 +165,13 @@ CAR_COMILLAS			   ["\""]
 			}
 {CONST_REAL}	{ 
 				
-					yylval.str_val = yytext;
+					yylval.real_val = yytext;
 
 					double n;
 					n = atof(yytext);
 					
 					if(n >= COTA_FLOAT*(-1) && n <= COTA_FLOAT){
-						push_TS("CONST_REAL", yytext);
+						//push_TS("CONST_REAL", yytext);
 						return CONST_REAL; 
 					}else{
 						printf("ERROR - Real fuera de rango.\n");
@@ -210,51 +186,3 @@ CAR_COMILLAS			   ["\""]
 "\r\n"
 .    { printf("Caracter invalido!");  exit(6);}
 %%
-int push_TS(char* tipo, char* nombre)
-{
-	int i, posicion;
-	
-	for(i = 0; i < puntero_array; i++)
-	{
-		if(strcmp(tablaSimbolos[i].nombre, nombre) == 0)
-		{
-			return i;
-		}
-	}
-	strcpy(tablaSimbolos[puntero_array].tipo, tipo);
-	strcpy(tablaSimbolos[puntero_array].nombre, nombre);
-	posicion = puntero_array;
-	puntero_array++;
-	return posicion;
-}
-
-int crearArchivoTS()
-{
-	FILE *archivo; 
-	int i;
-	archivo = fopen("ts.txt","w"); 
-
-	if (!archivo){	return ERROR; }
-
-	fprintf(archivo, "Nombre                        Tipo                  Valor                Longitud\n");
-	
-	for (i = 0; i < puntero_array; i++)
-	{
-		if (strcmp(tablaSimbolos[i].tipo, "ID") == 0 )
-		{  
-			fprintf(archivo,"%-30s%-10s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo);
-		}
-		else if(strcmp(tablaSimbolos[i].tipo, "CONST_STR") == 0 )
-		{
-			fprintf(archivo,"_%-29s%-10s                                    %-30d\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,strlen(tablaSimbolos[i].nombre));
-		}
-		else 
-		{
-			fprintf(archivo,"%-30s%-10s               %s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].nombre);
-		}
-	}
-	fclose(archivo); 
-
-	return TODO_OK;
-}
-

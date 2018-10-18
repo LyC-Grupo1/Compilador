@@ -2,16 +2,36 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <conio.h>
 #include "y.tab.h"
 #define TAM_PILA 100
 #define TODO_OK 1
 #define ERROR 0
+#define EXISTE 1
+#define NO_EXISTE 0
+#define PILA_IF 0
+#define PILA_DECLARACION 1
+#define PILA_WHILE 2
 
 //DECLARACION FUNCIONES
 
 int yyerror();
 int yylex();
 int yyparse();
+
+// TABLA DE SIMBOLOS
+struct struct_tablaSimbolos
+{
+	char nombre[100];
+	char tipo[100];
+	char valor[50];
+	char longitud[100];
+};
+int push_TS(char*, char*);
+int crearArchivoTS();
+int puntero_ts = 0;
+struct struct_tablaSimbolos tablaSimbolos[10000];
+
 
 int crearArchivoIntermedia();
 char * aux;
@@ -22,13 +42,26 @@ char * valorComparacion(char * );
 char comparador_usado[2];
 
 //DECLARACION PILA
-char * pila[TAM_PILA];
-int tope_pila=0;
-//int puntero_pila;
-void apilar(char * val);
-int desapilar();
-int pilaVacia();
-int pilaLlena();
+char * pilaIF[TAM_PILA];			// pila 0
+char * pilaWhile[TAM_PILA];			// pila 2
+
+int tope_pila_if=0;				// pila 0
+int tope_pila_while=0;			// pila 1
+
+char * listaDeclaracion[100];	// lista para declaraciones
+int puntero_declaracion = 0;
+
+
+void apilar(int nroPila, char * val);
+int desapilar(int nroPila);
+int pilaVacia(int tope);
+int pilaLlena(int tope);
+void debugPila(int nroPila, int tope);
+void debugListaDeclaracion();
+void debugTS();
+void finAnormal(char * tipo, char * mensaje);
+// VALIDACIONES
+void validarDeclaracionTipoDato(char * tipo);
 
 //DECLARACION VARIABLES
 int puntero_tokens=1; // arranca en uno para comparar en notepad++
@@ -42,15 +75,17 @@ FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 %}
 
 %union {
-	int intval;
-	char *str_val;
+	char * int_val;
+	char * real_val;
+	char * str_val;
+	char * cmp_val;
 }
 
 %start programa
 %token <str_val>ID
-%token <str_val>CONST_INT
+%token <int_val>CONST_INT
 %token <str_val>CONST_STR
-%token <str_val>CONST_REAL
+%token <real_val>CONST_REAL
 %token PROGRAM
 %token DECVAR
 %token ENDDEC
@@ -68,7 +103,7 @@ FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 %token OP_AND
 %token OP_OR
 %token OP_NOT
-%token <str_val>OP_COMPARACION
+%token <cmp_val>OP_COMPARACION
 %token OP_ASIG 
 %token OP_DOSP
 %token OP_SUM
@@ -109,14 +144,22 @@ declaraciones:
     	     ;
 
 declaracion:  
-           lista_var OP_DOSP REAL
-			| lista_var OP_DOSP STRING
-			| lista_var OP_DOSP INTEGER
+           lista_var OP_DOSP REAL {validarDeclaracionTipoDato("CONST_REAL");}; 
+			| lista_var OP_DOSP STRING { validarDeclaracionTipoDato("CONST_STR"); }
+			| lista_var OP_DOSP INTEGER { validarDeclaracionTipoDato("CONST_INT"); }
            ;
 
 lista_var:  
-	ID 
-	 | lista_var CAR_COMA ID  
+	ID  {
+		//  printf("Lei el ID: %s\n",yylval.str_val);
+		  insertarEnListaDeclaracion(yylval.str_val);
+		  debugListaDeclaracion();
+		}
+	 | lista_var CAR_COMA ID { 
+		//  printf("Lei el ID: %s\n",yylval.str_val);
+		  insertarEnListaDeclaracion(yylval.str_val);
+		  debugListaDeclaracion();
+		} 
  	 ;
 	 
 algoritmo: 
@@ -142,29 +185,28 @@ ciclo:
 												int iPosActual;
 												char sPosActual[5];
 												//itoa(puntero_tokens,sPosActual,10);	// paso a char * la posicion actual representada por el puntero de la lista de tokens
-																sprintf(sPosActual, "%d", puntero_tokens );
-
-												apilar(sPosActual);
+												sprintf(sPosActual, "%d", puntero_tokens );
+												apilar(PILA_WHILE, sPosActual);
+												
 											} condicion CAR_PC {
-																insertarEnLista("CMP");
-																insertarEnLista(valorComparacion(comparador_usado));
-																int iPosActual;
-																char sPosActual[5];
-																iPosActual = insertarEnLista("###"); // ACA estoy aumentando el tope de pila (avanzo) no inserta nada, pero avanza el puntero y devuelve en que celda estaba
-																//itoa(iPosActual,sPosActual,10);
-				sprintf(sPosActual, "%d", puntero_tokens );
-
-																apilar(sPosActual);
-															}
+												insertarEnLista("CMP");
+												insertarEnLista(valorComparacion(comparador_usado));
+												int iPosActual;
+												char sPosActual[5];
+												iPosActual = insertarEnLista("###"); // ACA estoy aumentando el tope de pila (avanzo) no inserta nada, pero avanza el puntero y devuelve en que celda estaba
+												//itoa(iPosActual,sPosActual,10);
+												sprintf(sPosActual, "%d", puntero_tokens );
+												apilar(PILA_WHILE, sPosActual);
+											}
 	 bloque ENDW{ 
 					insertarEnLista("BI");
 					int x,y;
 					char * val;
 								
-					x=desapilar();
+					x=desapilar(PILA_WHILE);
 					printf("DESAPILE TOPE PILA: %d\n",x);
 					sprintf(listaTokens[x],"CELDA %d",(puntero_tokens+1));
-					y=desapilar();
+					y=desapilar(PILA_WHILE);
 					printf("DESAPILE TOPE PILA: %d\n",x);
 					sprintf(val,"CELDA %d",(y));
 					insertarEnLista(val);
@@ -179,8 +221,30 @@ asignacion:
 	  ;
 
 lista_id:
-			lista_id OP_ASIG ID {insertarEnLista(":="); insertarEnLista(yylval.str_val);}
-			| ID {insertarEnLista(yylval.str_val);}
+			lista_id OP_ASIG ID {
+				printf("Voy a leer el ID %s  \n",$3);
+				
+				if(verificarExistencia($3) == EXISTE)
+				{
+					insertarEnLista($3);
+				} else {
+					// No existe en la tabla de simbolos
+					finAnormal("Syntax Error","Variable no declarada");
+				}
+			}
+			| ID {
+				
+				printf("Lei primer ID %s\n",$1);
+				
+				if(verificarExistencia($1) == EXISTE)
+				{
+					insertarEnLista($1);
+				} else {
+					// No existe en la tabla de simbolos
+					finAnormal("Syntax Error","Variable no declarada");
+				}
+				
+			}
 		;
 	  
 entrada_salida: 
@@ -192,20 +256,19 @@ entrada_salida:
 seleccion: 
     	IF CAR_PA condicion CAR_PC then_ bloque  ENDIF {
 				int x, i;
-				printf("\nTOPE DE PILA EN ENDIF %d\n", tope_pila);
-				int limit = tope_pila;
-				for(i=0; i < limit; i++){
-									printf("\nFor %d\n", i);
-
-												x=desapilar();
-												char sPosActual[5];
-												//itoa(puntero_tokens,sPosActual,10);
-												sprintf(sPosActual, "%d", puntero_tokens );
-												escribirEnLista(x,sPosActual);
-												sprintf(listaTokens[x],"CELDA %s",sPosActual);	
-																				printf("\nEND For %d\n", i);
-	
-											}
+				printf("\nTOPE DE PILA EN ENDIF %d\n", tope_pila_if);
+				int limit = tope_pila_if;
+				for(i=0; i < limit; i++)
+				{
+					printf("\nFor %d\n", i);
+					x=desapilar(PILA_IF);
+					char sPosActual[5];
+					//itoa(puntero_tokens,sPosActual,10);
+					sprintf(sPosActual, "%d", puntero_tokens );
+					escribirEnLista(x,sPosActual);
+					sprintf(listaTokens[x],"CELDA %s",sPosActual);	
+					printf("\nEND For %d\n", i);
+				}
 				printf("FIN DEL IF\n"); 
 			}
 		| IF CAR_PA condicion CAR_PC then_ bloque else_ bloque ENDIF {printf("FIN DEL IF CON ELSE\n");}	
@@ -220,15 +283,15 @@ then_: THEN {
 				//itoa(iPosActual,sPosActual,10);
 								sprintf(sPosActual, "%d", iPosActual );
 
-				apilar(sPosActual);
+				apilar(PILA_IF,sPosActual);
 			}
 ;			
 else_: ELSE {
 				int x;
-				x=desapilar();
+				x=desapilar(PILA_IF);
 				char sPosActual[5];
 				//itoa(puntero_tokens,sPosActual,10);
-								sprintf(sPosActual, "%d", puntero_tokens );
+				sprintf(sPosActual, "%d", puntero_tokens );
 
 				//escribirEnLista(x,sPosActual);
 				sprintf(listaTokens[x],"CELDA %s",sPosActual);	
@@ -253,19 +316,22 @@ op_and_: OP_AND{
 				char sPosActual[5];
 				iPosActual = insertarEnLista("###"); // no inserta nada, pero avanza el puntero y devuelve en que celda estaba
 				//itoa(iPosActual,sPosActual,10);
-								sprintf(sPosActual, "%d", iPosActual );
+				sprintf(sPosActual, "%d", iPosActual );
 
-				apilar(sPosActual);				
+				apilar(PILA_IF,sPosActual);				
 			}	 
 ;
 	 
 comparacion:
-	   expresion OP_COMPARACION {strcpy(comparador_usado,yylval.str_val);}  expresion
+	   expresion OP_COMPARACION {
+		   printf("Voy a convertir el comparador \n");
+		   strcpy(comparador_usado,yylval.cmp_val);
+		   }  expresion
 	   ;
 
 expresion:
 		expresion OP_SUM termino {insertarEnLista("+");}
-		|expresion OP_RES  termino {insertarEnLista("-");}
+		|expresion OP_RES termino {insertarEnLista("-");}
         | termino
  	 ;
 	 
@@ -280,57 +346,216 @@ termino:
 	   ;
 
 factor: 
-      ID {insertarEnLista(yylval.str_val);}
-      | CONST_INT {insertarEnLista(yylval.str_val);}
-      | CONST_REAL {insertarEnLista(yylval.str_val);}
-      | CONST_STR  {insertarEnLista(yylval.str_val);}
+      ID 
+      | CONST_INT 
+      | CONST_REAL 
+      | CONST_STR  
 	  | CAR_PA expresion CAR_PC 	  
       ;
 
 %%
-// FUNCIONES DE PILA
-void apilar(char * val)
+// FUNCIONES DE TABLA DE SIMBOLOS
+int push_TS(char* tipo, char* nombre)
 {
-	tope_pila++;
-	if(pilaLlena() == 1){
-		printf("Error: Se exedio el tamano de la pila.\n");
-		system ("Pause");
-		exit (1);
+	int i, posicion;
+	
+	for(i = 0; i < puntero_ts; i++)
+	{
+		if(strcmp(tablaSimbolos[i].nombre, nombre) == 0)
+		{
+			return i;
+		}
 	}
-	pila[tope_pila]=val;
-	printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
+	strcpy(tablaSimbolos[puntero_ts].tipo, tipo);
+	strcpy(tablaSimbolos[puntero_ts].nombre, nombre);
+	
+	if(strcmp(tipo,"CONST_STR") == 0)
+	{
+		int longitud = strlen(tablaSimbolos[i].nombre);
+		sprintf(tablaSimbolos[puntero_ts].longitud, "%d", longitud );		
+	} 
+	else if (strcmp(tipo,"CONST_INT") == 0 || strcmp(tipo,"CONST_REAL") == 0 )
+	{
+		strcpy(tablaSimbolos[puntero_ts].valor, tablaSimbolos[i].nombre);
+	}
+	
+	posicion = puntero_ts;
+	puntero_ts++;
+	return posicion;
 }
 
-int desapilar()
+int verificarExistencia(char* nombre)
 {
-	if(pilaVacia() == 0)
+	int i;
+	for (i=0;i < puntero_ts;i++)
 	{
-		char * dato = pila[tope_pila];
-		tope_pila--;	
-		printf("\tDESAPILAR #CELDA -> %s\n",dato);
-		return atoi(dato);		
-	} else {
-		printf("Error: La pila esta vacia.\n");
-		system ("Pause");
-		exit (1);
+		//printf("Voy a comprar %s con %s \n",nombre, tablaSimbolos[i].nombre);
+		if(strcmp(nombre,tablaSimbolos[i].nombre) == 0)
+		{
+			return EXISTE;
+		}
+	}
+	return NO_EXISTE;
+}
+
+
+int crearArchivoTS()
+{
+	FILE *archivo; 
+	int i;
+	archivo = fopen("ts.txt","w"); 
+
+	if (!archivo){	return ERROR; }
+
+	fprintf(archivo, "Nombre                        Tipo                  Valor                Longitud\n");
+	
+	for (i = 0; i < puntero_ts; i++)
+	{
+		if (strcmp(tablaSimbolos[i].tipo, "ID") == 0 )
+		{  
+			fprintf(archivo,"%-30s%-10s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo);
+		}
+		else if(strcmp(tablaSimbolos[i].tipo, "CONST_STR") == 0 )
+		{
+			fprintf(archivo,"_%-29s%-10s                                    %-30d\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,strlen(tablaSimbolos[i].nombre));
+		}
+		else 
+		{
+			fprintf(archivo,"%-30s%-10s               %s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].nombre);
+		}
+	}
+	fclose(archivo); 
+
+	return TODO_OK;
+}
+
+
+// FUNCIONES DE PILA
+void apilar(int nroPila, char * val)
+{
+	switch(nroPila){
+		case PILA_IF:
+			
+			
+			if(pilaLlena(PILA_IF) == 1){
+				printf("Error: Se exedio el tamano de la pila de IF.\n");
+				system ("Pause");
+				exit (1);
+			}
+			pilaIF[tope_pila_if]=val;
+			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
+			tope_pila_if++;
+			break;
+		
+		case PILA_WHILE:
+		
+			if(pilaLlena(PILA_WHILE) == 1){
+				printf("Error: Se exedio el tamano de la pila de WHILE.\n");
+				system ("Pause");
+				exit (1);
+			}
+			pilaWhile[tope_pila_while]=val;
+			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
+			tope_pila_while++;
+			break;
+		default:
+			printf("\tError: La pila recibida no se reconoce\n",val);
+			system ("Pause");
+			exit (1);
+			break;
+	}
+
+}
+
+int desapilar(int nroPila)
+{
+	switch(nroPila){
+		case PILA_IF:
+			if(pilaVacia(tope_pila_if) == 0)
+			{
+				char * dato = pilaIF[tope_pila_if-1];
+				tope_pila_if--;	
+				printf("\tDESAPILAR #CELDA -> %s\n",dato);
+				return atoi(dato);		
+			} else {
+				printf("Error: La pila esta vacia.\n");
+				system ("Pause");
+				exit (1);
+			}
+			
+			break;
+		
+		case PILA_WHILE:
+		
+			if(pilaVacia(tope_pila_while) == 0)
+			{
+				char * dato = pilaWhile[tope_pila_while-1];
+				tope_pila_while--;	
+				printf("\tDESAPILAR #CELDA -> %s\n",dato);
+				return atoi(dato);		
+			} else {
+				finAnormal("Stack Error","La pila esta vacia");
+			}
+		
+			break;
+		default:
+			finAnormal("Stack Error","La pila recibida no se reconoce");
+			break;
+		
 	}
 	
 }
 
-int pilaVacia()
+int pilaVacia(int tope)
 {
-	if (tope_pila == -1){
+	if (tope-1 == -1){
 		return 1;
 	} 
 	return 0;
 }
 
-int pilaLlena()
+int pilaLlena(int tope)
 {
-	if (tope_pila == TAM_PILA-1){
+	if (tope-1 == TAM_PILA-1){
 		return 1;
 	} 
 	return 0;
+}
+
+void debugPila(int nroPila, int tope)
+{
+	char * nombre;
+	char * pila[TAM_PILA];
+	int i;
+	printf("====== DEBUG PILA ======\n\n");
+	switch(nroPila){
+		case PILA_IF:
+			
+			printf("El tope de la pila es %d \n",tope_pila_if);		
+			printf("Lista de elementos: \n");		
+			for (i=0; i<tope_pila_if;i++){
+				printf("%d => %s\n",i,pilaIF[i]);		
+			}
+			
+			break;
+		
+		case PILA_WHILE:
+			
+			printf("El tope de la pila es %d \n",tope_pila_while);		
+			printf("Lista de elementos: \n");		
+			for (i=0; i<tope_pila_while;i++){
+				printf("%d => %s\n",i,pilaWhile[i]);		
+			}
+			
+			break;
+		default:
+			printf("Error interno: Pila no reconocida \n");
+			system("Pause");
+			exit(1);
+			break;
+	}
+	printf("\n====== FIN DEBUG PILA ======\n\n");	
+	
 }
 
 
@@ -352,6 +577,48 @@ int insertarEnLista(char * val)
 		printf("\tinsertar_en_polaca(%s)\n", aux);
 	}
 	return (puntero_tokens-1); // devuelvo posicion
+}
+
+int insertarEnListaDeclaracion(char * val)
+{
+	
+	// Convierto en CHAR *
+	aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
+    strcpy(aux, val);
+	
+	// Agrego al array de tokens
+	listaDeclaracion[puntero_declaracion] = aux;
+	puntero_declaracion++;
+	
+	return (puntero_declaracion-1); // devuelvo posicion
+	
+}
+
+void debugListaDeclaracion()
+{
+	int i;
+	printf("====== DEBUG LISTA DECLARACION ======\n\n");
+	printf("La cantidad de elementos es %d \n",puntero_declaracion);		
+	printf("Lista de elementos: \n");		
+	for (i=0; i < puntero_declaracion;i++){
+		printf("%d => %s\n",i,listaDeclaracion[i]);		
+	}
+	
+	printf("\n====== FIN DEBUG LISTA DECLARACION ======\n\n");	
+	
+}
+
+void debugTS()
+{
+	int i;
+	printf("====== DEBUG TABLA SIMBOLOS ======\n\n");
+	printf("La cantidad de elementos es %d \n",puntero_ts);		
+	printf("Lista de elementos: \n");		
+	for (i=0; i < puntero_ts;i++){
+		printf("%d => %s | %s | %s | %s \n",i,tablaSimbolos[i].nombre,tablaSimbolos[i].tipo,tablaSimbolos[i].valor,tablaSimbolos[i].longitud );		
+	}
+	
+	printf("\n====== FIN DEBUG TABLA SIMBOLOS ======\n\n");	
 	
 }
 
@@ -389,25 +656,15 @@ char * valorComparacion(char * val){
 
 int yyerror()
 {
-	printf("ERROR - Syntax error\n");
+	printf("** FIN DEL PROGRAMA **\n\n");
 	system ("Pause");
 	exit (1);
 }
 
-int main(int argc,char *argv[])
+void finAnormal(char * tipo, char * mensaje)
 {
-	
-	if ((yyin = fopen(argv[1], "rt")) == NULL)
-	{	
-		printf("\nError al abrir archivo: %s\n", argv[1]); 
-	} 
-	else
-	{ 
-		yyparse();
-	}
-			
-	fclose(yyin);
-	return 0;
+	printf("[ERROR]: %s - %s\n",tipo,mensaje);
+	yyerror();
 }
 
 int crearArchivoIntermedia()
@@ -426,4 +683,56 @@ int crearArchivoIntermedia()
 	fclose(archivo); 
 
 	return TODO_OK;
+}
+
+void validarDeclaracionTipoDato(char * tipo)
+{
+	int i;
+	for (i=0; i < puntero_declaracion; i++)
+	{
+	//printf("Voy a verificar la existencia del elemento %s: \n",listaDeclaracion[i]);
+		if(verificarExistencia(listaDeclaracion[i]) == NO_EXISTE)
+		{
+		//printf("No existe, la inserto en tabla de simbolos \n");
+		push_TS(tipo,listaDeclaracion[i]);
+		//debugListaDeclaracion();
+		//debugTS();
+		}
+		else 
+		{
+			printf("Syntax error: Variable ya declarada\n");
+			system("Pause");
+			exit(1);
+		}
+	}
+	// reinicio el contador para leer otro tipo de dato
+	puntero_declaracion = 0;
+}
+
+
+int main(int argc,char *argv[])
+{
+	
+	if ((yyin = fopen(argv[1], "rt")) == NULL)
+	{	
+		printf("\nError al abrir archivo: %s\n", argv[1]); 
+	} 
+	else
+	{ 
+		yyparse();
+	}
+	
+	if(crearArchivoTS() == TODO_OK)
+	{
+		printf("Se genero el archivo de tabla de simbolos\n");
+	}
+	else 
+	{
+		printf("ERROR - Syntax error\n");
+		system ("Pause");
+		exit(1);
+	}
+	
+	fclose(yyin);
+	return 0;
 }

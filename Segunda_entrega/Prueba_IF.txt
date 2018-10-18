@@ -1,6 +1,6 @@
 program  
 DECVAR	
- i,b : INTEGER
+ i, b: INTEGER
  cadena, s : STRING
 ENDDEC
 

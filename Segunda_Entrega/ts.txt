@@ -1,11 +1,5 @@
 Nombre                        Tipo                  Valor                Longitud
-i                             ID        
-b                             ID        
-cadena                        ID        
-s                             ID        
-1                             CONST_INT                1
-10                            CONST_INT                10
-a                             ID        
-7                             CONST_INT                7
-5                             CONST_INT                5
-8                             CONST_INT                8
+i                             CONST_INT                i
+b                             CONST_INT                b
+_cadena                       CONST_STR                                     6                             
+_s                            CONST_STR                                     1                             
