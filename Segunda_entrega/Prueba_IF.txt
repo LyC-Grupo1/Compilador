@@ -14,7 +14,7 @@ if (i=15) THEN
 	i:=16
 ENDIF
 
--/ IF doble /-
+-/ IF doble con and/-
 
 -/ CONDICION 2 /-
 if (i=15 AND a=4) THEN
@@ -32,6 +32,20 @@ ENDIF
 if (i=15 OR a=4) THEN
 	i:=16
 ENDIF
+
+-/ CONDICION 2 /-
+if (i=15 or a=4) THEN
+	i:=16
+ENDIF
+
+-/ IF SIMPLE con ELSE /-
+if (i=15) THEN
+	i:=16
+else 
+    i:=17
+ENDIF
+
+
 
 
 endp

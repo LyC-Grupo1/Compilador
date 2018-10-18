@@ -75,6 +75,7 @@ int puntero_aux=0;
 // DECLARACION DE VARIABLES - FUNCIONES
 void debugListaDeclaracion();
 int flagIFOR = FALSE;
+int flagELSE = FALSE;
 
 //DECLARACION VARIABLES
 char posAuxA[5], posAuxB[5];	// posicion auxiliar para pivotear con la condicion OR
@@ -310,7 +311,21 @@ seleccion:
 				
 				printf("FIN DEL IF\n"); 
 			}
-		| IF CAR_PA condicion CAR_PC then_ bloque else_ bloque ENDIF {printf("FIN DEL IF CON ELSE\n");}	
+		| IF CAR_PA condicion CAR_PC  then_ bloque else_ bloque ENDIF {
+				int x, i, iPosActual;
+				int limit = tope_pila_if;
+				for(i=0; i < limit; i++)
+				{
+					printf("\nFor %d\n", i);
+					x=desapilar(PILA_IF);
+					char sPosActual[5];
+					sprintf(sPosActual, "%d", puntero_tokens );
+					escribirEnLista(x,sPosActual);
+					sprintf(listaTokens[x],"CELDA %s",sPosActual);	
+					printf("\nEND For %d\n", i);
+				}
+			printf("FIN DEL IF CON ELSE\n");
+		}	
 ;
 
 then_: THEN {
@@ -322,15 +337,21 @@ then_: THEN {
 				sprintf(sPosActual, "%d", iPosActual );
 				apilar(PILA_IF,sPosActual);
 				sprintf(posAuxB, "%d", puntero_tokens ); 
-				printf("Posicion %s\n",posAuxB); 
+				//printf("Posicion %s\n",posAuxB); 
+								
 			}
-;			
+;
+
 else_: ELSE {
-				int x;
-				x=desapilar(PILA_IF);
-				char sPosActual[5];
-				sprintf(sPosActual, "%d", puntero_tokens );
-				sprintf(listaTokens[x],"CELDA %s",sPosActual);	
+				int x, i, iPosActual;
+				int limit = tope_pila_if;
+				insertarEnLista("BI");
+				char sPosActualB[5];
+				iPosActual = insertarEnLista("###"); // no inserta nada, pero avanza el puntero y devuelve en que celda estaba
+				sprintf(sPosActualB, "%d", iPosActual );
+				apilar(PILA_IF,sPosActualB);	
+				debugPila(PILA_IF,tope_pila_if);
+				
 		}
 ;
 
