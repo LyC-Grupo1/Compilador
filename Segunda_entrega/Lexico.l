@@ -44,6 +44,7 @@ CAR_PC                     [")"]
 CAR_COMILLAS			   ["\""]
 %%
 "program"		{ return PROGRAM;}
+"PROGRAM"		{ return PROGRAM;}
 "DECVAR"		{ return DECVAR;}
 "decvar"		{ return DECVAR;}
 "ENDDEC"		{ return ENDDEC;}
@@ -184,5 +185,5 @@ CAR_COMILLAS			   ["\""]
 "\t"		
 " "
 "\r\n"
-.    { printf("Caracter invalido!");  exit(6);}
+
 %%

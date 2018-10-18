@@ -153,9 +153,9 @@ declaraciones:
     	     ;
 
 declaracion:  
-           lista_var OP_DOSP REAL {validarDeclaracionTipoDato("CONST_REAL");}; 
-			| lista_var OP_DOSP STRING { validarDeclaracionTipoDato("CONST_STR"); }
-			| lista_var OP_DOSP INTEGER { validarDeclaracionTipoDato("CONST_INT"); }
+           lista_var OP_DOSP REAL {validarDeclaracionTipoDato("REAL");}; 
+			| lista_var OP_DOSP STRING { validarDeclaracionTipoDato("STRING"); }
+			| lista_var OP_DOSP INTEGER { validarDeclaracionTipoDato("INTEGER"); }
            ;
 
 lista_var:  
@@ -266,13 +266,12 @@ seleccion:
     	IF CAR_PA condicion CAR_PC then_ bloque  ENDIF {
 				int x, i;
 				printf("\nTOPE DE PILA EN ENDIF %d\n", tope_pila_if);
-				int limit = tope_pila_if;
-				for(i=0; i < limit; i++)
+				//int limit = tope_pila_if;
+				for(i=0; i < tope_pila_if; i++)
 				{
 					printf("\nFor %d\n", i);
 					x=desapilar(PILA_IF);
 					char sPosActual[5];
-					//itoa(puntero_tokens,sPosActual,10);
 					sprintf(sPosActual, "%d", puntero_tokens );
 					escribirEnLista(x,sPosActual);
 					sprintf(listaTokens[x],"CELDA %s",sPosActual);	
@@ -289,9 +288,7 @@ then_: THEN {
 				int iPosActual;
 				char sPosActual[5];
 				iPosActual = insertarEnLista("###"); // ACA estoy aumentando el tope de pila (avanzo) no inserta nada, pero avanza el puntero y devuelve en que celda estaba
-				//itoa(iPosActual,sPosActual,10);
-								sprintf(sPosActual, "%d", iPosActual );
-
+				sprintf(sPosActual, "%d", iPosActual );
 				apilar(PILA_IF,sPosActual);
 			}
 ;			
@@ -299,10 +296,7 @@ else_: ELSE {
 				int x;
 				x=desapilar(PILA_IF);
 				char sPosActual[5];
-				//itoa(puntero_tokens,sPosActual,10);
 				sprintf(sPosActual, "%d", puntero_tokens );
-
-				//escribirEnLista(x,sPosActual);
 				sprintf(listaTokens[x],"CELDA %s",sPosActual);	
 		}
 ;
@@ -355,10 +349,31 @@ termino:
 	   ;
 
 factor: 
-      ID 
-      | CONST_INT {insertarEnLista(yylval.int_val); }
-      | CONST_REAL {insertarEnLista(yylval.real_val); }
-      | CONST_STR  {insertarEnLista(yylval.str_val); }
+      ID { if(verificarExistencia(yylval.str_val) == NO_EXISTE)
+			{ 
+				finAnormal("Syntax Error","Variable no declarada"); 
+			} 
+		}
+      | CONST_INT {
+					  if(verificarExistencia(yylval.str_val) == NO_EXISTE)
+						{ 
+							insertar_TS("CONST_INT",yylval.int_val);
+						} 
+					  insertarEnLista(yylval.int_val); 
+				  }
+      | CONST_REAL {
+						if(verificarExistencia(yylval.real_val) == NO_EXISTE)
+						{ 
+							insertar_TS("CONST_REAL",yylval.real_val);
+						} 
+			}
+					 
+      | CONST_STR  {
+						if(verificarExistencia(yylval.str_val) == NO_EXISTE)
+						{ 
+							insertar_TS("CONST_STR",yylval.str_val);
+						} 
+	  }
 	  | CAR_PA expresion CAR_PC 	  
       ;
 
@@ -383,10 +398,11 @@ int insertar_TS(char* tipo, char* nombre)
 		int longitud = strlen(tablaSimbolos[i].nombre);
 		sprintf(tablaSimbolos[puntero_ts].longitud, "%d", longitud );		
 	} 
-	else if (strcmp(tipo,"CONST_INT") == 0 || strcmp(tipo,"CONST_REAL") == 0 )
+	else if (strcmp(tipo,"CONST_INT") == 0  || strcmp(tipo,"CONST_REAL") == 0)
 	{
 		strcpy(tablaSimbolos[puntero_ts].valor, tablaSimbolos[i].nombre);
 	}
+	
 	
 	posicion = puntero_ts;
 	puntero_ts++;
@@ -420,17 +436,21 @@ int crearArchivoTS()
 	
 	for (i = 0; i < puntero_ts; i++)
 	{
-		if (strcmp(tablaSimbolos[i].tipo, "ID") == 0 )
+		if (strcmp(tablaSimbolos[i].tipo, "INTEGER") == 0 || strcmp(tablaSimbolos[i].tipo, "REAL") == 0  || strcmp(tablaSimbolos[i].tipo, "STRING") == 0 )
 		{  
 			fprintf(archivo,"%-30s%-10s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo);
 		}
-		else if(strcmp(tablaSimbolos[i].tipo, "CONST_STR") == 0 )
+		else if(strcmp(tablaSimbolos[i].tipo, "CONST_STRING") == 0 )
 		{
-			fprintf(archivo,"_%-29s%-10s                                    %-30d\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,strlen(tablaSimbolos[i].nombre));
+			fprintf(archivo,"%-30s%-10s                                    %-30d\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,strlen(tablaSimbolos[i].nombre));
+		}
+		else if(strcmp(tablaSimbolos[i].tipo, "CONST_INT") == 0 || strcmp(tablaSimbolos[i].tipo, "CONST_REAL") == 0)
+		{
+			fprintf(archivo,"_%-30s%-10s           %-30s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
 		}
 		else 
 		{
-			fprintf(archivo,"%-30s%-10s               %s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].nombre);
+			fprintf(archivo,"%-30s%-10s                                %-30s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
 		}
 	}
 	fclose(archivo); 

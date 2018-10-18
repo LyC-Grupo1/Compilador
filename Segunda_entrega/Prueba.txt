@@ -1,9 +1,7 @@
--/Lenguajes y Compiladores /-
-
-program  
+﻿PROGRAM  
 DEFVAR	
  n : FLOAT
- a,b,i : INTEGER
+ a,b,c,i : INTEGER
  cadena, s : STRING
 enddef
 
