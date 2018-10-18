@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <conio.h>
 #include "y.tab.h"
 #define TAM_PILA 100
 #define TODO_OK 1
@@ -93,7 +92,7 @@ FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 %%
 programa:  	   
 	PROGRAM {printf("\tInicia el COMPILADOR\n");} est_declaracion algoritmo    
-	{printf("\tFin COMPILADOR ok\n"); if(crearArchivoIntermedia()==TODO_OK){printf("Archivo con intermedia generado");}else{printf("Hubo un error al generar el archivo de intermedia");}}
+	{printf("\tFin COMPILADOR ok\n"); if(crearArchivoIntermedia()==TODO_OK){printf("\nArchivo con intermedia generado\n");}else{printf("Hubo un error al generar el archivo de intermedia");}}
 	;
 
 est_declaracion:
@@ -142,7 +141,9 @@ ciclo:
 	 | WHILE {printf("WHILE\n");} CAR_PA {
 												int iPosActual;
 												char sPosActual[5];
-												itoa(puntero_tokens,sPosActual,10);	// paso a char * la posicion actual representada por el puntero de la lista de tokens
+												//itoa(puntero_tokens,sPosActual,10);	// paso a char * la posicion actual representada por el puntero de la lista de tokens
+																sprintf(sPosActual, "%d", puntero_tokens );
+
 												apilar(sPosActual);
 											} condicion CAR_PC {
 																insertarEnLista("CMP");
@@ -150,7 +151,9 @@ ciclo:
 																int iPosActual;
 																char sPosActual[5];
 																iPosActual = insertarEnLista("###"); // ACA estoy aumentando el tope de pila (avanzo) no inserta nada, pero avanza el puntero y devuelve en que celda estaba
-																itoa(iPosActual,sPosActual,10);
+																//itoa(iPosActual,sPosActual,10);
+				sprintf(sPosActual, "%d", puntero_tokens );
+
 																apilar(sPosActual);
 															}
 	 bloque ENDW{ 
@@ -188,14 +191,24 @@ entrada_salida:
 
 seleccion: 
     	IF CAR_PA condicion CAR_PC then_ bloque  ENDIF {
-				int x;
-				x=desapilar();
-				char sPosActual[5];
-				itoa(puntero_tokens,sPosActual,10);
-				sprintf(listaTokens[x],"CELDA %s",sPosActual);
+				int x, i;
+				printf("\nTOPE DE PILA EN ENDIF %d\n", tope_pila);
+				int limit = tope_pila;
+				for(i=0; i < limit; i++){
+									printf("\nFor %d\n", i);
+
+												x=desapilar();
+												char sPosActual[5];
+												//itoa(puntero_tokens,sPosActual,10);
+												sprintf(sPosActual, "%d", puntero_tokens );
+												escribirEnLista(x,sPosActual);
+												sprintf(listaTokens[x],"CELDA %s",sPosActual);	
+																				printf("\nEND For %d\n", i);
+	
+											}
 				printf("FIN DEL IF\n"); 
 			}
-		| IF CAR_PA condicion CAR_PC then_ bloque else_ bloque ENDIF {printf("FIN DEL IF\n");}	
+		| IF CAR_PA condicion CAR_PC then_ bloque else_ bloque ENDIF {printf("FIN DEL IF CON ELSE\n");}	
 ;
 
 then_: THEN {
@@ -204,7 +217,9 @@ then_: THEN {
 				int iPosActual;
 				char sPosActual[5];
 				iPosActual = insertarEnLista("###"); // ACA estoy aumentando el tope de pila (avanzo) no inserta nada, pero avanza el puntero y devuelve en que celda estaba
-				itoa(iPosActual,sPosActual,10);
+				//itoa(iPosActual,sPosActual,10);
+								sprintf(sPosActual, "%d", iPosActual );
+
 				apilar(sPosActual);
 			}
 ;			
@@ -212,7 +227,9 @@ else_: ELSE {
 				int x;
 				x=desapilar();
 				char sPosActual[5];
-				itoa(puntero_tokens,sPosActual,10);
+				//itoa(puntero_tokens,sPosActual,10);
+								sprintf(sPosActual, "%d", puntero_tokens );
+
 				//escribirEnLista(x,sPosActual);
 				sprintf(listaTokens[x],"CELDA %s",sPosActual);	
 		}
@@ -221,18 +238,7 @@ else_: ELSE {
 condicion:
          comparacion 
          |OP_NOT comparacion{printf("NOT CONDICION\n");}
-         |comparacion op_and_ {	printf("CONDICION CON AND\n");
-											int i, x;
-											for(i=0; i < (tope_pila);i++){
-												x=desapilar();
-												char sPosActual[5];
-												itoa(puntero_tokens,sPosActual,10);
-												escribirEnLista(x,sPosActual);
-												sprintf(listaTokens[x],"CELDA %s",sPosActual);	
-												
-											}
-											printf("FIN CONDICION DOBLE AND\n");
-										} comparacion 
+         |comparacion op_and_  comparacion
 		 |comparacion OP_OR comparacion{printf("CONDICION DOBLE OR\n");}
 		 |OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC {printf("NOT CONDICION DOBLE AND\n");}
 		 |OP_NOT CAR_PA comparacion OP_OR  comparacion CAR_PC{printf("NOT CONDICION DOBLE OR\n");}
@@ -246,7 +252,9 @@ op_and_: OP_AND{
 				int iPosActual;
 				char sPosActual[5];
 				iPosActual = insertarEnLista("###"); // no inserta nada, pero avanza el puntero y devuelve en que celda estaba
-				itoa(iPosActual,sPosActual,10);
+				//itoa(iPosActual,sPosActual,10);
+								sprintf(sPosActual, "%d", iPosActual );
+
 				apilar(sPosActual);				
 			}	 
 ;
