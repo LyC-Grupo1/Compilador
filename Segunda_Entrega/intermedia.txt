@@ -40,21 +40,16 @@ i
 :=
 i
 15
+CMP
+BNE
+CELDA 48
+BI
+CELDA 53
 a
 4
 CMP
 BNE
-CELDA 51
-i
-16
-:=
-i
-15
-a
-4
-CMP
-BNE
-CELDA 61
+CELDA 56
 i
 16
 :=

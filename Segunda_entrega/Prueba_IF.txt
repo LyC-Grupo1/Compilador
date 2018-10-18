@@ -33,11 +33,6 @@ if (i=15 OR a=4) THEN
 	i:=16
 ENDIF
 
--/ CONDICION 3 /-
-if (i=15 or a=4) THEN
-	i:=16
-ENDIF
-
 
 endp
 

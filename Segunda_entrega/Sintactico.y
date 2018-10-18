@@ -12,6 +12,8 @@
 #define PILA_IF 0
 #define PILA_DECLARACION 1
 #define PILA_WHILE 2
+#define TRUE 1
+#define FALSE 0
 
 //DECLARACION FUNCIONES
 
@@ -66,14 +68,16 @@ void debugPila(int nroPila, int tope);
 
 char * listaDeclaracion[100];	// lista para declaraciones
 char * listaTokens[10000];		// lista de tokens para gci polaca inversa
+char * listaAux[100];		// lista de tokens para gci polaca inversa
 int puntero_declaracion = 0;
 int puntero_tokens=1; // arranca en uno para comparar en notepad++
+int puntero_aux=0;
 // DECLARACION DE VARIABLES - FUNCIONES
 void debugListaDeclaracion();
-
+int flagIFOR = FALSE;
 
 //DECLARACION VARIABLES
-
+char posAuxA[5], posAuxB[5];	// posicion auxiliar para pivotear con la condicion OR
 int pos_actual=0;
 int yystopparser=0;
 
@@ -264,20 +268,46 @@ entrada_salida:
 
 seleccion: 
     	IF CAR_PA condicion CAR_PC then_ bloque  ENDIF {
-				int x, i;
-				printf("\nTOPE DE PILA EN ENDIF %d\n", tope_pila_if);
-				int limit = tope_pila_if;
-				debugPila(PILA_IF,tope_pila_if);
-				for(i=0; i < limit; i++)
-				{
-					printf("\nFor %d\n", i);
+				
+				if (flagIFOR == TRUE){
+					int x;
+					printf("\nTOPE DE PILA EN ENDIF %d\n", tope_pila_if);
+					debugPila(PILA_IF,tope_pila_if);
+					
+					// el primero
 					x=desapilar(PILA_IF);
 					char sPosActual[5];
 					sprintf(sPosActual, "%d", puntero_tokens );
-					escribirEnLista(x,sPosActual);
-					sprintf(listaTokens[x],"CELDA %s",sPosActual);	
-					printf("\nEND For %d\n", i);
-				}
+					sprintf(listaTokens[x],"CELDA %s",sPosActual);
+					printf("Asigne en CELDA %d la CELDA %s\n",x,sPosActual);
+					// el segundo
+					x=desapilar(PILA_IF);
+					sprintf(listaTokens[x],"CELDA %s",posAuxB);
+					printf("Asigne en CELDA %d la CELDA %s\n",x,posAuxB);
+					// el tercero
+					x=desapilar(PILA_IF);
+					sprintf(listaTokens[x],"CELDA %s",posAuxA);
+					printf("Asigne en CELDA %d la CELDA %s\n",x,posAuxA);
+					
+					flagIFOR = FALSE;	// Lo dejo en false de nuevo
+				} else {
+					int x, i;
+					printf("\nTOPE DE PILA EN ENDIF %d\n", tope_pila_if);
+					int limit = tope_pila_if;
+					debugPila(PILA_IF,tope_pila_if);
+					for(i=0; i < limit; i++)
+					{
+						printf("\nFor %d\n", i);
+						x=desapilar(PILA_IF);
+						char sPosActual[5];
+						sprintf(sPosActual, "%d", puntero_tokens );
+						escribirEnLista(x,sPosActual);
+						sprintf(listaTokens[x],"CELDA %s",sPosActual);	
+						printf("\nEND For %d\n", i);
+					}
+				} 
+				
+				
 				printf("FIN DEL IF\n"); 
 			}
 		| IF CAR_PA condicion CAR_PC then_ bloque else_ bloque ENDIF {printf("FIN DEL IF CON ELSE\n");}	
@@ -291,6 +321,8 @@ then_: THEN {
 				iPosActual = insertarEnLista("###"); // ACA estoy aumentando el tope de pila (avanzo) no inserta nada, pero avanza el puntero y devuelve en que celda estaba
 				sprintf(sPosActual, "%d", iPosActual );
 				apilar(PILA_IF,sPosActual);
+				sprintf(posAuxB, "%d", puntero_tokens ); 
+				printf("Posicion %s\n",posAuxB); 
 			}
 ;			
 else_: ELSE {
@@ -306,9 +338,11 @@ condicion:
          comparacion 
          |OP_NOT comparacion{printf("NOT CONDICION\n");}
          |comparacion op_and_  comparacion
-		 |comparacion OP_OR comparacion{printf("CONDICION DOBLE OR\n");}
+		 |comparacion op_or_ {  sprintf(posAuxA, "%d", puntero_tokens ); printf("Posicion %s\n",posAuxA); } 
+			comparacion { printf("CONDICION DOBLE OR\n");
+			 }
 		 |OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC {printf("NOT CONDICION DOBLE AND\n");}
-		 |OP_NOT CAR_PA comparacion OP_OR  comparacion CAR_PC{printf("NOT CONDICION DOBLE OR\n");}
+		 |OP_NOT CAR_PA comparacion OP_OR  comparacion  CAR_PC{printf("NOT CONDICION DOBLE OR\n");}
 		 |between
 		 |OP_NOT between
 	 ;
@@ -319,18 +353,35 @@ op_and_: OP_AND{
 				int iPosActual;
 				char sPosActual[5];
 				iPosActual = insertarEnLista("###"); // no inserta nada, pero avanza el puntero y devuelve en que celda estaba
-				//itoa(iPosActual,sPosActual,10);
 				sprintf(sPosActual, "%d", iPosActual );
 
 				apilar(PILA_IF,sPosActual);				
 			}	 
 ;
+
+op_or_: OP_OR{
+				flagIFOR = TRUE;
+				
+				insertarEnLista("CMP");
+				insertarEnLista(valorComparacion(comparador_usado));
+				int iPosActual;
+				char sPosActual[5];
+				iPosActual = insertarEnLista("###"); // no inserta nada, pero avanza el puntero y devuelve en que celda estaba
+				sprintf(sPosActual, "%d", iPosActual );
+				apilar(PILA_IF,sPosActual);	
+				debugPila(PILA_IF,tope_pila_if);
+				insertarEnLista("BI");
+				char sPosActualB[5];
+				iPosActual = insertarEnLista("###"); // no inserta nada, pero avanza el puntero y devuelve en que celda estaba
+				sprintf(sPosActualB, "%d", iPosActual );
+				apilar(PILA_IF,sPosActualB);	
+				debugPila(PILA_IF,tope_pila_if);				
+			}	 
+;
+
 	 
 comparacion:
-	   expresion OP_COMPARACION {
-		  
-		   strcpy(comparador_usado,yylval.cmp_val);
-		   }  expresion
+	   expresion OP_COMPARACION { strcpy(comparador_usado,yylval.cmp_val);}  expresion
 	   ;
 
 expresion:
