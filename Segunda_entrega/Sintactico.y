@@ -74,6 +74,7 @@ int puntero_tokens=1; // arranca en uno para comparar en notepad++
 int puntero_aux=0;
 // DECLARACION DE VARIABLES - FUNCIONES
 void debugListaDeclaracion();
+int flagWHILE = FALSE;
 int flagIFOR = FALSE;
 int flagIFAND = FALSE;
 int flagELSE = FALSE;
@@ -197,39 +198,18 @@ sentencia:
 	 ;
 
 ciclo:
-     REPEAT { printf("REPEAT\n");}bloque UNTIL condicion { printf("FIN DEL REPEAT\n");}
-	 | WHILE {printf("WHILE\n");} CAR_PA {
-												int iPosActual;
-												char sPosActual[5];
-												//itoa(puntero_tokens,sPosActual,10);	// paso a char * la posicion actual representada por el puntero de la lista de tokens
-												sprintf(sPosActual, "%d", puntero_tokens );
-												apilar(PILA_WHILE, sPosActual);
-												
-											} condicion CAR_PC {
-												insertarEnLista("CMP");
-												insertarEnLista(valorComparacion(comparador_usado));
-												int iPosActual;
-												char sPosActual[5];
-												iPosActual = insertarEnLista("###"); // ACA estoy aumentando el tope de pila (avanzo) no inserta nada, pero avanza el puntero y devuelve en que celda estaba
-												//itoa(iPosActual,sPosActual,10);
-												sprintf(sPosActual, "%d", puntero_tokens );
-												apilar(PILA_WHILE, sPosActual);
-											}
-	 bloque ENDW{ 
-					insertarEnLista("BI");
-					int x,y;
-					char * val;
-								
-					x=desapilar(PILA_WHILE);
-					printf("DESAPILE TOPE PILA: %d\n",x);
-					sprintf(listaTokens[x],"CELDA %d",(puntero_tokens+1));
-					y=desapilar(PILA_WHILE);
-					printf("DESAPILE TOPE PILA: %d\n",x);
-					sprintf(val,"CELDA %d",(y));
-					insertarEnLista(val);
-
-					printf("FIN DEL WHILE\n");
-	 
+     REPEAT { flagWHILE = TRUE; printf("REPEAT\n");} bloque UNTIL condicion { printf("FIN DEL REPEAT\n");}
+	 | WHILE { flagWHILE = TRUE; printf("WHILE\n");} CAR_PA  
+		
+		condicion {
+			
+		}
+		
+		CAR_PC bloque { 
+			
+		} 
+		ENDW {
+			
 		}
      ;
 
@@ -250,8 +230,6 @@ lista_id:
 				}
 			}
 			| ID {
-				
-			//	printf("Lei primer ID %s\n",$1);
 				
 				if(verificarExistencia($1) == EXISTE)
 				{
@@ -436,10 +414,64 @@ else_: ELSE {	sprintf(posFalse, "%d", puntero_tokens); } // guardo la posicion d
 ;
 
 condicion:
-         comparacion 
+         comparacion {
+			 if(flagWHILE == TRUE){
+				insertarEnLista("CMP");
+				insertarEnLista(valorComparacion(comparador_usado));
+				char sPosActual[5];
+				insertarEnLista("###");
+				sprintf(sPosActual, "%d", puntero_tokens-1);
+				apilar(PILA_WHILE,sPosActual);
+				
+				char sPosActualB[5];
+				insertarEnLista("BI");
+				insertarEnLista("###");
+				sprintf(sPosActualB, "%d", puntero_tokens-1);
+				apilar(PILA_WHILE,sPosActualB);	
+				sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true				
+				debugPila(PILA_WHILE,tope_pila_while);		
+			 }
+		 }
          |OP_NOT comparacion{printf("NOT CONDICION\n");}
-         |comparacion op_and_ {sprintf(posCondDos, "%d", puntero_tokens);}  comparacion
-		 |comparacion op_or_ { sprintf(posCondDos, "%d", puntero_tokens); /*sprintf(posAuxA, "%d", puntero_tokens ); printf("Posicion %s\n",posAuxA);*/ } comparacion { printf("CONDICION DOBLE OR\n"); }
+         |comparacion op_and_ {sprintf(posCondDos, "%d", puntero_tokens);}  
+			comparacion {
+			 if(flagWHILE == TRUE){
+				insertarEnLista("CMP");
+				insertarEnLista(valorComparacion(comparador_usado));
+				char sPosActual[5];
+				insertarEnLista("###");
+				sprintf(sPosActual, "%d", puntero_tokens-1);
+				apilar(PILA_WHILE,sPosActual);
+				
+				char sPosActualB[5];
+				insertarEnLista("BI");
+				insertarEnLista("###");
+				sprintf(sPosActualB, "%d", puntero_tokens-1);
+				apilar(PILA_WHILE,sPosActualB);	
+				sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true				
+				debugPila(PILA_WHILE,tope_pila_while);		
+			 }
+			}
+		 |comparacion op_or_ { sprintf(posCondDos, "%d", puntero_tokens); } 
+			comparacion { 
+				if(flagWHILE == TRUE){
+					insertarEnLista("CMP");
+					insertarEnLista(valorComparacion(comparador_usado));
+					char sPosActual[5];
+					insertarEnLista("###");
+					sprintf(sPosActual, "%d", puntero_tokens-1);
+					apilar(PILA_WHILE,sPosActual);
+					
+					char sPosActualB[5];
+					insertarEnLista("BI");
+					insertarEnLista("###");
+					sprintf(sPosActualB, "%d", puntero_tokens-1);
+					apilar(PILA_WHILE,sPosActualB);	
+					sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true				
+					debugPila(PILA_WHILE,tope_pila_while);		
+				 }
+				printf("CONDICION DOBLE OR\n"); 
+			}
 		 |OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC {printf("NOT CONDICION DOBLE AND\n");}
 		 |OP_NOT CAR_PA comparacion OP_OR  comparacion  CAR_PC{printf("NOT CONDICION DOBLE OR\n");}
 		 |between
