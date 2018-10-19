@@ -12,6 +12,7 @@
 #define PILA_IF 0
 #define PILA_DECLARACION 1
 #define PILA_WHILE 2
+#define PILA_ASIGNACION 3
 #define TRUE 1
 #define FALSE 0
 
@@ -23,8 +24,8 @@ int yyparse();
 
 void finAnormal(char * tipo, char * mensaje);
 void validarDeclaracionTipoDato(char * tipo);
-
-
+int insertarEnListaAsig(char * val);
+void debugListaAsignacion();
 // TABLA DE SIMBOLOS
 
 struct struct_tablaSimbolos
@@ -41,10 +42,12 @@ struct struct_tablaSimbolos tablaSimbolos[10000];
 int insertar_TS(char*, char*);
 int crearArchivoTS();
 void debugTS();
-
+char * recuperarValorTS(char* nombre);
 
 int crearArchivoIntermedia();
 char * aux;
+char * valorID, valorINT, valorSTR, valorREAL;
+char valorFactor[5];
 int cont = 0;
 int insertarEnLista(char*);
 void escribirEnLista(int, char*);
@@ -54,8 +57,10 @@ char comparador_usado[2];
 // PILAS 
 char * pilaIF[TAM_PILA];			// pila 0
 char * pilaWhile[TAM_PILA];			// pila 1
+char * pilaAsignacion[TAM_PILA];	// pila 3
 int tope_pila_if=0;				// pila 0
 int tope_pila_while=0;			// pila 1
+int tope_pila_asignacion=0;		// pila 3
 
 ////////////////////
 void apilar(int nroPila, char * val);
@@ -69,7 +74,9 @@ void debugPila(int nroPila, int tope);
 char * listaDeclaracion[100];	// lista para declaraciones
 char * listaTokens[10000];		// lista de tokens para gci polaca inversa
 char * listaAux[100];		// lista de tokens para gci polaca inversa
+char * listaAsignacion[30];	// lista para acumular la asignacion multiple
 int puntero_declaracion = 0;
+int puntero_asignacion = 0;
 int puntero_tokens=1; // arranca en uno para comparar en notepad++
 int puntero_aux=0;
 // DECLARACION DE VARIABLES - FUNCIONES
@@ -80,7 +87,7 @@ int flagIFAND = FALSE;
 int flagWHILEOR = FALSE;
 int flagWHILEAND = FALSE;
 int flagELSE = FALSE;
-
+int flagPrimero = FALSE;		// para identificar los token en asign multiple
 //DECLARACION VARIABLES
 char posAuxA[5], posAuxB[5];	// posicion auxiliar para pivotear con la condicion OR
 char posTrue[5], posFalse[5],posCondDos[5];
@@ -170,16 +177,8 @@ declaracion:
            ;
 
 lista_var:  
-	ID  {
-		//  printf("Lei el ID: %s\n",yylval.str_val);
-		  insertarEnListaDeclaracion(yylval.str_val);
-		  //debugListaDeclaracion();
-		}
-	 | lista_var CAR_COMA ID { 
-		//  printf("Lei el ID: %s\n",yylval.str_val);
-		  insertarEnListaDeclaracion(yylval.str_val);
-		  //debugListaDeclaracion();
-		} 
+	ID  {	insertarEnListaDeclaracion(yylval.str_val);	}
+	 | lista_var CAR_COMA ID {  insertarEnListaDeclaracion(yylval.str_val);	} 
  	 ;
 	 
 algoritmo: 
@@ -206,43 +205,40 @@ ciclo:
 			int x, i, iPosActual;
 			char wPosActual[5], wPosActualTrue[5], wPosCondDos[5];
 				
-			debugPila(PILA_WHILE,tope_pila_while);
-			// Primero que desapilo -> apunta a la parte verdadera
-			x=desapilar(PILA_WHILE);
+			// debugPila(PILA_WHILE,tope_pila_while);
+			
+			x=desapilar(PILA_WHILE); // Primero que desapilo -> apunta a la parte verdadera
 			sprintf(wPosActualTrue, "CELDA %s", posTrue);
 			escribirEnLista(x,wPosActualTrue);
 			
-			// Segundo que desapilo -> apunta al final
-			x=desapilar(PILA_WHILE);
+			x=desapilar(PILA_WHILE); // Segundo que desapilo -> apunta al final
 			sprintf(wPosActual, "CELDA %d", puntero_tokens);
 			escribirEnLista(x,wPosActual);
-			debugPila(PILA_WHILE,tope_pila_while);
+			//debugPila(PILA_WHILE,tope_pila_while);
 			
 			if(flagWHILEAND == TRUE){
 				
 				if(pilaVacia(tope_pila_while) == FALSE){
-					// Tercero que desapilo -> apunta a la segunda condicion
-					x=desapilar(PILA_WHILE);
+					
+					x=desapilar(PILA_WHILE); // Tercero que desapilo -> apunta a la segunda condicion
 					sprintf(wPosCondDos, "CELDA %s", posCondDos);
 					escribirEnLista(x,wPosCondDos);
 					
-					// Cuarto que desapilo -> apunta al final
-					x=desapilar(PILA_WHILE);
+					x=desapilar(PILA_WHILE); // Cuarto que desapilo -> apunta al final
 					sprintf(wPosActual, "CELDA %d", puntero_tokens);
 					escribirEnLista(x,wPosActual);
-					debugPila(PILA_WHILE,tope_pila_while);
+					//debugPila(PILA_WHILE,tope_pila_while);
 				}
 			
 			} else if (flagWHILEOR == TRUE) {
 				
 				if(pilaVacia(tope_pila_while) == FALSE){
-					// Tercero que desapilo -> apunta a la parte verdadera
-					x=desapilar(PILA_WHILE);
+					
+					x=desapilar(PILA_WHILE);// Tercero que desapilo -> apunta a la parte verdadera
 					sprintf(wPosActualTrue, "CELDA %s", posTrue);
 					escribirEnLista(x,wPosActualTrue);
 					
-					// Tercero que desapilo -> apunta a la segunda condicion
-					x=desapilar(PILA_WHILE);
+					x=desapilar(PILA_WHILE);// Tercero que desapilo -> apunta a la segunda condicion
 					sprintf(wPosCondDos, "CELDA %s", posCondDos);
 					escribirEnLista(x,wPosCondDos);
 				}			
@@ -254,27 +250,71 @@ ciclo:
 		}
      ;
 
-asignacion:
-			lista_id OP_ASIG expresion {insertarEnLista(":="); printf("FIN LINEA ASIGNACION\n");}
+asignacion: // estaria faltando actualizar la tabla de simbolos
+			lista_id OP_ASIG 
+			expresion {
+				int i,x,limit;
+				char sAux[5];
+				sprintf(sAux,yylval.str_val);
+				debugPila(PILA_ASIGNACION,tope_pila_asignacion);
+				
+			printf("Voy a terminar la asignacion\n");
+			limit = tope_pila_asignacion;
+			for (i=0; i < limit;i++)
+			{
+				x=desapilar(PILA_ASIGNACION);
+				printf("Voy a escribir en la posiciion %d el valor %s\n",x,valorFactor);
+				escribirEnLista(x,valorFactor);
+				
+			}
+			insertarEnLista(":=");
+				
+			puntero_asignacion = 0;	// reset
+				
+			printf("FIN LINEA ASIGNACION\n");
+			
+		}
 	  ;
 
-lista_id:
+lista_id:		
 			lista_id OP_ASIG ID {
-			//	printf("Voy a leer el ID %s  \n",$3);
-				
+				printf("Lei el ID A %s  \n",$3);
+				if(flagPrimero == TRUE){
+					insertarEnLista("###");
+					char sPos[5];
+					sprintf(sPos,"%d",puntero_tokens-1);
+					apilar(PILA_ASIGNACION,sPos);
+					insertarEnLista(":=");
+					flagPrimero = FALSE;
+				}
+				char * strPos;
 				if(verificarExistencia($3) == EXISTE)
 				{
+					strPos = (char *) malloc(sizeof(char) * (sizeof(int) + 1));
 					insertarEnLista($3);
+					insertarEnLista("###");
+					sprintf(strPos,"%d",puntero_tokens-1);
+					apilar(PILA_ASIGNACION,strPos);
+					insertarEnLista(":=");
+					
+					
 				} else {
 					// No existe en la tabla de simbolos
 					finAnormal("Syntax Error","Variable no declarada");
 				}
 			}
 			| ID {
-				
+				printf("Lei el ID B %s  \n",$1);
 				if(verificarExistencia($1) == EXISTE)
 				{
 					insertarEnLista($1);
+					flagPrimero = TRUE;
+					//insertarEnLista("###");
+					//char sPos[5];
+					//sprintf(sPos,"%d",puntero_tokens-1);
+					//apilar(PILA_ASIGNACION,sPos);
+					//insertarEnLista(":=");
+					//debugPila(PILA_ASIGNACION,tope_pila_asignacion);
 				} else {
 					// No existe en la tabla de simbolos
 					finAnormal("Syntax Error","Variable no declarada");
@@ -302,49 +342,33 @@ seleccion:
 				int x, i, iPosActual;
 				char sPosActual[5], sPosActualTrue[5], sPosActualFalse[5], sPosCondDos[5];
 				
-				debugPila(PILA_IF,tope_pila_if);
-				// Primero que desapilo -> apunta a la posicion actual
-				x=desapilar(PILA_IF);
+				x=desapilar(PILA_IF); // Primero que desapilo -> apunta a la posicion actual
 				sprintf(sPosActual, "CELDA %d", puntero_tokens);
 				escribirEnLista(x,sPosActual);
 				
-				debugPila(PILA_IF,tope_pila_if);
-				// Segundo que desapilo -> apunta a la parte verdadera
-				x=desapilar(PILA_IF);
+				x=desapilar(PILA_IF);// Segundo que desapilo -> apunta a la parte verdadera
 				sprintf(sPosActualTrue, "CELDA %s", posTrue);
 				escribirEnLista(x,sPosActualTrue);
-								
 				
-				// Tercero que desapilo -> apunta al final
-				debugPila(PILA_IF,tope_pila_if);
-				x=desapilar(PILA_IF);
+				x=desapilar(PILA_IF); // Tercero que desapilo -> apunta al final
 				sprintf(sPosActual, "CELDA %d", puntero_tokens);
 				escribirEnLista(x,sPosActual);
 				
 					
 				if(flagIFOR == TRUE){
-					debugPila(PILA_IF,tope_pila_if);
-					// Cuarto que desapilo -> apunta a la parte verdadera
-					x=desapilar(PILA_IF);
+					x=desapilar(PILA_IF); // Cuarto que desapilo -> apunta a la parte verdadera
 					escribirEnLista(x,sPosActualTrue);
 					
-					debugPila(PILA_IF,tope_pila_if);
-					// Quinto que desapilo -> apunta a la segunda condicion
-					x=desapilar(PILA_IF);
+					x=desapilar(PILA_IF); // Quinto que desapilo -> apunta a la segunda condicion
 					sprintf(sPosCondDos, "CELDA %s", posCondDos);
 					escribirEnLista(x,sPosCondDos);
 					
 				} else if (flagIFAND == TRUE){
-					
-					debugPila(PILA_IF,tope_pila_if);
-					// Cuarto que desapilo -> apunta a la segunda condicion
-					x=desapilar(PILA_IF);
+					x=desapilar(PILA_IF); // Cuarto que desapilo -> apunta a la segunda condicion
 					sprintf(sPosCondDos, "CELDA %s", posCondDos);
 					escribirEnLista(x,sPosCondDos);
 					
-					debugPila(PILA_IF,tope_pila_if);
-					// Quinto que desapilo -> apunta a la parte falsa
-					x=desapilar(PILA_IF);
+					x=desapilar(PILA_IF);// Quinto que desapilo -> apunta a la parte falsa
 					escribirEnLista(x,sPosActualFalse);
 				} else {
 					// NO HAGO NADA - IF DE CONDICION SIMPLE	
@@ -373,48 +397,35 @@ seleccion:
 				int x, i, iPosActual;
 				char sPosActual[5], sPosActualTrue[5], sPosActualFalse[5], sPosCondDos[5];
 				
-				debugPila(PILA_IF,tope_pila_if);
-				// Primero que desapilo -> apunta a la posicion actual
-				x=desapilar(PILA_IF);
+				x=desapilar(PILA_IF); // Primero que desapilo -> apunta a la posicion actual
 				sprintf(sPosActual, "CELDA %d", puntero_tokens);
 				escribirEnLista(x,sPosActual);
 				
-				debugPila(PILA_IF,tope_pila_if);
-				// Segundo que desapilo -> apunta a la parte verdadera
-				x=desapilar(PILA_IF);
+				x=desapilar(PILA_IF); // Segundo que desapilo -> apunta a la parte verdadera
 				sprintf(sPosActualTrue, "CELDA %s", posTrue);
 				escribirEnLista(x,sPosActualTrue);
 				
-				debugPila(PILA_IF,tope_pila_if);
-				// Tercero que desapilo -> apunta a la posicion actual
-				x=desapilar(PILA_IF);
+				x=desapilar(PILA_IF); // Tercero que desapilo -> apunta a la posicion actual
 				sprintf(sPosActualFalse, "CELDA %s", posFalse);
 				escribirEnLista(x,sPosActualFalse);
-				printf("*** LLEGUE *** \n\n");
+				
 				if(flagIFOR == TRUE){
-					debugPila(PILA_IF,tope_pila_if);
-					// Cuarto que desapilo -> apunta a la parte verdadera
-					x=desapilar(PILA_IF);
+					
+					x=desapilar(PILA_IF); // Cuarto que desapilo -> apunta a la parte verdadera
 					sprintf(sPosActualTrue, "CELDA %s", posTrue);
 					escribirEnLista(x,sPosActualTrue);
 					
-					debugPila(PILA_IF,tope_pila_if);
-					// Quinto que desapilo -> apunta a la segunda condicion
-					x=desapilar(PILA_IF);
+					x=desapilar(PILA_IF); // Quinto que desapilo -> apunta a la segunda condicion
 					sprintf(sPosCondDos, "CELDA %s", posCondDos);
 					escribirEnLista(x,sPosCondDos);
 					
 				} else if (flagIFAND == TRUE){
 					
-					debugPila(PILA_IF,tope_pila_if);
-					// Cuarto que desapilo -> apunta a la segunda condicion
-					x=desapilar(PILA_IF);
+					x=desapilar(PILA_IF); // Cuarto que desapilo -> apunta a la segunda condicion
 					sprintf(sPosCondDos, "CELDA %s", posCondDos);
 					escribirEnLista(x,sPosCondDos);
 					
-					debugPila(PILA_IF,tope_pila_if);
-					// Quinto que desapilo -> apunta a la parte falsa
-					x=desapilar(PILA_IF);
+					x=desapilar(PILA_IF); // Quinto que desapilo -> apunta a la parte falsa
 					sprintf(sPosActualFalse, "CELDA %s", posFalse);
 					escribirEnLista(x,sPosActualFalse);
 				} else {
@@ -447,7 +458,7 @@ then_: THEN {
 				apilar(PILA_IF,sPosActualB);	
 			
 				sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true				
-				debugPila(PILA_IF,tope_pila_if);			
+					
 			}
 ;
 
@@ -470,7 +481,7 @@ condicion:
 				sprintf(sPosActualB, "%d", puntero_tokens-1);
 				apilar(PILA_WHILE,sPosActualB);	
 				sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true				
-				debugPila(PILA_WHILE,tope_pila_while);		
+				//debugPila(PILA_WHILE,tope_pila_while);		
 			 }
 		 }
          |OP_NOT comparacion{printf("NOT CONDICION\n");}
@@ -492,7 +503,7 @@ condicion:
 				sprintf(sPosActualB, "%d", puntero_tokens-1);
 				apilar(PILA_WHILE,sPosActualB);	
 				sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true				
-				debugPila(PILA_WHILE,tope_pila_while);		
+				//debugPila(PILA_WHILE,tope_pila_while);		
 			 }
 			}
 		 |comparacion op_or_ { sprintf(posCondDos, "%d", puntero_tokens); } 
@@ -512,7 +523,7 @@ condicion:
 					sprintf(sPosActualB, "%d", puntero_tokens-1);
 					apilar(PILA_WHILE,sPosActualB);	
 					sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true				
-					debugPila(PILA_WHILE,tope_pila_while);		
+					//debugPila(PILA_WHILE,tope_pila_while);		
 				 }
 				printf("CONDICION DOBLE OR\n"); 
 			}
@@ -593,26 +604,6 @@ op_or_: OP_OR{
 					apilar(PILA_IF,sPosActualB);	
 				}
 				
-				
-				
-				/*flagIFOR = TRUE;
-				
-				insertarEnLista("CMP");
-				insertarEnLista(valorComparacion(comparador_usado));
-				int iPosActual;
-				
-				char sPosActual[5];
-				iPosActual = insertarEnLista("###"); // no inserta nada, pero avanza el puntero y devuelve en que celda estaba
-				sprintf(sPosActual, "%d", iPosActual );
-				apilar(PILA_IF,sPosActual);	
-				//debugPila(PILA_IF,tope_pila_if);
-				insertarEnLista("BI");
-				
-				char sPosActualB[5];
-				iPosActual = insertarEnLista("###"); // no inserta nada, pero avanza el puntero y devuelve en que celda estaba
-				sprintf(sPosActualB, "%d", iPosActual );
-				apilar(PILA_IF,sPosActualB);	
-				//debugPila(PILA_IF,tope_pila_if);		*/		
 			}	 
 ;
 
@@ -628,7 +619,16 @@ expresion:
  	 ;
 	 
 between: 
-	{printf("INICIO BETWEEN\n");}BETWEEN CAR_PA ID CAR_COMA CAR_CA expresion CAR_PYC expresion CAR_CC CAR_PC {printf("\t\tFIN BETWEEN\n");}
+	{printf("INICIO BETWEEN\n");}BETWEEN CAR_PA 
+		ID {
+			char elemABuscar[5],valorElem[5];
+			sprintf(elemABuscar,yylval.str_val);
+			printf("Elemento leido: %s\n",elemABuscar);
+			//valorElem = recuperarValorTS(elemABuscar);
+			//printf("El valor del elemento es %s\n",valorElem);
+			// obtener tipo y valor del ID
+		} 
+		CAR_COMA CAR_CA expresion CAR_PYC expresion CAR_CC CAR_PC {printf("\t\tFIN BETWEEN\n");}
 	 ;
 	 
 termino: 
@@ -644,6 +644,7 @@ factor:
 				finAnormal("Syntax Error","Variable no declarada"); 
 			} 
 			insertarEnLista(yylval.str_val);
+			
 		}
       | CONST_INT {
 					  if(verificarExistencia(yylval.str_val) == NO_EXISTE)
@@ -651,12 +652,14 @@ factor:
 							insertar_TS("CONST_INT",yylval.int_val);
 						} 
 					  insertarEnLista(yylval.int_val); 
+					  sprintf(valorFactor,"%s",yylval.int_val);
 				  }
       | CONST_REAL {
 						if(verificarExistencia(yylval.real_val) == NO_EXISTE)
 						{ 
 							insertar_TS("CONST_REAL",yylval.real_val);
 						} 
+						 sprintf(valorFactor,"%s",yylval.real_val);
 			}
 					 
       | CONST_STR  {
@@ -664,7 +667,8 @@ factor:
 						{ 
 							insertar_TS("CONST_STR",yylval.str_val);
 						} 
-	  }
+						 sprintf(valorFactor,"%s",yylval.str_val);
+		}
 	  | CAR_PA expresion CAR_PC 	  
       ;
 
@@ -714,6 +718,20 @@ int verificarExistencia(char* nombre)
 	return NO_EXISTE;
 }
 
+char * recuperarValorTS(char* nombre)
+{
+	int i;
+	for (i=0;i < puntero_ts;i++)
+	{
+		//printf("Voy a comprar %s con %s \n",nombre, tablaSimbolos[i].nombre);
+		if(strcmp(nombre,tablaSimbolos[i].nombre) == 0)
+		{
+			return tablaSimbolos[i].valor;
+		}
+	}
+	finAnormal("Syntax Error","Variable no inicializada");
+	return "error";
+}
 
 int crearArchivoTS()
 {
@@ -757,7 +775,7 @@ void apilar(int nroPila, char * val)
 		case PILA_IF:
 			
 			
-			if(pilaLlena(PILA_IF) == 1){
+			if(pilaLlena(PILA_IF) == TRUE){
 				printf("Error: Se exedio el tamano de la pila de IF.\n");
 				system ("Pause");
 				exit (1);
@@ -769,7 +787,7 @@ void apilar(int nroPila, char * val)
 		
 		case PILA_WHILE:
 		
-			if(pilaLlena(PILA_WHILE) == 1){
+			if(pilaLlena(PILA_WHILE) == TRUE){
 				printf("Error: Se exedio el tamano de la pila de WHILE.\n");
 				system ("Pause");
 				exit (1);
@@ -778,6 +796,17 @@ void apilar(int nroPila, char * val)
 			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
 			tope_pila_while++;
 			break;
+		case PILA_ASIGNACION:
+		
+			if(pilaLlena(PILA_ASIGNACION) == TRUE){
+				printf("Error: Se exedio el tamano de la pila de ASIGNACION.\n");
+				system ("Pause");
+				exit (1);
+			}
+			pilaAsignacion[tope_pila_asignacion]=val;
+			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
+			tope_pila_asignacion++;
+			break;	
 		default:
 			printf("\tError: La pila recibida no se reconoce\n",val);
 			system ("Pause");
@@ -818,6 +847,19 @@ int desapilar(int nroPila)
 			}
 		
 			break;
+		case PILA_ASIGNACION:
+		
+			if(pilaVacia(tope_pila_asignacion) == 0)
+			{
+				char * dato = pilaAsignacion[tope_pila_asignacion-1];
+				tope_pila_asignacion--;	
+				printf("\tDESAPILAR #CELDA -> %s\n",dato);
+				return atoi(dato);		
+			} else {
+				finAnormal("Stack Error","La pila esta vacia");
+			}
+		
+			break;	
 		default:
 			finAnormal("Stack Error","La pila recibida no se reconoce");
 			break;
@@ -848,12 +890,12 @@ void debugPila(int nroPila, int tope)
 	char * pila[TAM_PILA];
 	int i;
 	printf("====== DEBUG PILA ======\n\n");
-	printf("posCondDos: %s\n",posCondDos);
-	printf("posTrue: %s\n",posTrue);
-	printf("posFalse: %s\n",posFalse);
+	
 	switch(nroPila){
 		case PILA_IF:
-			
+			printf("posCondDos: %s\n",posCondDos);
+			printf("posTrue: %s\n",posTrue);
+			printf("posFalse: %s\n",posFalse);
 			printf("El tope de la pila es %d \n",tope_pila_if);		
 			printf("Lista de elementos: \n");		
 			for (i=0; i<tope_pila_if;i++){
@@ -863,7 +905,9 @@ void debugPila(int nroPila, int tope)
 			break;
 		
 		case PILA_WHILE:
-			
+			printf("posCondDos: %s\n",posCondDos);
+			printf("posTrue: %s\n",posTrue);
+			printf("posFalse: %s\n",posFalse);
 			printf("El tope de la pila es %d \n",tope_pila_while);		
 			printf("Lista de elementos: \n");		
 			for (i=0; i<tope_pila_while;i++){
@@ -871,6 +915,15 @@ void debugPila(int nroPila, int tope)
 			}
 			
 			break;
+		case PILA_ASIGNACION:
+			
+			printf("El tope de la pila es %d \n",tope_pila_asignacion);		
+			printf("Lista de elementos: \n");			
+			for (i=0; i<tope_pila_asignacion;i++){
+				printf("%d => %s\n",i,pilaAsignacion[i]);		
+			}
+			
+			break;	
 		default:
 			printf("Error interno: Pila no reconocida \n");
 			system("Pause");
@@ -917,6 +970,21 @@ int insertarEnListaDeclaracion(char * val)
 	
 }
 
+int insertarEnListaAsig(char * val)
+{
+	
+	// Convierto en CHAR *
+	aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
+    strcpy(aux, val);
+	
+	// Agrego al array de tokens
+	listaAsignacion[puntero_asignacion] = aux;
+	puntero_asignacion++;
+	
+	return (puntero_asignacion-1); // devuelvo posicion
+	
+}
+
 void debugListaDeclaracion()
 {
 	int i;
@@ -928,6 +996,20 @@ void debugListaDeclaracion()
 	}
 	
 	printf("\n====== FIN DEBUG LISTA DECLARACION ======\n\n");	
+	
+}
+
+void debugListaAsignacion()
+{
+	int i;
+	printf("====== DEBUG LISTA ASIGNACION ======\n\n");
+	printf("La cantidad de elementos es %d \n",puntero_asignacion);		
+	printf("Lista de elementos: \n");		
+	for (i=0; i < puntero_asignacion;i++){
+		printf("%d => %s\n",i,listaAsignacion[i]);		
+	}
+	
+	printf("\n====== FIN DEBUG LISTA ASIGNACION ======\n\n");	
 	
 }
 

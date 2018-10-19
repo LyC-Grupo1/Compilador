@@ -5,7 +5,7 @@ pause
 d:\MinGW\bin\gcc.exe lex.yy.c y.tab.c -o Compilador.exe
 pause
 cls
-Compilador.exe Prueba_IF_WHILE.txt
+Compilador.exe Prueba_IF_WHILE_BTN.txt
 pause
 del lex.yy.c
 del y.tab.c
