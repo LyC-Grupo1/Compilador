@@ -77,6 +77,8 @@ void debugListaDeclaracion();
 int flagWHILE = FALSE;
 int flagIFOR = FALSE;
 int flagIFAND = FALSE;
+int flagWHILEOR = FALSE;
+int flagWHILEAND = FALSE;
 int flagELSE = FALSE;
 
 //DECLARACION VARIABLES
@@ -199,17 +201,56 @@ sentencia:
 
 ciclo:
      REPEAT { flagWHILE = TRUE; printf("REPEAT\n");} bloque UNTIL condicion { printf("FIN DEL REPEAT\n");}
-	 | WHILE { flagWHILE = TRUE; printf("WHILE\n");} CAR_PA  
-		
-		condicion {
-			
-		}
-		
-		CAR_PC bloque { 
-			
-		} 
+	 | WHILE { flagWHILE = TRUE; printf("WHILE\n");} CAR_PA  condicion CAR_PC bloque 
 		ENDW {
+			int x, i, iPosActual;
+			char wPosActual[5], wPosActualTrue[5], wPosCondDos[5];
+				
+			debugPila(PILA_WHILE,tope_pila_while);
+			// Primero que desapilo -> apunta a la parte verdadera
+			x=desapilar(PILA_WHILE);
+			sprintf(wPosActualTrue, "CELDA %s", posTrue);
+			escribirEnLista(x,wPosActualTrue);
 			
+			// Segundo que desapilo -> apunta al final
+			x=desapilar(PILA_WHILE);
+			sprintf(wPosActual, "CELDA %d", puntero_tokens);
+			escribirEnLista(x,wPosActual);
+			debugPila(PILA_WHILE,tope_pila_while);
+			
+			if(flagWHILEAND == TRUE){
+				
+				if(pilaVacia(tope_pila_while) == FALSE){
+					// Tercero que desapilo -> apunta a la segunda condicion
+					x=desapilar(PILA_WHILE);
+					sprintf(wPosCondDos, "CELDA %s", posCondDos);
+					escribirEnLista(x,wPosCondDos);
+					
+					// Cuarto que desapilo -> apunta al final
+					x=desapilar(PILA_WHILE);
+					sprintf(wPosActual, "CELDA %d", puntero_tokens);
+					escribirEnLista(x,wPosActual);
+					debugPila(PILA_WHILE,tope_pila_while);
+				}
+			
+			} else if (flagWHILEOR == TRUE) {
+				
+				if(pilaVacia(tope_pila_while) == FALSE){
+					// Tercero que desapilo -> apunta a la parte verdadera
+					x=desapilar(PILA_WHILE);
+					sprintf(wPosActualTrue, "CELDA %s", posTrue);
+					escribirEnLista(x,wPosActualTrue);
+					
+					// Tercero que desapilo -> apunta a la segunda condicion
+					x=desapilar(PILA_WHILE);
+					sprintf(wPosCondDos, "CELDA %s", posCondDos);
+					escribirEnLista(x,wPosCondDos);
+				}			
+				
+			}
+			flagWHILEOR = FALSE;
+			flagWHILEAND = FALSE;
+
 		}
      ;
 
@@ -349,7 +390,7 @@ seleccion:
 				x=desapilar(PILA_IF);
 				sprintf(sPosActualFalse, "CELDA %s", posFalse);
 				escribirEnLista(x,sPosActualFalse);
-				
+				printf("*** LLEGUE *** \n\n");
 				if(flagIFOR == TRUE){
 					debugPila(PILA_IF,tope_pila_if);
 					// Cuarto que desapilo -> apunta a la parte verdadera
@@ -435,7 +476,9 @@ condicion:
          |OP_NOT comparacion{printf("NOT CONDICION\n");}
          |comparacion op_and_ {sprintf(posCondDos, "%d", puntero_tokens);}  
 			comparacion {
+			 
 			 if(flagWHILE == TRUE){
+				flagWHILEAND = TRUE;
 				insertarEnLista("CMP");
 				insertarEnLista(valorComparacion(comparador_usado));
 				char sPosActual[5];
@@ -455,6 +498,7 @@ condicion:
 		 |comparacion op_or_ { sprintf(posCondDos, "%d", puntero_tokens); } 
 			comparacion { 
 				if(flagWHILE == TRUE){
+					// flagWHILEOR = TRUE;
 					insertarEnLista("CMP");
 					insertarEnLista(valorComparacion(comparador_usado));
 					char sPosActual[5];
@@ -479,37 +523,77 @@ condicion:
 	 ;
 
 op_and_: OP_AND{
-				flagIFAND = TRUE;
-				insertarEnLista("CMP");
-				insertarEnLista(valorComparacion(comparador_usado));
-				char sPosActual[5];
-				insertarEnLista("###");
-				sprintf(sPosActual, "%d", puntero_tokens-1);
-				apilar(PILA_IF,sPosActual);
-				
-				char sPosActualB[5];
-				insertarEnLista("BI");
-				insertarEnLista("###");
-				sprintf(sPosActualB, "%d", puntero_tokens-1);
-				apilar(PILA_IF,sPosActualB);	
+			
+				if(flagWHILE == TRUE){
+					flagWHILEAND = TRUE;
+					flagWHILEOR = FALSE;
+					insertarEnLista("CMP");
+					insertarEnLista(valorComparacion(comparador_usado));
+					char sPosActual[5];
+					insertarEnLista("###");
+					sprintf(sPosActual, "%d", puntero_tokens-1);
+					apilar(PILA_WHILE,sPosActual);
+					
+					char sPosActualB[5];
+					insertarEnLista("BI");
+					insertarEnLista("###");
+					sprintf(sPosActualB, "%d", puntero_tokens-1);
+					apilar(PILA_WHILE,sPosActualB);
+				} else {
+					flagIFAND = TRUE;
+					flagIFOR = FALSE;
+					insertarEnLista("CMP");
+					insertarEnLista(valorComparacion(comparador_usado));
+					char sPosActual[5];
+					insertarEnLista("###");
+					sprintf(sPosActual, "%d", puntero_tokens-1);
+					apilar(PILA_IF,sPosActual);
+					
+					char sPosActualB[5];
+					insertarEnLista("BI");
+					insertarEnLista("###");
+					sprintf(sPosActualB, "%d", puntero_tokens-1);
+					apilar(PILA_IF,sPosActualB);
+				}
+					
 			
 			}	 
 ;
 
 op_or_: OP_OR{
-				flagIFOR = TRUE;
-				insertarEnLista("CMP");
-				insertarEnLista(valorComparacion(comparador_usado));
-				char sPosActual[5];
-				insertarEnLista("###");
-				sprintf(sPosActual, "%d", puntero_tokens-1);
-				apilar(PILA_IF,sPosActual);
 				
-				char sPosActualB[5];
-				insertarEnLista("BI");
-				insertarEnLista("###");
-				sprintf(sPosActualB, "%d", puntero_tokens-1);
-				apilar(PILA_IF,sPosActualB);	
+				if(flagWHILE == TRUE){
+					flagWHILEOR = TRUE;
+					insertarEnLista("CMP");
+					insertarEnLista(valorComparacion(comparador_usado));
+					char sPosActual[5];
+					insertarEnLista("###");
+					sprintf(sPosActual, "%d", puntero_tokens-1);
+					apilar(PILA_WHILE,sPosActual);
+					
+					char sPosActualB[5];
+					insertarEnLista("BI");
+					insertarEnLista("###");
+					sprintf(sPosActualB, "%d", puntero_tokens-1);
+					apilar(PILA_WHILE,sPosActualB);	
+				} else {
+					flagIFAND = FALSE;
+					flagIFOR = TRUE;
+					insertarEnLista("CMP");
+					insertarEnLista(valorComparacion(comparador_usado));
+					char sPosActual[5];
+					insertarEnLista("###");
+					sprintf(sPosActual, "%d", puntero_tokens-1);
+					apilar(PILA_IF,sPosActual);
+					
+					char sPosActualB[5];
+					insertarEnLista("BI");
+					insertarEnLista("###");
+					sprintf(sPosActualB, "%d", puntero_tokens-1);
+					apilar(PILA_IF,sPosActualB);	
+				}
+				
+				
 				
 				/*flagIFOR = TRUE;
 				
@@ -745,17 +829,17 @@ int desapilar(int nroPila)
 int pilaVacia(int tope)
 {
 	if (tope-1 == -1){
-		return 1;
+		return TRUE;
 	} 
-	return 0;
+	return FALSE;
 }
 
 int pilaLlena(int tope)
 {
 	if (tope-1 == TAM_PILA-1){
-		return 1;
+		return TRUE;
 	} 
-	return 0;
+	return FALSE;
 }
 
 void debugPila(int nroPila, int tope)

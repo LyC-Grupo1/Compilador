@@ -79,9 +79,9 @@ a
 7
 CMP
 BGE
-###
+CELDA 90
 BI
-###
+CELDA 85
 i
 5
 b
@@ -91,16 +91,16 @@ a
 7
 CMP
 BGE
-###
+CELDA 109
 BI
-###
+CELDA 97
 b
 8
 CMP
 BLE
-###
+CELDA 109
 BI
-###
+CELDA 104
 i
 5
 b
@@ -110,16 +110,16 @@ a
 7
 CMP
 BGE
-###
+CELDA 116
 BI
-###
+CELDA 123
 b
 8
 CMP
 BLE
-###
+CELDA 128
 BI
-###
+CELDA 123
 i
 5
 b
