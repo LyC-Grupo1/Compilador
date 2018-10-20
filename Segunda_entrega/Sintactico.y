@@ -200,8 +200,9 @@ sentencia:
 
 ciclo:
      REPEAT { flagWHILE = TRUE; printf("REPEAT\n");} bloque UNTIL condicion { printf("FIN DEL REPEAT\n");}
-	 | WHILE { flagWHILE = TRUE; printf("WHILE\n");} CAR_PA  condicion CAR_PC bloque 
-		ENDW {
+	 | WHILE { flagWHILE = TRUE; printf("WHILE\n");} CAR_PA  condicion CAR_PC bloque endw_
+
+endw_: ENDW {
 			int x, i, iPosActual;
 			char wPosActual[5], wPosActualTrue[5], wPosCondDos[5];
 				
@@ -248,8 +249,7 @@ ciclo:
 			flagWHILEAND = FALSE;
 
 		}
-     ;
-
+	 
 asignacion: // estaria faltando actualizar la tabla de simbolos
 			lista_id OP_ASIG 
 			expresion {
@@ -309,12 +309,7 @@ lista_id:
 				{
 					insertarEnLista($1);
 					flagPrimero = TRUE;
-					//insertarEnLista("###");
-					//char sPos[5];
-					//sprintf(sPos,"%d",puntero_tokens-1);
-					//apilar(PILA_ASIGNACION,sPos);
-					//insertarEnLista(":=");
-					//debugPila(PILA_ASIGNACION,tope_pila_asignacion);
+
 				} else {
 					// No existe en la tabla de simbolos
 					finAnormal("Syntax Error","Variable no declarada");
@@ -480,8 +475,7 @@ condicion:
 				insertarEnLista("###");
 				sprintf(sPosActualB, "%d", puntero_tokens-1);
 				apilar(PILA_WHILE,sPosActualB);	
-				sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true				
-				//debugPila(PILA_WHILE,tope_pila_while);		
+				sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true						
 			 }
 		 }
          |OP_NOT comparacion{printf("NOT CONDICION\n");}
@@ -566,7 +560,6 @@ op_and_: OP_AND{
 					sprintf(sPosActualB, "%d", puntero_tokens-1);
 					apilar(PILA_IF,sPosActualB);
 				}
-					
 			
 			}	 
 ;
@@ -628,7 +621,11 @@ between:
 			//printf("El valor del elemento es %s\n",valorElem);
 			// obtener tipo y valor del ID
 		} 
-		CAR_COMA CAR_CA expresion CAR_PYC expresion CAR_CC CAR_PC {printf("\t\tFIN BETWEEN\n");}
+		CAR_COMA CAR_CA expresion 
+		{
+			//primerElemento
+		}
+		CAR_PYC expresion CAR_CC CAR_PC {printf("\t\tFIN BETWEEN\n");}
 	 ;
 	 
 termino: 
@@ -659,7 +656,9 @@ factor:
 						{ 
 							insertar_TS("CONST_REAL",yylval.real_val);
 						} 
-						 sprintf(valorFactor,"%s",yylval.real_val);
+						insertarEnLista(yylval.real_val); 
+						sprintf(valorFactor,"%s",yylval.real_val);
+						printf("Guarde el valor real %s\n",valorFactor);
 			}
 					 
       | CONST_STR  {
@@ -667,6 +666,7 @@ factor:
 						{ 
 							insertar_TS("CONST_STR",yylval.str_val);
 						} 
+						 insertarEnLista(yylval.str_val); 
 						 sprintf(valorFactor,"%s",yylval.str_val);
 		}
 	  | CAR_PA expresion CAR_PC 	  
@@ -697,7 +697,6 @@ int insertar_TS(char* tipo, char* nombre)
 	{
 		strcpy(tablaSimbolos[puntero_ts].valor, tablaSimbolos[i].nombre);
 	}
-	
 	
 	posicion = puntero_ts;
 	puntero_ts++;

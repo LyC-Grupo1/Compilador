@@ -52,7 +52,7 @@ endw
 
 -/ ASIGNACION MULTIPLE /-
 
-a:=b:=i:=8
+a:=b:=i:=s:=8
 
 -/ BETWEEN /-
 
