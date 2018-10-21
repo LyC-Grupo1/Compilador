@@ -47,7 +47,10 @@ char * recuperarValorTS(char* nombre);
 int crearArchivoIntermedia();
 char * aux;
 char * valorID, valorINT, valorSTR, valorREAL;
-char valorFactor[5];
+char valorFactor[5],valorTermino[5],valorElemento[5];
+double sumTermino = 0;
+double sumElemento = 0;
+
 int cont = 0;
 int insertarEnLista(char*);
 void escribirEnLista(int, char*);
@@ -629,9 +632,25 @@ between:
 	 ;
 	 
 termino: 
-	   termino OP_MUL factor {insertarEnLista("*");}
-	   |termino OP_DIV factor {insertarEnLista("/");}
-       |factor
+	   termino OP_MUL 
+		   factor 
+		   {
+			   insertarEnLista("*"); 
+			   sumTermino = sumTermino * atof(valorFactor);
+			}
+	   |termino OP_DIV 
+			factor 
+			{
+				insertarEnLista("/"); 
+				sumTermino = sumTermino / atof(valorFactor);
+			}
+       |factor { 
+			sumTermino = 0;
+			sumTermino = atof(valorFactor);
+			sprintf(valorTermino,"%f",sumTermino); 
+			printf("EL VALOR DEL TERMINO ES: %s\n",valorTermino);
+			
+		   }
 	   ;
 
 factor: 
@@ -641,6 +660,10 @@ factor:
 				finAnormal("Syntax Error","Variable no declarada"); 
 			} 
 			insertarEnLista(yylval.str_val);
+			// esto no se como resolverlo
+			//sprintf(valorFactor,"%s",recuperarValorTS(yylval.str_val));
+			//printf("El valor de la variable %s es %s\n\n\n",yylval.str_val,valorFactor);
+			
 			
 		}
       | CONST_INT {
@@ -651,23 +674,25 @@ factor:
 					  insertarEnLista(yylval.int_val); 
 					  sprintf(valorFactor,"%s",yylval.int_val);
 				  }
-      | CONST_REAL {
-						if(verificarExistencia(yylval.real_val) == NO_EXISTE)
-						{ 
-							insertar_TS("CONST_REAL",yylval.real_val);
-						} 
-						insertarEnLista(yylval.real_val); 
-						sprintf(valorFactor,"%s",yylval.real_val);
-						printf("Guarde el valor real %s\n",valorFactor);
-			}
+      | CONST_REAL 
+		{
+			if(verificarExistencia(yylval.real_val) == NO_EXISTE)
+			{ 
+				insertar_TS("CONST_REAL",yylval.real_val);
+			} 
+			insertarEnLista(yylval.real_val); 
+			sprintf(valorFactor,"%s",yylval.real_val);
+			printf("Guarde el valor real %s\n",valorFactor);
+		}
 					 
-      | CONST_STR  {
-						if(verificarExistencia(yylval.str_val) == NO_EXISTE)
-						{ 
-							insertar_TS("CONST_STR",yylval.str_val);
-						} 
-						 insertarEnLista(yylval.str_val); 
-						 sprintf(valorFactor,"%s",yylval.str_val);
+      | CONST_STR  
+		{
+			if(verificarExistencia(yylval.str_val) == NO_EXISTE)
+			{ 
+				insertar_TS("CONST_STR",yylval.str_val);
+			} 
+			insertarEnLista(yylval.str_val); 
+			sprintf(valorFactor,"%s",yylval.str_val);
 		}
 	  | CAR_PA expresion CAR_PC 	  
       ;
@@ -729,7 +754,7 @@ char * recuperarValorTS(char* nombre)
 		}
 	}
 	finAnormal("Syntax Error","Variable no inicializada");
-	return "error";
+	return "ERROR";
 }
 
 int crearArchivoTS()
