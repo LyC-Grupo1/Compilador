@@ -1,11 +1,11 @@
-d:\GnuWin32\bin\flex Lexico.l
+c:\GnuWin32\bin\flex Lexico.l
 pause
-d:\GnuWin32\bin\bison -dyv Sintactico.y
+c:\GnuWin32\bin\bison -dyv Sintactico.y
 pause
-d:\MinGW\bin\gcc.exe lex.yy.c y.tab.c -o Compilador.exe
+c:\MinGW\bin\gcc.exe lex.yy.c y.tab.c -o Compilador.exe
 pause
 cls
-Compilador.exe Prueba_IF_WHILE_BTN.txt
+Compilador.exe PRUEBA_REPEAT.txt
 pause
 del lex.yy.c
 del y.tab.c

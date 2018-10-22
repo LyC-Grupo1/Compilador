@@ -13,6 +13,7 @@
 #define PILA_DECLARACION 1
 #define PILA_WHILE 2
 #define PILA_ASIGNACION 3
+#define PILA_REPEAT 4
 #define TRUE 1
 #define FALSE 0
 
@@ -22,10 +23,13 @@ int yyerror();
 int yylex();
 int yyparse();
 
-void finAnormal(char * tipo, char * mensaje);
-void validarDeclaracionTipoDato(char * tipo);
-int insertarEnListaAsig(char * val);
+void finAnormal(char *, char * );
+void validarDeclaracionTipoDato(char *);
+int insertarEnListaAsig(char *);
 void debugListaAsignacion();
+int insertarEnListaDeclaracion(char *);
+int verificarExistencia(char* );
+char * valorComparacionCICLO(char * ); // utilizado en repeat
 // TABLA DE SIMBOLOS
 
 struct struct_tablaSimbolos
@@ -61,9 +65,11 @@ char comparador_usado[2];
 char * pilaIF[TAM_PILA];			// pila 0
 char * pilaWhile[TAM_PILA];			// pila 1
 char * pilaAsignacion[TAM_PILA];	// pila 3
+char * pilaRepeat[TAM_PILA];
 int tope_pila_if=0;				// pila 0
 int tope_pila_while=0;			// pila 1
 int tope_pila_asignacion=0;		// pila 3
+int tope_pila_repeat=0;
 
 ////////////////////
 void apilar(int nroPila, char * val);
@@ -91,6 +97,7 @@ int flagWHILEOR = FALSE;
 int flagWHILEAND = FALSE;
 int flagELSE = FALSE;
 int flagPrimero = FALSE;		// para identificar los token en asign multiple
+int flagREPEAT = FALSE;
 //DECLARACION VARIABLES
 char posAuxA[5], posAuxB[5];	// posicion auxiliar para pivotear con la condicion OR
 char posTrue[5], posFalse[5],posCondDos[5];
@@ -202,13 +209,22 @@ sentencia:
 	 ;
 
 ciclo:
-     REPEAT { flagWHILE = TRUE; printf("REPEAT\n");} bloque UNTIL condicion { printf("FIN DEL REPEAT\n");}
+     REPEAT 
+	 { 
+		flagREPEAT = TRUE; 
+		printf("REPEAT\n");
+		char sPosActual[5];
+		itoa(puntero_tokens,sPosActual,10);
+		apilar(PILA_REPEAT,sPosActual);
+	} bloque UNTIL condicion { 
+								printf("FIN DEL REPEAT\n");
+								
+							 }
 	 | WHILE { flagWHILE = TRUE; printf("WHILE\n");} CAR_PA  condicion CAR_PC bloque endw_
 
 endw_: ENDW {
 			int x, i, iPosActual;
 			char wPosActual[5], wPosActualTrue[5], wPosCondDos[5];
-				
 			// debugPila(PILA_WHILE,tope_pila_while);
 			
 			x=desapilar(PILA_WHILE); // Primero que desapilo -> apunta a la parte verdadera
@@ -465,13 +481,13 @@ else_: ELSE {	sprintf(posFalse, "%d", puntero_tokens); } // guardo la posicion d
 
 condicion:
          comparacion {
-			 if(flagWHILE == TRUE){
+			 if(flagWHILE == TRUE){ //Manejo del While
 				insertarEnLista("CMP");
 				insertarEnLista(valorComparacion(comparador_usado));
 				char sPosActual[5];
 				insertarEnLista("###");
 				sprintf(sPosActual, "%d", puntero_tokens-1);
-				apilar(PILA_WHILE,sPosActual);
+				apilar(PILA_WHILE,sPosActual); // usado en el while
 				
 				char sPosActualB[5];
 				insertarEnLista("BI");
@@ -479,7 +495,25 @@ condicion:
 				sprintf(sPosActualB, "%d", puntero_tokens-1);
 				apilar(PILA_WHILE,sPosActualB);	
 				sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true						
+			 
+				flagWHILE = FALSE; //agregado lucas (dsp fijate mauro es para q no vuelva a entrar)
 			 }
+			 
+			 if(flagREPEAT == TRUE){
+				
+				insertarEnLista("CMP");
+				insertarEnLista(valorComparacionCICLO(comparador_usado)); // devuelvo por verdadero
+				int x;
+				char sPosActual[5];
+				x=desapilar(PILA_REPEAT);
+				itoa(x,sPosActual,10);
+				insertarEnLista(sPosActual);
+				//printf("Hicr%d", puntero_tokens-1);
+				flagREPEAT = FALSE;
+			 }
+			 
+			 
+			 
 		 }
          |OP_NOT comparacion{printf("NOT CONDICION\n");}
          |comparacion op_and_ {sprintf(posCondDos, "%d", puntero_tokens);}  
@@ -855,6 +889,17 @@ void apilar(int nroPila, char * val)
 			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
 			tope_pila_asignacion++;
 			break;	
+		case PILA_REPEAT:
+			if(pilaLlena(PILA_REPEAT) == TRUE){
+				printf("Error: Se exedio el tamano de la pila de REPEAT.\n");
+				system ("Pause");
+				exit (1);
+			}
+			pilaRepeat[tope_pila_repeat]=val;
+			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
+			tope_pila_repeat++;
+			break;	
+			
 		default:
 			printf("\tError: La pila recibida no se reconoce\n",val);
 			system ("Pause");
@@ -908,6 +953,20 @@ int desapilar(int nroPila)
 			}
 		
 			break;	
+		case PILA_REPEAT:
+		
+			if(pilaVacia(tope_pila_repeat) == 0)
+			{
+				char * dato = pilaRepeat[tope_pila_repeat-1];
+				tope_pila_repeat--;	
+				printf("\tDESAPILAR #CELDA -> %s\n",dato);
+				return atoi(dato);		
+			} else {
+				finAnormal("Stack Error","La pila esta vacia");
+			}
+		
+			break;	
+		
 		default:
 			finAnormal("Stack Error","La pila recibida no se reconoce");
 			break;
@@ -1086,6 +1145,25 @@ void escribirEnLista(int pos, char * val)
 	
 	printf("\tEscribio en %i el valor %s\n",pos,aux);
 	
+}
+
+char * valorComparacionCICLO(char * val){
+	if(strcmp("=", val) == 0){
+		return "BEQ";
+	} else if(strcmp(">=", val) == 0){
+		return "BGE";
+	} else if(strcmp(">", val) == 0){
+		return "BGT";
+	} else if(strcmp("<=", val) == 0){
+		return "BLE";
+	} else if(strcmp("<", val) == 0){
+		return "BLT";
+	} else if(strcmp("><", val) == 0){
+		return "BNE";
+	} else {
+		// NUNCA DEBERIA CAER ACA
+		return val;
+	}
 }
 
 char * valorComparacion(char * val){
