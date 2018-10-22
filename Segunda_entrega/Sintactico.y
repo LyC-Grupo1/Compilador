@@ -526,8 +526,8 @@ condicion:
 			}
 		 |OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC {printf("NOT CONDICION DOBLE AND\n");}
 		 |OP_NOT CAR_PA comparacion OP_OR  comparacion  CAR_PC{printf("NOT CONDICION DOBLE OR\n");}
-		 |between
-		 |OP_NOT between
+		 |between {insertarEnLista("TRUE");}
+		 |OP_NOT between {insertarEnLista("FALSE");}
 	 ;
 
 op_and_: OP_AND{
@@ -615,20 +615,44 @@ expresion:
  	 ;
 	 
 between: 
-	{printf("INICIO BETWEEN\n");}BETWEEN CAR_PA 
-		ID {
-			char elemABuscar[5],valorElem[5];
-			sprintf(elemABuscar,yylval.str_val);
-			printf("Elemento leido: %s\n",elemABuscar);
-			//valorElem = recuperarValorTS(elemABuscar);
-			//printf("El valor del elemento es %s\n",valorElem);
-			// obtener tipo y valor del ID
-		} 
-		CAR_COMA CAR_CA expresion 
-		{
-			//primerElemento
-		}
-		CAR_PYC expresion CAR_CC CAR_PC {printf("\t\tFIN BETWEEN\n");}
+	{printf("INICIO BETWEEN\n");}BETWEEN CAR_PA ID {
+													int iPosID = insertarEnLista(yylval.str_val);
+													char sPosID[5];
+													itoa(iPosID,sPosID,10);
+													apilar(PILA_IF,sPosID);
+												   } CAR_COMA CAR_CA 
+		expresion {
+					int iPosActual;
+					char sPosActual[5]; 
+					int iPosID;
+					iPosID = desapilar(PILA_IF);
+					insertarEnLista("CMP");
+					insertarEnLista("BLT");
+					iPosActual = insertarEnLista("###");
+					itoa(iPosActual,sPosActual,10);
+					apilar(PILA_IF,sPosActual);
+					insertarEnLista(listaTokens[iPosID]);		
+					} CAR_PYC expresion {
+											int iPosActual;
+											char sPosActual[5];
+											insertarEnLista("CMP");
+											insertarEnLista("BGT");
+											iPosActual = insertarEnLista("###");
+											itoa(iPosActual,sPosActual,10);
+											apilar(PILA_IF,sPosActual);
+											insertarEnLista("TRUE");
+											insertarEnLista("BI");
+											char sPosElse[5];
+											itoa(puntero_tokens + 2,sPosElse,10);
+											sprintf(listaTokens[insertarEnLista(sPosElse)],"CELDA %s",sPosElse);
+											int x;
+											x=desapilar(PILA_IF);
+											itoa(puntero_tokens,sPosActual,10);
+											sprintf(listaTokens[x],"CELDA %s",sPosActual);
+											x=desapilar(PILA_IF);
+											sprintf(listaTokens[x],"CELDA %s",sPosActual);
+											insertarEnLista("FALSE");
+										} CAR_CC CAR_PC {printf("\t\tFIN BETWEEN\n");}
 	 ;
 	 
 termino: 
