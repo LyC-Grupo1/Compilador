@@ -58,6 +58,10 @@ a:=b:=i:=s:=8
 
 BETWEEN (a,[2;a*(b+4)])
 
+IF (BETWEEN(a,[2;4])) THEN 
+	i:=4
+ENDIF
+
 a:=2
 
 REPEAT a:=a+2 UNTIL a <= 10

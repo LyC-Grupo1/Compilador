@@ -14,6 +14,7 @@
 #define PILA_WHILE 2
 #define PILA_ASIGNACION 3
 #define PILA_REPEAT 4
+#define PILA_BETWEEN 5
 #define TRUE 1
 #define FALSE 0
 
@@ -65,11 +66,13 @@ char comparador_usado[2];
 char * pilaIF[TAM_PILA];			// pila 0
 char * pilaWhile[TAM_PILA];			// pila 1
 char * pilaAsignacion[TAM_PILA];	// pila 3
-char * pilaRepeat[TAM_PILA];
+char * pilaRepeat[TAM_PILA];		// pila 4
+char * pilaBetween[TAM_PILA];		// pila 5
 int tope_pila_if=0;				// pila 0
 int tope_pila_while=0;			// pila 1
 int tope_pila_asignacion=0;		// pila 3
-int tope_pila_repeat=0;
+int tope_pila_repeat=0;			// pila 4
+int tope_pila_between=0;			// pila 5
 
 ////////////////////
 void apilar(int nroPila, char * val);
@@ -476,7 +479,7 @@ then_: THEN {
 			}
 ;
 
-else_: ELSE {	sprintf(posFalse, "%d", puntero_tokens); } // guardo la posicion del true	
+else_: ELSE {	sprintf(posFalse, "%d", puntero_tokens); /*guardo la posicion del true*/ } 	
 ;
 
 condicion:
@@ -560,8 +563,8 @@ condicion:
 			}
 		 |OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC {printf("NOT CONDICION DOBLE AND\n");}
 		 |OP_NOT CAR_PA comparacion OP_OR  comparacion  CAR_PC{printf("NOT CONDICION DOBLE OR\n");}
-		 |between {insertarEnLista("TRUE");}
-		 |OP_NOT between {insertarEnLista("FALSE");}
+		 |between {insertarEnLista("1");}
+		 |OP_NOT between {insertarEnLista("0");}
 	 ;
 
 op_and_: OP_AND{
@@ -653,18 +656,18 @@ between:
 													int iPosID = insertarEnLista(yylval.str_val);
 													char sPosID[5];
 													itoa(iPosID,sPosID,10);
-													apilar(PILA_IF,sPosID);
+													apilar(PILA_BETWEEN,sPosID);
 												   } CAR_COMA CAR_CA 
 		expresion {
 					int iPosActual;
 					char sPosActual[5]; 
 					int iPosID;
-					iPosID = desapilar(PILA_IF);
+					iPosID = desapilar(PILA_BETWEEN);
 					insertarEnLista("CMP");
 					insertarEnLista("BLT");
 					iPosActual = insertarEnLista("###");
 					itoa(iPosActual,sPosActual,10);
-					apilar(PILA_IF,sPosActual);
+					apilar(PILA_BETWEEN,sPosActual);
 					insertarEnLista(listaTokens[iPosID]);		
 					} CAR_PYC expresion {
 											int iPosActual;
@@ -673,19 +676,19 @@ between:
 											insertarEnLista("BGT");
 											iPosActual = insertarEnLista("###");
 											itoa(iPosActual,sPosActual,10);
-											apilar(PILA_IF,sPosActual);
-											insertarEnLista("TRUE");
+											apilar(PILA_BETWEEN,sPosActual);
+											insertarEnLista("1");
 											insertarEnLista("BI");
 											char sPosElse[5];
 											itoa(puntero_tokens + 2,sPosElse,10);
 											sprintf(listaTokens[insertarEnLista(sPosElse)],"CELDA %s",sPosElse);
 											int x;
-											x=desapilar(PILA_IF);
+											x=desapilar(PILA_BETWEEN);
 											itoa(puntero_tokens,sPosActual,10);
 											sprintf(listaTokens[x],"CELDA %s",sPosActual);
-											x=desapilar(PILA_IF);
+											x=desapilar(PILA_BETWEEN);
 											sprintf(listaTokens[x],"CELDA %s",sPosActual);
-											insertarEnLista("FALSE");
+											insertarEnLista("0");
 										} CAR_CC CAR_PC {printf("\t\tFIN BETWEEN\n");}
 	 ;
 	 
@@ -900,6 +903,17 @@ void apilar(int nroPila, char * val)
 			tope_pila_repeat++;
 			break;	
 			
+		case PILA_BETWEEN:
+			if(pilaLlena(PILA_BETWEEN) == TRUE){
+				printf("Error: Se exedio el tamano de la pila de BETWEEN.\n");
+				system ("Pause");
+				exit (1);
+			}
+			pilaBetween[tope_pila_between]=val;
+			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
+			tope_pila_between++;
+			break;	
+		
 		default:
 			printf("\tError: La pila recibida no se reconoce\n",val);
 			system ("Pause");
@@ -967,6 +981,20 @@ int desapilar(int nroPila)
 		
 			break;	
 		
+		case PILA_BETWEEN:
+		
+			if(pilaVacia(tope_pila_between) == 0)
+			{
+				char * dato = pilaBetween[tope_pila_between-1];
+				tope_pila_between--;	
+				printf("\tDESAPILAR #CELDA -> %s\n",dato);
+				return atoi(dato);		
+			} else {
+				finAnormal("Stack Error","La pila esta vacia");
+			}
+		
+			break;	
+
 		default:
 			finAnormal("Stack Error","La pila recibida no se reconoce");
 			break;
