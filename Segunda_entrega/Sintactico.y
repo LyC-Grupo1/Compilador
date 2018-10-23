@@ -57,6 +57,7 @@ double sumTermino = 0;
 double sumElemento = 0;
 
 int cont = 0;
+int iPosCondDos;
 int insertarEnLista(char*);
 void escribirEnLista(int, char*);
 char * valorComparacion(char * );
@@ -101,6 +102,7 @@ int flagWHILEAND = FALSE;
 int flagELSE = FALSE;
 int flagPrimero = FALSE;		// para identificar los token en asign multiple
 int flagREPEAT = FALSE;
+int flagAsigMul = FALSE;
 //DECLARACION VARIABLES
 char posAuxA[5], posAuxB[5];	// posicion auxiliar para pivotear con la condicion OR
 char posTrue[5], posFalse[5],posCondDos[5];
@@ -292,14 +294,22 @@ asignacion: // estaria faltando actualizar la tabla de simbolos
 			insertarEnLista(":=");
 				
 			puntero_asignacion = 0;	// reset
-				
+			
+			// ya se, es horrible esto
+			if(flagAsigMul == TRUE){
+				puntero_tokens = puntero_tokens -2;
+			}
+			flagAsigMul = FALSE;
 			printf("FIN LINEA ASIGNACION\n");
 			
 		}
+		| lista_id OP_ASIG 
+			between
 	  ;
 
 lista_id:		
 			lista_id OP_ASIG ID {
+				flagAsigMul = TRUE;
 				printf("Lei el ID A %s  \n",$3);
 				if(flagPrimero == TRUE){
 					insertarEnLista("###");
@@ -654,41 +664,79 @@ expresion:
 between: 
 	{printf("INICIO BETWEEN\n");}BETWEEN CAR_PA ID {
 													int iPosID = insertarEnLista(yylval.str_val);
-													char sPosID[5];
+													char * sPosID = (char *) malloc(sizeof(char) * (sizeof(int) + 1));
 													itoa(iPosID,sPosID,10);
 													apilar(PILA_BETWEEN,sPosID);
 												   } CAR_COMA CAR_CA 
 		expresion {
-					int iPosActual;
-					char sPosActual[5]; 
-					int iPosID;
+					int iPosActual, iPosID;
+					char * sPosActual = (char *) malloc(sizeof(char) * (sizeof(int) + 1));
+				
 					iPosID = desapilar(PILA_BETWEEN);
 					insertarEnLista("CMP");
 					insertarEnLista("BLT");
+					
 					iPosActual = insertarEnLista("###");
+					sPosActual = (char *) malloc(sizeof(char) * (sizeof(int) + 1));
 					itoa(iPosActual,sPosActual,10);
 					apilar(PILA_BETWEEN,sPosActual);
+					
+					insertarEnLista("BI");
+					iPosActual = insertarEnLista("###");
+					sPosActual = (char *) malloc(sizeof(char) * (sizeof(int) + 1));
+					itoa(iPosActual,sPosActual,10);
+					apilar(PILA_BETWEEN,sPosActual);
+					iPosCondDos = puntero_tokens;
 					insertarEnLista(listaTokens[iPosID]);		
+					
 					} CAR_PYC expresion {
-											int iPosActual;
-											char sPosActual[5];
+											int x, i, iPosActual, posTrue, posFalse;
+											char sPosActualTrue[5], sPosActualFalse[5], sPosCondDos[5];
+											char * sPosActual = (char *) malloc(sizeof(char) * (sizeof(int) + 1));
 											insertarEnLista("CMP");
 											insertarEnLista("BGT");
+											
 											iPosActual = insertarEnLista("###");
 											itoa(iPosActual,sPosActual,10);
 											apilar(PILA_BETWEEN,sPosActual);
-											insertarEnLista("1");
+											
 											insertarEnLista("BI");
-											char sPosElse[5];
-											itoa(puntero_tokens + 2,sPosElse,10);
-											sprintf(listaTokens[insertarEnLista(sPosElse)],"CELDA %s",sPosElse);
-											int x;
-											x=desapilar(PILA_BETWEEN);
-											itoa(puntero_tokens,sPosActual,10);
-											sprintf(listaTokens[x],"CELDA %s",sPosActual);
-											x=desapilar(PILA_BETWEEN);
-											sprintf(listaTokens[x],"CELDA %s",sPosActual);
+											iPosActual = insertarEnLista("###");
+											sPosActual = (char *) malloc(sizeof(char) * (sizeof(int) + 1));
+											itoa(iPosActual,sPosActual,10);
+											apilar(PILA_BETWEEN,sPosActual);
+											
+											insertarEnLista("1");
+											posTrue = puntero_tokens-1;
+											
+											insertarEnLista("BI");
+											iPosActual = insertarEnLista("###");
+											sPosActual = (char *) malloc(sizeof(char) * (sizeof(int) + 1));
+											itoa(iPosActual,sPosActual,10);
+											apilar(PILA_BETWEEN,sPosActual);
 											insertarEnLista("0");
+											posFalse = puntero_tokens-1;
+											
+											x=desapilar(PILA_BETWEEN); // Primero que desapilo -> apunta a la posicion actual
+											sprintf(sPosActual, "CELDA %d", puntero_tokens);
+											escribirEnLista(x,sPosActual);
+											
+											x=desapilar(PILA_BETWEEN); // Segundo que desapilo -> apunta a la parte verdadera
+											sprintf(sPosActualTrue, "CELDA %d", posTrue);
+											escribirEnLista(x,sPosActualTrue);
+											
+											x=desapilar(PILA_BETWEEN); // Tercero que desapilo -> apunta a la posicion actual
+											sprintf(sPosActualFalse, "CELDA %d", posFalse);
+											escribirEnLista(x,sPosActualFalse);
+											
+											x=desapilar(PILA_BETWEEN); // Cuarto que desapilo -> apunta a la segunda condicion
+											sprintf(sPosCondDos, "CELDA %d", iPosCondDos);
+											escribirEnLista(x,sPosCondDos);
+												
+											x=desapilar(PILA_BETWEEN); // Quinto que desapilo -> apunta a la parte falsa
+											sprintf(sPosActualFalse, "CELDA %d", posFalse);
+											escribirEnLista(x,sPosActualFalse);
+											
 										} CAR_CC CAR_PC {printf("\t\tFIN BETWEEN\n");}
 	 ;
 	 
@@ -1059,6 +1107,15 @@ void debugPila(int nroPila, int tope)
 			}
 			
 			break;	
+		case PILA_BETWEEN:
+			
+			printf("El tope de la pila es %d \n",tope_pila_between);		
+			printf("Lista de elementos: \n");			
+			for (i=0; i<tope_pila_between;i++){
+				printf("%d => %s\n",i,pilaBetween[i]);		
+			}
+			
+			break;		
 		default:
 			printf("Error interno: Pila no reconocida \n");
 			system("Pause");
