@@ -51,7 +51,6 @@ char * recuperarValorTS(char* nombre);
 
 int crearArchivoIntermedia();
 char * aux;
-char * valorID, valorINT, valorSTR, valorREAL;
 char valorFactor[5],valorTermino[5],valorElemento[5];
 double sumTermino = 0;
 double sumElemento = 0;
@@ -106,6 +105,7 @@ int flagAsigMul = FALSE;
 //DECLARACION VARIABLES
 char posAuxA[5], posAuxB[5];	// posicion auxiliar para pivotear con la condicion OR
 char posTrue[5], posFalse[5],posCondDos[5];
+char inicioCuerpoRepeat[5];
 //int posTrue, posFalse, posCondDos;
 int pos_actual=0;
 int yystopparser=0;
@@ -218,13 +218,25 @@ ciclo:
 	 { 
 		flagREPEAT = TRUE; 
 		printf("REPEAT\n");
-		char sPosActual[5];
-		itoa(puntero_tokens,sPosActual,10);
-		apilar(PILA_REPEAT,sPosActual);
-	} bloque UNTIL condicion { 
-								printf("FIN DEL REPEAT\n");
-								
-							 }
+		
+		sprintf(inicioCuerpoRepeat, "CELDA %d", puntero_tokens);
+		//itoa(puntero_tokens,sPosActual,10);
+		//apilar(PILA_REPEAT,inicioCuerpo);
+	} bloque UNTIL 
+		condicion 
+		{ 
+			//debugPila(PILA_REPEAT,tope_pila_repeat);
+			int x;
+			char sPosActual[5];
+			escribirEnLista(puntero_tokens-1,inicioCuerpoRepeat);
+			x = desapilar(PILA_REPEAT);
+			
+			sprintf(sPosActual, "CELDA %d", puntero_tokens);
+			
+			escribirEnLista(x,sPosActual);	// %%%%
+			
+			printf("FIN DEL REPEAT\n");
+		}
 	 | WHILE { flagWHILE = TRUE; printf("WHILE\n");} CAR_PA  condicion CAR_PC bloque endw_
 
 endw_: ENDW {
@@ -271,6 +283,7 @@ endw_: ENDW {
 			}
 			flagWHILEOR = FALSE;
 			flagWHILEAND = FALSE;
+			flagWHILE = FALSE;
 
 		}
 	 
@@ -280,14 +293,14 @@ asignacion: // estaria faltando actualizar la tabla de simbolos
 				int i,x,limit;
 				char sAux[5];
 				sprintf(sAux,yylval.str_val);
-				debugPila(PILA_ASIGNACION,tope_pila_asignacion);
+				//debugPila(PILA_ASIGNACION,tope_pila_asignacion);
 				
-			printf("Voy a terminar la asignacion\n");
+			
 			limit = tope_pila_asignacion;
 			for (i=0; i < limit;i++)
 			{
 				x=desapilar(PILA_ASIGNACION);
-				printf("Voy a escribir en la posiciion %d el valor %s\n",x,valorFactor);
+				//printf("Voy a escribir en la posiciion %d el valor %s\n",x,valorFactor);
 				escribirEnLista(x,valorFactor);
 				
 			}
@@ -310,7 +323,7 @@ asignacion: // estaria faltando actualizar la tabla de simbolos
 lista_id:		
 			lista_id OP_ASIG ID {
 				flagAsigMul = TRUE;
-				printf("Lei el ID A %s  \n",$3);
+				//printf("Lei el ID A %s  \n",$3);
 				if(flagPrimero == TRUE){
 					insertarEnLista("###");
 					char sPos[5];
@@ -336,7 +349,7 @@ lista_id:
 				}
 			}
 			| ID {
-				printf("Lei el ID B %s  \n",$1);
+				//printf("Lei el ID B %s  \n",$1);
 				if(verificarExistencia($1) == EXISTE)
 				{
 					insertarEnLista($1);
@@ -489,7 +502,7 @@ then_: THEN {
 			}
 ;
 
-else_: ELSE {	sprintf(posFalse, "%d", puntero_tokens); /*guardo la posicion del true*/ } 	
+else_: ELSE {	sprintf(posFalse, "%d", puntero_tokens); /*guardo la posicion del false*/ } 	
 ;
 
 condicion:
@@ -515,14 +528,21 @@ condicion:
 			 if(flagREPEAT == TRUE){
 				
 				insertarEnLista("CMP");
-				insertarEnLista(valorComparacionCICLO(comparador_usado)); // devuelvo por verdadero
-				int x;
+				insertarEnLista(valorComparacion(comparador_usado));
 				char sPosActual[5];
-				x=desapilar(PILA_REPEAT);
-				itoa(x,sPosActual,10);
-				insertarEnLista(sPosActual);
-				//printf("Hicr%d", puntero_tokens-1);
+				insertarEnLista("###");
+				sprintf(sPosActual, "%d", puntero_tokens-1);
+				apilar(PILA_REPEAT,sPosActual); // usado en el while
+				
+				char sPosActualB[5];
+				insertarEnLista("BI");
+				insertarEnLista("###");
+				sprintf(sPosActualB, "%d", puntero_tokens-1);
+				apilar(PILA_WHILE,sPosActualB);	
+				sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true						
+			 
 				flagREPEAT = FALSE;
+				
 			 }
 			 
 			 
@@ -757,7 +777,7 @@ termino:
 			sumTermino = 0;
 			sumTermino = atof(valorFactor);
 			sprintf(valorTermino,"%f",sumTermino); 
-			printf("EL VALOR DEL TERMINO ES: %s\n",valorTermino);
+			
 			
 		   }
 	   ;
@@ -769,9 +789,7 @@ factor:
 				finAnormal("Syntax Error","Variable no declarada"); 
 			} 
 			insertarEnLista(yylval.str_val);
-			// esto no se como resolverlo
-			//sprintf(valorFactor,"%s",recuperarValorTS(yylval.str_val));
-			//printf("El valor de la variable %s es %s\n\n\n",yylval.str_val,valorFactor);
+			
 			
 			
 		}
@@ -791,7 +809,7 @@ factor:
 			} 
 			insertarEnLista(yylval.real_val); 
 			sprintf(valorFactor,"%s",yylval.real_val);
-			printf("Guarde el valor real %s\n",valorFactor);
+			//printf("Guarde el valor real %s\n",valorFactor);
 		}
 					 
       | CONST_STR  
@@ -1116,6 +1134,15 @@ void debugPila(int nroPila, int tope)
 			}
 			
 			break;		
+		case PILA_REPEAT:
+			
+			printf("El tope de la pila es %d \n",tope);		
+			printf("Lista de elementos: \n");			
+			for (i=0; i<tope_pila_repeat;i++){
+				printf("%d => %s\n",i,pilaRepeat[i]);		
+			}
+			
+			break;			
 		default:
 			printf("Error interno: Pila no reconocida \n");
 			system("Pause");

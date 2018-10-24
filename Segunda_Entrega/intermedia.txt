@@ -157,9 +157,62 @@ CELDA 156
 BI
 CELDA 160
 0
+i
+1
+:=
+a
+15
+:=
+n
+99.99
+:=
+n
+.99
+:=
+n
+99.
+:=
+n
+-542.43
+:=
+s
+""
+:=
 a
 2
+CMP
+BLT
+CELDA 202
+BI
+CELDA 188
+a
+a
+b
+4
++
+*
+CMP
+BGT
+CELDA 202
+BI
+CELDA 199
+1
+BI
+CELDA 203
+0
+1
+CMP
+BLE
+CELDA 216
+BI
+CELDA 209
+i
+i
+2
++
 :=
+BI
+CELDA 216
 a
 a
 2
@@ -169,9 +222,6 @@ a
 10
 CMP
 BGT
-###
+CELDA 228
 BI
-###
-CMP
-BLE
-163
+CELDA 216

@@ -1,5 +1,6 @@
 program  
 DECVAR	
+ n : FLOAT 
  i, a, b: INTEGER
  cadena, s : STRING
 ENDDEC
@@ -58,8 +59,43 @@ a:=b:=i:=8
 
 i:= BETWEEN(a,[2;a*(b+4)])
 
-a:=2
+-/ ASIGNACIONES VARIAS /-
+i:=1	
+a:=15
+n:= 99.99
+n:= .99
+n:= 99.
+n:=-542.43
+s:=""
 
+
+-/ COMENTARIO SIMPLE MAS DE UNA LINEA
+-//-
+/-
+
+-/COMENTARIOS CON CARACTER ESPECIAL "·$"% /-
+
+-//-
+
+-/ WRITE Y READ /-
+
+READ n
+WRITE b
+WRITE "ewr"
+write "ewr"
+read n
+write i1
+write "@%asdr"
+write "@% > = FA <asdr"
+
+
+-/ BETWEEN EN SELECCION /-
+if(BETWEEN (a,[2;a*(b+4)])) then
+	i:=i+2
+endif
+
+
+-/ REPEAT /- 
 REPEAT a:=a+2 UNTIL a <= 10
 
 endp
