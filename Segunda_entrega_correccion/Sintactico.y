@@ -45,9 +45,10 @@ int puntero_ts = 0;
 struct struct_tablaSimbolos tablaSimbolos[10000];
 ////////////////////////////
 int insertar_TS(char*, char*);
+char * recuperarTipoTS(char* );
 int crearArchivoTS();
 void debugTS();
-char * recuperarValorTS(char* nombre);
+char * recuperarValorTS(char* );
 
 int crearArchivoIntermedia();
 char * aux;
@@ -61,6 +62,7 @@ int insertarEnLista(char*);
 void escribirEnLista(int, char*);
 char * valorComparacion(char * );
 char comparador_usado[2];
+
 
 // PILAS 
 char * pilaIF[TAM_PILA];			// pila 0
@@ -106,6 +108,8 @@ int flagAsigMul = FALSE;
 char posAuxA[5], posAuxB[5];	// posicion auxiliar para pivotear con la condicion OR
 char posTrue[5], posFalse[5],posCondDos[5];
 char inicioCuerpoRepeat[5];
+char * auxTipoAsignacion;
+
 //int posTrue, posFalse, posCondDos;
 int pos_actual=0;
 int yystopparser=0;
@@ -322,6 +326,15 @@ asignacion: // estaria faltando actualizar la tabla de simbolos
 
 lista_id:		
 			lista_id OP_ASIG ID {
+				
+				// VERIFICO EL TIPO DE DATO
+				
+				if (strcmp(recuperarTipoTS($3),auxTipoAsignacion) != 0)
+				{
+					finAnormal("Error","No puede asignar IDs con distinto tipo\n");
+				}
+				
+				
 				flagAsigMul = TRUE;
 				//printf("Lei el ID A %s  \n",$3);
 				if(flagPrimero == TRUE){
@@ -342,7 +355,6 @@ lista_id:
 					apilar(PILA_ASIGNACION,strPos);
 					insertarEnLista(":=");
 					
-					
 				} else {
 					// No existe en la tabla de simbolos
 					finAnormal("Syntax Error","Variable no declarada");
@@ -354,7 +366,14 @@ lista_id:
 				{
 					insertarEnLista($1);
 					flagPrimero = TRUE;
-
+					// GUARDO EL TIPO DE DATO PARA COMPARAR CON LOS DEMAS IDs
+				//	&&&&&&
+				
+					free(auxTipoAsignacion);
+					auxTipoAsignacion = (char *) malloc(sizeof(char) * (sizeof(char) + 1));
+					strcpy(auxTipoAsignacion, recuperarTipoTS($1));
+					printf("TIPO de dato %s\n",auxTipoAsignacion);
+					
 				} else {
 					// No existe en la tabla de simbolos
 					finAnormal("Syntax Error","Variable no declarada");
@@ -878,6 +897,21 @@ char * recuperarValorTS(char* nombre)
 		if(strcmp(nombre,tablaSimbolos[i].nombre) == 0)
 		{
 			return tablaSimbolos[i].valor;
+		}
+	}
+	finAnormal("Syntax Error","Variable no inicializada");
+	return "ERROR";
+}
+
+char * recuperarTipoTS(char* nombre)
+{
+	int i;
+	for (i=0;i < puntero_ts;i++)
+	{
+		//printf("Voy a comprar %s con %s \n",nombre, tablaSimbolos[i].nombre);
+		if(strcmp(nombre,tablaSimbolos[i].nombre) == 0)
+		{
+			return tablaSimbolos[i].tipo;
 		}
 	}
 	finAnormal("Syntax Error","Variable no inicializada");

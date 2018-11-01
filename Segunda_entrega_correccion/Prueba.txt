@@ -10,6 +10,8 @@ beginp
 i:=1	
 b:=10
 
+s:=i:=10
+
 -/ IF SIMPLE /-
 if (i=15) THEN
 	i:=16
