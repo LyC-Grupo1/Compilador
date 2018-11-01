@@ -94,5 +94,11 @@ if(BETWEEN (a,[2;a*(b+4)])) then
 	i:=i+2
 endif
 
+
+-/ ASIGNACION MULTIPLE CON EXPRESION/-
+
+a:=b:=i:=8+5
+
+
 endp
 
