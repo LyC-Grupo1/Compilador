@@ -21,7 +21,7 @@ CONST_REAL		"-"?({DIGITO})+"."({DIGITO})*|({DIGITO})*"."({DIGITO})+
 LETRA			[a-zA-Z]
 COMENTARIO_SIMPLE		"-/"([^-/]|\n)*?"/-"
 COMENTARIO_DOBLE		"-/"([^-/]|\n|{COMENTARIO_SIMPLE})*?"/-"
-CONST_STR               {CAR_COMILLAS}({LETRA}|{DIGITO}|" "|_|@|%|{OP_COMPARACION}|{OP_SUM}|{OP_RES}|{OP_MUL}|{OP_DIV})*{CAR_COMILLAS}
+CONST_STR               {CAR_COMILLAS}({LETRA}|{DIGITO}|" "|_|@|%|"?"|"!"|"¿"|"¡"|{OP_COMPARACION}|{OP_SUM}|{OP_RES}|{OP_MUL}|{OP_DIV})*{CAR_COMILLAS}
 ID						{LETRA}({LETRA}|{DIGITO}|_)*
 OP_COMPARACION          ["<"|"="|">"|"<="|">="|"><"]
 OP_SUM                  ["+"]
