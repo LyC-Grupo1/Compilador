@@ -109,7 +109,7 @@ char posAuxA[5], posAuxB[5];	// posicion auxiliar para pivotear con la condicion
 char posTrue[5], posFalse[5],posCondDos[5];
 char inicioCuerpoRepeat[5];
 char * auxTipoAsignacion;
-
+char * inicioWhilePos;
 //int posTrue, posFalse, posCondDos;
 int pos_actual=0;
 int yystopparser=0;
@@ -241,12 +241,23 @@ ciclo:
 			
 			printf("FIN DEL REPEAT\n");
 		}
-	 | WHILE { flagWHILE = TRUE; printf("WHILE\n");} CAR_PA  condicion CAR_PC bloque endw_
+	 | WHILE 
+	 { 
+		 free(inicioWhilePos);
+		 inicioWhilePos = (char *) malloc(sizeof(char) * (sizeof(int) + 1));
+		 sprintf(inicioWhilePos,"CELDA %d",puntero_tokens);
+		
+		 flagWHILE = TRUE; 
+		 printf("WHILE\n");
+	 
+	 } CAR_PA  condicion CAR_PC bloque endw_
 
 endw_: ENDW {
 			int x, i, iPosActual;
 			char wPosActual[5], wPosActualTrue[5], wPosCondDos[5];
 			// debugPila(PILA_WHILE,tope_pila_while);
+			insertarEnLista("BI");
+			insertarEnLista(inicioWhilePos);			
 			
 			x=desapilar(PILA_WHILE); // Primero que desapilo -> apunta a la parte verdadera
 			sprintf(wPosActualTrue, "CELDA %s", posTrue);
