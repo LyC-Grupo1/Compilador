@@ -623,8 +623,10 @@ condicion:
 			}
 		 |OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC {printf("NOT CONDICION DOBLE AND\n");}
 		 |OP_NOT CAR_PA comparacion OP_OR  comparacion  CAR_PC{printf("NOT CONDICION DOBLE OR\n");}
-		 |between {insertarEnLista("1");}
-		 |OP_NOT between {insertarEnLista("0");}
+		 |between {	insertarEnLista("1");
+		 			strcpy(comparador_usado,"=");}
+		 |OP_NOT between {	insertarEnLista("0");
+		 					strcpy(comparador_usado,"=");}
 	 ;
 
 op_and_: OP_AND{
@@ -873,7 +875,7 @@ int insertar_TS(char* tipo, char* nombre)
 	if(strcmp(tipo,"CONST_STR") == 0)
 	{
 		int longitud = strlen(tablaSimbolos[i].nombre);
-		sprintf(tablaSimbolos[puntero_ts].longitud, "%d", longitud );		
+		sprintf(tablaSimbolos[puntero_ts].longitud, "%d", longitud);
 	} 
 	else if (strcmp(tipo,"CONST_INT") == 0  || strcmp(tipo,"CONST_REAL") == 0)
 	{

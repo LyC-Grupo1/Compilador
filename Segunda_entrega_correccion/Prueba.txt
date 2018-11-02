@@ -59,6 +59,24 @@ a:=b:=i:=8
 
 i:= BETWEEN(a,[2;a*(b+4)])
 
+
+-/ IF CON BETWEEN /-
+if (BETWEEN(a,[2;a*(b+4)])) THEN
+	i:=16+a
+ENDIF
+
+-/ IF CON NOT BETWEEN /-
+if ( NOT BETWEEN(a,[2;a*(b+4)])) THEN
+	i:=16+a
+ENDIF
+
+-/ IF CON BETWEEN Y ELSE /-
+if (BETWEEN(a,[2;a*(b+4)])) THEN
+	i:=16
+else 
+    i:=17	
+ENDIF
+
 -/ ASIGNACIONES VARIAS /-
 i:=1	
 a:=15
@@ -66,14 +84,14 @@ n:= 99.99
 n:= .99
 n:= 99.
 n:=-542.43
-s:=""
+s:="asdad"
 
 
 -/ COMENTARIO SIMPLE MAS DE UNA LINEA
 -//-
 /-
 
--/COMENTARIOS CON CARACTER ESPECIAL "·$"% /-
+-/COMENTARIOS CON CARACTER ESPECIAL "ï¿½$"% /-
 
 -//-
 
