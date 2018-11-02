@@ -113,6 +113,7 @@ char * inicioWhilePos;
 //int posTrue, posFalse, posCondDos;
 int pos_actual=0;
 int yystopparser=0;
+int iniExpre, finExpre;
 
 FILE *yyin;
 FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
@@ -301,31 +302,42 @@ endw_: ENDW {
 
 		}
 	 
-asignacion: // estaria faltando actualizar la tabla de simbolos
-			lista_id OP_ASIG 
-			expresion {
-				int i,x,limit;
-				char sAux[5];
-				sprintf(sAux,yylval.str_val);
-				//debugPila(PILA_ASIGNACION,tope_pila_asignacion);
-				
+asignacion: 
+		lista_id OP_ASIG 
+		expresion {
+			finExpre = puntero_tokens;
+			int i,j,limit;
+			char sAux[5];
+			sprintf(sAux,yylval.str_val);
 			
-			limit = tope_pila_asignacion;
-			for (i=0; i < limit;i++)
+			if(flagAsigMul == TRUE)
 			{
-				x=desapilar(PILA_ASIGNACION);
-				//printf("Voy a escribir en la posiciion %d el valor %s\n",x,valorFactor);
-				escribirEnLista(x,valorFactor);
+				printf("\n\n ASIGNACION MULTIPLE \n\n");
+				insertarEnLista(":=");
+							
+				limit = puntero_asignacion;
 				
+				for (i=0; i < limit;i++)
+				{
+					
+					insertarEnLista(listaAsignacion[i]);
+					printf("\n\n INICIO EXPRE: %d - FIN EXPRE %d \n\n",iniExpre,finExpre);
+					for(j=iniExpre ; j<finExpre; j++){
+						printf("Entre en el For \n");
+						insertarEnLista(listaTokens[j]);
+					}
+				
+					insertarEnLista(":=");				
+				}
+			} 
+			else 
+			{
+				insertarEnLista(":=");	
 			}
-			insertarEnLista(":=");
+			
 				
 			puntero_asignacion = 0;	// reset
 			
-			// ya se, es horrible esto
-			if(flagAsigMul == TRUE){
-				puntero_tokens = puntero_tokens -2;
-			}
 			flagAsigMul = FALSE;
 			printf("FIN LINEA ASIGNACION\n");
 			
@@ -344,29 +356,19 @@ lista_id:
 					finAnormal("Error","No puede asignar IDs con distinto tipo\n");
 				}
 				
-				
 				flagAsigMul = TRUE;
-				//printf("Lei el ID A %s  \n",$3);
+				
 				if(flagPrimero == TRUE){
-					insertarEnLista("###");
-					char sPos[5];
-					sprintf(sPos,"%d",puntero_tokens-1);
-					apilar(PILA_ASIGNACION,sPos);
-					insertarEnLista(":=");
 					flagPrimero = FALSE;
 				}
 				char * strPos;
 				if(verificarExistencia($3) == EXISTE)
 				{
-					strPos = (char *) malloc(sizeof(char) * (sizeof(int) + 1));
-					insertarEnLista($3);
-					insertarEnLista("###");
-					sprintf(strPos,"%d",puntero_tokens-1);
-					apilar(PILA_ASIGNACION,strPos);
-					insertarEnLista(":=");
+					insertarEnListaAsig($3); 	// insertarEnListaAsig($3);apilar(PILA_ASIGNACION,$3);
 					
-				} else {
-					// No existe en la tabla de simbolos
+				} 
+				else 
+				{
 					finAnormal("Syntax Error","Variable no declarada");
 				}
 			}
@@ -376,14 +378,14 @@ lista_id:
 				{
 					insertarEnLista($1);
 					flagPrimero = TRUE;
-					// GUARDO EL TIPO DE DATO PARA COMPARAR CON LOS DEMAS IDs
-				//	&&&&&&
-				
+								
 					free(auxTipoAsignacion);
 					auxTipoAsignacion = (char *) malloc(sizeof(char) * (sizeof(char) + 1));
 					strcpy(auxTipoAsignacion, recuperarTipoTS($1));
-					printf("TIPO de dato %s\n",auxTipoAsignacion);
 					
+					// medio jugado ponerlo aca pero bueno.
+					// es para tomar donde inicia la expresion que luego asignare
+					iniExpre = puntero_tokens;
 				} else {
 					// No existe en la tabla de simbolos
 					finAnormal("Syntax Error","Variable no declarada");
@@ -710,7 +712,8 @@ op_and_: OP_AND{
 
 op_or_: OP_OR{
 				
-				if(flagWHILE == TRUE){
+				if(flagWHILE == TRUE)
+				{
 					flagWHILEOR = TRUE;
 					insertarEnLista("CMP");
 					insertarEnLista(valorComparacion(comparador_usado));
@@ -750,18 +753,21 @@ comparacion:
 	   ;
 
 expresion:
-		expresion OP_SUM termino {insertarEnLista("+");}
-		|expresion OP_RES termino {insertarEnLista("-");}
-        | termino
+		expresion OP_SUM termino {insertarEnLista("+"); }
+		|  expresion OP_RES termino {insertarEnLista("-"); }
+        | termino 
  	 ;
 	 
 between: 
-	{printf("INICIO BETWEEN\n");}BETWEEN CAR_PA ID {
-													int iPosID = insertarEnLista(yylval.str_val);
-													char * sPosID = (char *) malloc(sizeof(char) * (sizeof(int) + 1));
-													itoa(iPosID,sPosID,10);
-													apilar(PILA_BETWEEN,sPosID);
-												   } CAR_COMA CAR_CA 
+	{
+		printf("INICIO BETWEEN\n");}BETWEEN CAR_PA ID 
+		{
+			int iPosID = insertarEnLista(yylval.str_val);
+			char * sPosID = (char *) malloc(sizeof(char) * (sizeof(int) + 1));
+			itoa(iPosID,sPosID,10);
+			apilar(PILA_BETWEEN,sPosID);
+												   
+		} CAR_COMA CAR_CA 
 		expresion {
 					int iPosActual, iPosID;
 					char * sPosActual = (char *) malloc(sizeof(char) * (sizeof(int) + 1));
@@ -1115,7 +1121,7 @@ int desapilar(int nroPila)
 				char * dato = pilaAsignacion[tope_pila_asignacion-1];
 				tope_pila_asignacion--;	
 				printf("\tDESAPILAR #CELDA -> %s\n",dato);
-				return atoi(dato);		
+				return (tope_pila_asignacion);			// ESTA PILA EN VEZ DE DEVOLVER EL DATO DEVUELVE LA POSICION, SINO TENGO QUE HACER UNA FUNCION NUEVA
 			} else {
 				finAnormal("Stack Error","La pila esta vacia");
 			}
