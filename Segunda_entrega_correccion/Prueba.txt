@@ -59,33 +59,6 @@ a:=b:=i:=8
 
 i:= BETWEEN(a,[2;a*(b+4)])
 
--/ IF CON BETWEEN /-
-if (BETWEEN(a,[2;a*(b+4)])) THEN
-	i:=16+a
-ENDIF
-
--/ IF CON NOT BETWEEN /-
-if ( NOT BETWEEN(a,[2;a*(b+4)])) THEN
-	i:=16+a
-ENDIF
-
--/ IF CON BETWEEN Y ELSE /-
-if (BETWEEN(a,[2;a*(b+4)])) THEN
-	i:=16
-else 
-    i:=17	
-ENDIF
-
--/ WHILE CON BETWEEN /-
-while (BETWEEN(a,[2;b+4]))
-	i:=5 - b
-endw
-
--/ WHILE CON NOT BETWEEN /-
-while (NOT BETWEEN(a,[2;b+4]))
-	i:=5 - b
-endw
-
 -/ ASIGNACIONES VARIAS /-
 i:=1	
 a:=15
@@ -93,14 +66,14 @@ n:= 99.99
 n:= .99
 n:= 99.
 n:=-542.43
-s:="asdad"
+s:=""
 
 
 -/ COMENTARIO SIMPLE MAS DE UNA LINEA
 -//-
 /-
 
--/COMENTARIOS CON CARACTER ESPECIAL "ï¿½$"% /-
+-/COMENTARIOS CON CARACTER ESPECIAL "·$"% /-
 
 -//-
 
@@ -126,6 +99,34 @@ endif
 
 a:=b:=i:=8+5
 
+-/ IF CON BETWEEN /-
+if (BETWEEN(a,[2;a*(b+4)])) THEN
+	i:=16+a
+ENDIF
+
+-/ IF CON NOT BETWEEN /-
+if ( NOT BETWEEN(a,[2;a*(b+4)])) THEN
+	i:=16+a
+ENDIF
+
+-/ IF CON BETWEEN Y ELSE /-
+if (BETWEEN(a,[2;a*(b+4)])) THEN
+	i:=16
+else 
+    i:=17	
+ENDIF
+
+s:="asdad"
+
+-/ WHILE CON BETWEEN /-
+while (BETWEEN(a,[2;b+4]))
+	i:=5 - b
+endw
+
+-/ WHILE CON NOT BETWEEN /-
+while (NOT BETWEEN(a,[2;b+4]))
+	i:=5 - b
+endw
 
 endp
 

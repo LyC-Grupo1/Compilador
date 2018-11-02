@@ -214,7 +214,7 @@ sentencia:
 	 |seleccion  
 	 |asignacion
 	 |entrada_salida
-	 |between	 
+	 |between	{insertarEnLista(":="); } 
 	 ;
 
 ciclo:
@@ -237,7 +237,7 @@ ciclo:
 			
 			sprintf(sPosActual, "CELDA %d", puntero_tokens);
 			
-			escribirEnLista(x,sPosActual);	// %%%%
+			escribirEnLista(x,sPosActual);	
 			
 			printf("FIN DEL REPEAT\n");
 		}
@@ -279,7 +279,6 @@ endw_: ENDW {
 					x=desapilar(PILA_WHILE); // Cuarto que desapilo -> apunta al final
 					sprintf(wPosActual, "CELDA %d", puntero_tokens);
 					escribirEnLista(x,wPosActual);
-					//debugPila(PILA_WHILE,tope_pila_while);
 				}
 			
 			} else if (flagWHILEOR == TRUE) {
@@ -332,9 +331,7 @@ asignacion: // estaria faltando actualizar la tabla de simbolos
 			
 		}
 		| lista_id OP_ASIG 
-			between {
-				insertarEnLista(":=");
-			}
+			between
 	  ;
 
 lista_id:		
@@ -625,48 +622,53 @@ condicion:
 			}
 		 |OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC {printf("NOT CONDICION DOBLE AND\n");}
 		 |OP_NOT CAR_PA comparacion OP_OR  comparacion  CAR_PC{printf("NOT CONDICION DOBLE OR\n");}
-		 |between {	insertarEnLista("1");
-		 			if(flagWHILE == TRUE){ //Manejo del While
-						insertarEnLista("CMP");
-						insertarEnLista(valorComparacion("="));
-						char sPosActual[5];
-						insertarEnLista("###");
-						sprintf(sPosActual, "%d", puntero_tokens-1);
-						apilar(PILA_WHILE,sPosActual); // usado en el while
+		 |between 
+		 {
+			 insertarEnLista("1"); 
+			 if(flagWHILE == TRUE){ //Manejo del While
+				insertarEnLista("CMP");
+				insertarEnLista(valorComparacion("="));
+				char sPosActual[5];
+				insertarEnLista("###");
+				sprintf(sPosActual, "%d", puntero_tokens-1);
+				apilar(PILA_WHILE,sPosActual); // usado en el while
 						
-						char sPosActualB[5];
-						insertarEnLista("BI");
-						insertarEnLista("###");
-						sprintf(sPosActualB, "%d", puntero_tokens-1);
-						apilar(PILA_WHILE,sPosActualB);	
-						sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true						
-					
-						flagWHILE = FALSE; //agregado lucas (dsp fijate mauro es para q no vuelva a entrar)
-					} else {
-		 				strcpy(comparador_usado,"=");
-					}
-				}
-		 |OP_NOT between {	insertarEnLista("0");
-		 					if(flagWHILE == TRUE){ //Manejo del While
-						insertarEnLista("CMP");
-						insertarEnLista(valorComparacion("="));
-						char sPosActual[5];
-						insertarEnLista("###");
-						sprintf(sPosActual, "%d", puntero_tokens-1);
-						apilar(PILA_WHILE,sPosActual); // usado en el while
+				char sPosActualB[5];
+				insertarEnLista("BI");
+				insertarEnLista("###");
+				sprintf(sPosActualB, "%d", puntero_tokens-1);
+				apilar(PILA_WHILE,sPosActualB);	
+				sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true						
+				flagWHILE = FALSE; //agregado lucas (dsp fijate mauro es para q no vuelva a entrar)
+			} else {
+		 		strcpy(comparador_usado,"=");
+			}
+		}
+		 
+		 |OP_NOT between 
+		 {
+			 insertarEnLista("0");
+			 if(flagWHILE == TRUE){ //Manejo del While
+				insertarEnLista("CMP");
+				insertarEnLista(valorComparacion("="));
+				char sPosActual[5];
+				insertarEnLista("###");
+				sprintf(sPosActual, "%d", puntero_tokens-1);
+				apilar(PILA_WHILE,sPosActual); // usado en el while
 						
-						char sPosActualB[5];
-						insertarEnLista("BI");
-						insertarEnLista("###");
-						sprintf(sPosActualB, "%d", puntero_tokens-1);
-						apilar(PILA_WHILE,sPosActualB);	
-						sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true						
+				char sPosActualB[5];
+				insertarEnLista("BI");
+				insertarEnLista("###");
+				sprintf(sPosActualB, "%d", puntero_tokens-1);
+				apilar(PILA_WHILE,sPosActualB);	
+				sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true						
 					
-						flagWHILE = FALSE; //agregado lucas (dsp fijate mauro es para q no vuelva a entrar)
-					} else {
-		 				strcpy(comparador_usado,"=");
-					}
-				}
+				flagWHILE = FALSE; //agregado lucas (dsp fijate mauro es para q no vuelva a entrar)
+			} else {
+		 		strcpy(comparador_usado,"=");
+			}
+				
+		 }
 	 ;
 
 op_and_: OP_AND{
@@ -881,7 +883,6 @@ factor:
 			} 
 			insertarEnLista(yylval.real_val); 
 			sprintf(valorFactor,"%s",yylval.real_val);
-			//printf("Guarde el valor real %s\n",valorFactor);
 		}
 					 
       | CONST_STR  
@@ -915,7 +916,7 @@ int insertar_TS(char* tipo, char* nombre)
 	if(strcmp(tipo,"CONST_STR") == 0)
 	{
 		int longitud = strlen(tablaSimbolos[i].nombre);
-		sprintf(tablaSimbolos[puntero_ts].longitud, "%d", longitud);
+		sprintf(tablaSimbolos[puntero_ts].longitud, "%d", longitud);	
 	} 
 	else if (strcmp(tipo,"CONST_INT") == 0  || strcmp(tipo,"CONST_REAL") == 0)
 	{
