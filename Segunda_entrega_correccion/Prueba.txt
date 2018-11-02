@@ -59,7 +59,6 @@ a:=b:=i:=8
 
 i:= BETWEEN(a,[2;a*(b+4)])
 
-
 -/ IF CON BETWEEN /-
 if (BETWEEN(a,[2;a*(b+4)])) THEN
 	i:=16+a
@@ -76,6 +75,16 @@ if (BETWEEN(a,[2;a*(b+4)])) THEN
 else 
     i:=17	
 ENDIF
+
+-/ WHILE CON BETWEEN /-
+while (BETWEEN(a,[2;b+4]))
+	i:=5 - b
+endw
+
+-/ WHILE CON NOT BETWEEN /-
+while (NOT BETWEEN(a,[2;b+4]))
+	i:=5 - b
+endw
 
 -/ ASIGNACIONES VARIAS /-
 i:=1	

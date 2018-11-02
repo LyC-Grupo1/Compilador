@@ -332,7 +332,9 @@ asignacion: // estaria faltando actualizar la tabla de simbolos
 			
 		}
 		| lista_id OP_ASIG 
-			between
+			between {
+				insertarEnLista(":=");
+			}
 	  ;
 
 lista_id:		
@@ -624,9 +626,47 @@ condicion:
 		 |OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC {printf("NOT CONDICION DOBLE AND\n");}
 		 |OP_NOT CAR_PA comparacion OP_OR  comparacion  CAR_PC{printf("NOT CONDICION DOBLE OR\n");}
 		 |between {	insertarEnLista("1");
-		 			strcpy(comparador_usado,"=");}
+		 			if(flagWHILE == TRUE){ //Manejo del While
+						insertarEnLista("CMP");
+						insertarEnLista(valorComparacion("="));
+						char sPosActual[5];
+						insertarEnLista("###");
+						sprintf(sPosActual, "%d", puntero_tokens-1);
+						apilar(PILA_WHILE,sPosActual); // usado en el while
+						
+						char sPosActualB[5];
+						insertarEnLista("BI");
+						insertarEnLista("###");
+						sprintf(sPosActualB, "%d", puntero_tokens-1);
+						apilar(PILA_WHILE,sPosActualB);	
+						sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true						
+					
+						flagWHILE = FALSE; //agregado lucas (dsp fijate mauro es para q no vuelva a entrar)
+					} else {
+		 				strcpy(comparador_usado,"=");
+					}
+				}
 		 |OP_NOT between {	insertarEnLista("0");
-		 					strcpy(comparador_usado,"=");}
+		 					if(flagWHILE == TRUE){ //Manejo del While
+						insertarEnLista("CMP");
+						insertarEnLista(valorComparacion("="));
+						char sPosActual[5];
+						insertarEnLista("###");
+						sprintf(sPosActual, "%d", puntero_tokens-1);
+						apilar(PILA_WHILE,sPosActual); // usado en el while
+						
+						char sPosActualB[5];
+						insertarEnLista("BI");
+						insertarEnLista("###");
+						sprintf(sPosActualB, "%d", puntero_tokens-1);
+						apilar(PILA_WHILE,sPosActualB);	
+						sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true						
+					
+						flagWHILE = FALSE; //agregado lucas (dsp fijate mauro es para q no vuelva a entrar)
+					} else {
+		 				strcpy(comparador_usado,"=");
+					}
+				}
 	 ;
 
 op_and_: OP_AND{
@@ -949,7 +989,7 @@ int crearArchivoTS()
 		}
 		else if(strcmp(tablaSimbolos[i].tipo, "CONST_STR") == 0 )
 		{
-			fprintf(archivo,"%-29s%-10s                                    %-30d\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,strlen(tablaSimbolos[i].nombre));
+			fprintf(archivo,"%-29s%-10s                                    %-30d\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,strlen(tablaSimbolos[i].nombre) - 2);
 		}
 		else if(strcmp(tablaSimbolos[i].tipo, "CONST_INT") == 0 || strcmp(tablaSimbolos[i].tipo, "CONST_REAL") == 0)
 		{
