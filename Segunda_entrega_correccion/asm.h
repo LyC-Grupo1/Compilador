@@ -3,6 +3,7 @@
 #define PILA_LLENA -1
 #define PILA_VACIA 0
 #define TODO_OK 1
+#define STR_VALUE 1024
 
 #include <stdio.h>
 #include <stdlib.h>

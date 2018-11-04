@@ -4,6 +4,7 @@
 #include <string.h>
 #include <conio.h>
 #include "y.tab.h"
+#include "asm.h"	
 #define TAM_PILA 100
 #define TODO_OK 1
 #define ERROR 0
