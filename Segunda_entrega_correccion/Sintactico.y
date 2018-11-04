@@ -5,6 +5,7 @@
 #include <conio.h>
 #include "y.tab.h"
 #include "asm.h"
+
 #define TAM_PILA 100
 #define TODO_OK 1
 #define ERROR 0
@@ -179,7 +180,7 @@ programa:
 		printf("\tFin COMPILADOR ok\n"); 
 		if(crearArchivoIntermedia()==TODO_OK) {
 			printf("\nArchivo con intermedia generado\n");
-			//generarASM();
+			generarASM();
 		} else {
 			printf("Hubo un error al generar el archivo de intermedia");
 		}

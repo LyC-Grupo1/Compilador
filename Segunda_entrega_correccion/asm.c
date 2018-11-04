@@ -11,7 +11,7 @@ void generarASM() {
             informeError("Error al crear el archivo Final.asm, verifique los permisos de escritura.");
         }
     }
-
+	
     //Crear pila para apilar operandos
     crear_pila(&pila);
 
@@ -22,7 +22,7 @@ void generarASM() {
     //generarDatos();
     generarCodigo();
     generarFin();
-
+	
     //Cerrar archivo
     fclose(pfASM);
 }
@@ -37,6 +37,7 @@ void generarEncabezado() {
     fprintf(pfASM, ".STACK 200h ; bytes en el stack\n"); 
 }
 
+/*
 void generarDatos() {
     int i = 0;
     TS elemento;
@@ -78,7 +79,9 @@ void generarDatos() {
         }
     }    
 }
+*/
 
+/*
 void imprimirFuncString(){
     if(!cFlag)
         return;
@@ -106,6 +109,7 @@ void imprimirFuncString(){
     }
 
 }
+*/
 
 void generarCodigo() {
     FILE *pfINT;
@@ -143,178 +147,181 @@ void generarCodigo() {
 void imprimirInstruccionPolaca(char* linea){
 	char op1[STR_VALUE];
     char op2[STR_VALUE] = "";
+	char aux[STR_VALUE];
 
-	switch(linea){
-		case "+":
-				fprintf(pfASM,"\t;SUMA\n");
-	            if(sacar_de_pila(&pila,op2,255) != PILA_VACIA)
-	            {
-	                if(sacar_de_pila(&pila,op1,255) != PILA_VACIA)
-	                {
-	                    fprintf(pfASM, "\tfld %s\n",op1);
-	                    fprintf(pfASM, "\tfld %s\n",op2);
-	                    fprintf(pfASM, "\tfadd\n");
-	                    //fprintf(pfASM, "\tlocal %s\n",aux); // Variable local en vez de los aux de arriba
+	// comento switch porque no funciona con variables char*
+	//switch(linea){
+	if(strcmp(linea,"+") == 0){
+			fprintf(pfASM,"\t;SUMA\n");
+			if(sacar_de_pila(&pila,op2,255) != PILA_VACIA)
+			{
+				if(sacar_de_pila(&pila,op1,255) != PILA_VACIA)
+				{
+					fprintf(pfASM, "\tfld %s\n",op1);
+					fprintf(pfASM, "\tfld %s\n",op2);
+					fprintf(pfASM, "\tfadd\n");
+					//fprintf(pfASM, "\tlocal %s\n",aux); // Variable local en vez de los aux de arriba
 
-	                    //guardar valor en aux
-	                    if(strcmp(aux,"@aux2") == 0){
-	                        fprintf(pfASM, "\tfstp @aux3\n\n");                    
-	                        poner_en_pila(&pila,"@aux3",255);
-	                    }else{
-	                        fprintf(pfASM, "\tfstp @aux2\n\n");                    
-	                        poner_en_pila(&pila,"@aux2",255);
-	                    }
-	                }                
-	            } 
-	            break;
-				/*if(sacar_de_pila(&pila, op2, 255) != PILA_VACIA){
-					if(sacar_de_pila(&pila, op1, 255) != PILA_VACIA){
-						fprintf(pfASM, "\t\nadd %s" + ", " + "%s\n", op1, op2); 
-						printf("\t\nadd %s" + ", " + "%s\n", op1, op2);	
-					}					
-				}*/
-		case "-":
-				fprintf(pfASM,"\t;RESTA\n");
-				if(sacar_de_pila(&pila, op2, 255) != PILA_VACIA){
-					if(sacar_de_pila(&pila, op1, 255) != PILA_VACIA){
-						fprintf(pfASM, "\tfld %s\n",op2);
-                    	fprintf(pfASM, "\tfld %s\n",op1);                   
-                    	fprintf(pfASM, "\tfsub\n");
-
-
-                    	//guardar valor en aux
-	                    if(strcmp(aux,"@aux2") == 0){
-	                        fprintf(pfASM, "\tfstp @aux3\n\n");                    
-	                        poner_en_pila(&pila,"@aux3",255);
-	                    }else{
-	                        fprintf(pfASM, "\tfstp @aux2\n\n");                    
-	                        poner_en_pila(&pila,"@aux2",255);
-	                    }
-						fprintf(pfASM, "\t\nmov %s" + ", " + "%s\n", op1, op2); 
-						printf("\t\nmov %s" + ", " + "%s\n", op1, op2);	
-					}					
-				}
-				break;
-		case "*":
-				fprintf(pfASM,"\t;MULTIPLICACION\n");
-	            if(sacar_de_pila(&pila,op2,255) != PILA_VACIA)
-	            {
-	                if(sacar_de_pila(&pila,op1,255) != PILA_VACIA)
-	                {
-	                    fprintf(pfASM, "\tfld %s\n",op1);
-	                    fprintf(pfASM, "\tfld %s\n",op2);
-	                    fprintf(pfASM, "\tfmul\n");
-	                    //fprintf(pfASM, "\tlocal %s\n",aux); // Variable local en vez de los aux de arriba
-
-	                    //guardar valor en aux
-	                    if(strcmp(op1,"@aux2") == 0){
-	                        fprintf(pfASM, "\tfstp @aux3\n\n");                    
-	                        poner_en_pila(&pila,"@aux3",255);
-	                    }else{
-	                        fprintf(pfASM, "\tfstp @aux2\n\n");                    
-	                        poner_en_pila(&pila,"@aux2",255);
-	                    }
-	                }                
-	            }  
-	            break;
-				/*if(sacar_de_pila(&pila, op2, 255) != PILA_VACIA){
-					if(sacar_de_pila(&pila, op1, 255) != PILA_VACIA){
-						fprintf(pfASM, "\t\nmul %s" + ", " + "%s\n", op1, op2); 
-						printf("\t\nmul %s" + ", " + "%s\n", op1, op2);	
-					}					
-				}*/
-		case "/":
-				fprintf(pfASM,"\t;DIVISION\n");
-	            if(sacar_de_pila(&pila,op2,255) != PILA_VACIA)
-	            {
-	                if(sacar_de_pila(&pila,op1,255) != PILA_VACIA)
-	                {
-	                    fprintf(pfASM, "\tfld %s\n",op1);
-	                    fprintf(pfASM, "\tfld %s\n",op2);
-	                    fprintf(pfASM, "\tfdiv\n");
-	                    //fprintf(pfASM, "\tlocal %s\n",aux); // Variable local en vez de los aux de arriba
-
-	                    //guardar valor en aux
-	                    if(strcmp(op1,"@aux2") == 0){
-	                        fprintf(pfASM, "\tfstp @aux3\n\n");                    
-	                        poner_en_pila(&pila,"@aux3",255);
-	                    }else{
-	                        fprintf(pfASM, "\tfstp @aux2\n\n");                    
-	                        poner_en_pila(&pila,"@aux2",255);
-	                    }
-	                }                
-	            }  
-	            break;
-				/*if(sacar_de_pila(&pila, op2, 255) != PILA_VACIA){
-					if(sacar_de_pila(&pila, op1, 255) != PILA_VACIA){
-						fprintf(pfASM, "\t\nmov %s" + ", " + "%s\n", op1, op2); 
-						printf("\t\nmov %s" + ", " + "%s\n", op1, op2);	
-					}					
-				}*/
-		case "=":
-				if(sacar_de_pila(&pila, op2, 255) != PILA_VACIA){
-					if(sacar_de_pila(&pila, op1, 255) != PILA_VACIA){
-						fprintf(pfASM, "\t\nmov %s" + ", " + "%s\n", op1, op2); 
-						printf("\t\nmov %s" + ", " + "%s\n", op1, op2);	
-					}					
-				}	
-				break;	
-
-		case "CMP":
-            fprintf(pfASM,"\t;CMP\n");
-            if(sacar_de_pila(&pila,op1,255) != PILA_VACIA)
-            {
-                if(sacar_de_pila(&pila,op2,255) != PILA_VACIA)
-                {
-                    fprintf(pfASM, "\tfld %s\n",op1);
-                    fprintf(pfASM, "\tfld %s\n",op2);                    
-                    fprintf(pfASM, "\tfcomp\n");
-                    fprintf(pfASM, "\tfstsw ax\n");
-                    fprintf(pfASM, "\tfwait\n");
-                    fprintf(pfASM, "\tsahf\n\n");                            
-                }
-            }            
-            break;
-        /*case TERC_ETIQ:
-            sprintf(aux,"ETIQUETA%d:",nTerc);                            
-            fprintf(pfASM,"ETIQUETA%d:\n",nTerc);                
-            strcpy(last,aux);            
-            break;*/
-        case "BI":
-            //sprintf(op1,"ETIQUETA%d", terc.opIzq);
-            fprintf(pfASM, "\tjmp %s\n",op1);
-            break;
-        case "BE":
-            //sprintf(op1,"ETIQUETA%d", terc.opDer);
-            fprintf(pfASM, "\tje %s\n",op1); //JE	Jump if Equal	salta si igual	A=B
-            break;
-        case "BNE":
-            //sprintf(aux,"ETIQUETA%d", terc.opDer);
-            fprintf(pfASM, "\tjne %s\n",op1);
-            break;
-        case "BL":
-            //sprintf(aux,"ETIQUETA%d", terc.opDer);
-            fprintf(pfASM, "\tjl %s\n",op1); //JL	Jump if Less	salta si menor	A<B (con signo)
-            break;
-        case "BLE":
-            //sprintf(aux,"ETIQUETA%d", terc.opDer);
-            fprintf(pfASM, "\tjle %s\n",op1); //JLE	Jump if Less or Equal	salta si menor o igual
-            break;   
-        case "BG":
-            //sprintf(aux,"ETIQUETA%d", terc.opDer);
-            fprintf(pfASM, "\tjg %s\n",op1); //JG	Jump if Greater	salta si mayor	A>B (con signo)
-            break;                             
-        case "BGE":
-            //sprintf(aux,"ETIQUETA%d", terc.opDer);
-            fprintf(pfASM, "\tjge %s\n",op1);  //JGE	Jump if Greater or Equal	salta si mayor o igual	A>=B (con signo)  
-            break;
-		case else: 
-			poner_en_pila(&pila, linea, 255); //todo lo que sea operando lo apilo, para luego desapilar cuando llegue a operador
-			break;		
+					//guardar valor en aux
+					if(strcmp(aux,"@aux2") == 0){
+						fprintf(pfASM, "\tfstp @aux3\n\n");                    
+						poner_en_pila(&pila,"@aux3",255);
+					}else{
+						fprintf(pfASM, "\tfstp @aux2\n\n");                    
+						poner_en_pila(&pila,"@aux2",255);
+					}
+				}                
+			} 
 	}
+			/*if(sacar_de_pila(&pila, op2, 255) != PILA_VACIA){
+				if(sacar_de_pila(&pila, op1, 255) != PILA_VACIA){
+					fprintf(pfASM, "\t\nadd %s" + ", " + "%s\n", op1, op2); 
+					printf("\t\nadd %s" + ", " + "%s\n", op1, op2);	
+				}					
+			}*/
+	if(strcmp(linea,"-") == 0){
+			fprintf(pfASM,"\t;RESTA\n");
+			if(sacar_de_pila(&pila, op2, 255) != PILA_VACIA){
+				if(sacar_de_pila(&pila, op1, 255) != PILA_VACIA){
+					fprintf(pfASM, "\tfld %s\n",op2);
+					fprintf(pfASM, "\tfld %s\n",op1);                   
+					fprintf(pfASM, "\tfsub\n");
+
+
+					//guardar valor en aux
+					if(strcmp(aux,"@aux2") == 0){
+						fprintf(pfASM, "\tfstp @aux3\n\n");                    
+						poner_en_pila(&pila,"@aux3",255);
+					}else{
+						fprintf(pfASM, "\tfstp @aux2\n\n");                    
+						poner_en_pila(&pila,"@aux2",255);
+					}
+					fprintf(pfASM, "\t\nmov %s, %s\n", op1, op2); 
+					printf("\t\nmov %s, %s\n", op1, op2);	
+				}					
+			}
+	}
+	
+	if(strcmp(linea,"*")==0){
+			fprintf(pfASM,"\t;MULTIPLICACION\n");
+			if(sacar_de_pila(&pila,op2,255) != PILA_VACIA)
+			{
+				if(sacar_de_pila(&pila,op1,255) != PILA_VACIA)
+				{
+					fprintf(pfASM, "\tfld %s\n",op1);
+					fprintf(pfASM, "\tfld %s\n",op2);
+					fprintf(pfASM, "\tfmul\n");
+					//fprintf(pfASM, "\tlocal %s\n",aux); // Variable local en vez de los aux de arriba
+
+					//guardar valor en aux
+					if(strcmp(op1,"@aux2") == 0){
+						fprintf(pfASM, "\tfstp @aux3\n\n");                    
+						poner_en_pila(&pila,"@aux3",255);
+					}else{
+						fprintf(pfASM, "\tfstp @aux2\n\n");                    
+						poner_en_pila(&pila,"@aux2",255);
+					}
+				}                
+			}  
+	}
+			/*if(sacar_de_pila(&pila, op2, 255) != PILA_VACIA){
+				if(sacar_de_pila(&pila, op1, 255) != PILA_VACIA){
+					fprintf(pfASM, "\t\nmul %s" + ", " + "%s\n", op1, op2); 
+					printf("\t\nmul %s" + ", " + "%s\n", op1, op2);	
+				}					
+			}*/
+	if(strcmp(linea,"/")==0){
+			fprintf(pfASM,"\t;DIVISION\n");
+			if(sacar_de_pila(&pila,op2,255) != PILA_VACIA)
+			{
+				if(sacar_de_pila(&pila,op1,255) != PILA_VACIA)
+				{
+					fprintf(pfASM, "\tfld %s\n",op1);
+					fprintf(pfASM, "\tfld %s\n",op2);
+					fprintf(pfASM, "\tfdiv\n");
+					//fprintf(pfASM, "\tlocal %s\n",aux); // Variable local en vez de los aux de arriba
+
+					//guardar valor en aux
+					if(strcmp(op1,"@aux2") == 0){
+						fprintf(pfASM, "\tfstp @aux3\n\n");                    
+						poner_en_pila(&pila,"@aux3",255);
+					}else{
+						fprintf(pfASM, "\tfstp @aux2\n\n");                    
+						poner_en_pila(&pila,"@aux2",255);
+					}
+				}                
+			}  
+	}
+			/*if(sacar_de_pila(&pila, op2, 255) != PILA_VACIA){
+				if(sacar_de_pila(&pila, op1, 255) != PILA_VACIA){
+					fprintf(pfASM, "\t\nmov %s" + ", " + "%s\n", op1, op2); 
+					printf("\t\nmov %s" + ", " + "%s\n", op1, op2);	
+				}					
+			}*/
+	if(strcmp(linea,"=")==0){
+			if(sacar_de_pila(&pila, op2, 255) != PILA_VACIA){
+				if(sacar_de_pila(&pila, op1, 255) != PILA_VACIA){
+					fprintf(pfASM, "\t\nmov %s, %s\n", op1, op2); 
+					printf("\t\nmov %s, %s\n", op1, op2);	
+				}					
+			}	
+	}
+
+	if(strcmp(linea,"CMP")==0){
+		fprintf(pfASM,"\t;CMP\n");
+		if(sacar_de_pila(&pila,op1,255) != PILA_VACIA)
+		{
+			if(sacar_de_pila(&pila,op2,255) != PILA_VACIA)
+			{
+				fprintf(pfASM, "\tfld %s\n",op1);
+				fprintf(pfASM, "\tfld %s\n",op2);                    
+				fprintf(pfASM, "\tfcomp\n");
+				fprintf(pfASM, "\tfstsw ax\n");
+				fprintf(pfASM, "\tfwait\n");
+				fprintf(pfASM, "\tsahf\n\n");                            
+			}
+		}            
+	}
+	/*case TERC_ETIQ:
+		sprintf(aux,"ETIQUETA%d:",nTerc);                            
+		fprintf(pfASM,"ETIQUETA%d:\n",nTerc);                
+		strcpy(last,aux);            
+		break;*/
+	if(strcmp(linea,"BI")==0){
+		//sprintf(op1,"ETIQUETA%d", terc.opIzq);
+		fprintf(pfASM, "\tjmp %s\n",op1);
+	}
+	if(strcmp(linea,"BEQ")==0){
+		//sprintf(op1,"ETIQUETA%d", terc.opDer);
+		fprintf(pfASM, "\tje %s\n",op1); //JE	Jump if Equal	salta si igual	A=B
+	}
+	if(strcmp(linea,"BNE")==0){
+		//sprintf(aux,"ETIQUETA%d", terc.opDer);
+		fprintf(pfASM, "\tjne %s\n",op1);
+	}
+	if(strcmp(linea,"BLT")==0){
+		//sprintf(aux,"ETIQUETA%d", terc.opDer);
+		fprintf(pfASM, "\tjl %s\n",op1); //JL	Jump if Less	salta si menor	A<B (con signo)
+	}
+	if(strcmp(linea,"BLE")==0){
+		//sprintf(aux,"ETIQUETA%d", terc.opDer);
+		fprintf(pfASM, "\tjle %s\n",op1); //JLE	Jump if Less or Equal	salta si menor o igual
+	}
+	if(strcmp(linea,"BGT")==0){
+		//sprintf(aux,"ETIQUETA%d", terc.opDer);
+		fprintf(pfASM, "\tjg %s\n",op1); //JG	Jump if Greater	salta si mayor	A>B (con signo)
+	}                           
+	if(strcmp(linea,"BGE")==0){
+		//sprintf(aux,"ETIQUETA%d", terc.opDer);
+		fprintf(pfASM, "\tjge %s\n",op1);  //JGE	Jump if Greater or Equal	salta si mayor o igual	A>=B (con signo)  
+	}else{ //apilo operando 
+		poner_en_pila(&pila, linea, 255); //todo lo que sea operando lo apilo, para luego desapilar cuando llegue a operador
+	}		
+	
 }
 
-
+/* 
+// ESTO ES PARA ELIMINAR
 void imprimirInstrucciones(terceto_t terc, int nTerc){
     char tConst,tConst2;
     char aux[STR_VALUE];
@@ -576,6 +583,7 @@ void imprimirInstrucciones(terceto_t terc, int nTerc){
             break;
     }
 }
+*/
 
 void generarFin(){
     //Fin de ejecución
