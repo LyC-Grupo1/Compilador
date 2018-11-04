@@ -4,6 +4,7 @@
 #include <string.h>
 #include <conio.h>
 #include "y.tab.h"
+#include "asm.h"
 #define TAM_PILA 100
 #define TODO_OK 1
 #define ERROR 0
@@ -174,8 +175,15 @@ FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 %%
 programa:  	   
 	PROGRAM {printf("\tInicia el COMPILADOR\n");} est_declaracion algoritmo    
-	{printf("\tFin COMPILADOR ok\n"); if(crearArchivoIntermedia()==TODO_OK){printf("\nArchivo con intermedia generado\n");}else{printf("Hubo un error al generar el archivo de intermedia");}}
-	;
+	{
+		printf("\tFin COMPILADOR ok\n"); 
+		if(crearArchivoIntermedia()==TODO_OK) {
+			printf("\nArchivo con intermedia generado\n");
+			//generarASM();
+		} else {
+			printf("Hubo un error al generar el archivo de intermedia");
+		}
+	};
 
 est_declaracion:
 	DECVAR {printf("\t\tDECLARACIONES\n");} declaraciones ENDDEC {printf("\tFin de las Declaraciones\n");}
