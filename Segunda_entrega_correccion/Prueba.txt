@@ -55,10 +55,6 @@ endw
 
 a:=b:=i:=8
 
--/ BETWEEN /-
-
-i:= BETWEEN(a,[2;a*(b+4)])
-
 -/ ASIGNACIONES VARIAS /-
 i:=1	
 a:=15
@@ -68,12 +64,57 @@ n:= 99.
 n:=-542.43
 s:=""
 
+-/ ASIGNACION MULTIPLE CON EXPRESION/-
+a:=b:=i:=8+5
+
+-/ BETWEEN /-
+BETWEEN(a,[2;a*(b+4)])
+
+-/ BETWEEN CON ASIGNACION /-
+i:= BETWEEN(a,[2;4])
+
+-/ BETWEEN EN SELECCION /-
+if(BETWEEN (a,[2;4])) then
+	i:=i+2
+endif
+
+-/ NOT BETWEEN EN SELECCION /-
+if(NOT BETWEEN (a,[2;4])) then
+	i:=i+2
+endif
+
+-/ BETWEEN EN SELECCION CON ELSE /-
+if(BETWEEN (a,[2;4])) then
+	i:=i+2
+else
+	a:=2
+endif
+
+-/ BETWEEN DENTRO DE SELECCION /-
+if(i > 2) then
+	BETWEEN (a,[2;4])
+endif
+
+-/ BETWEEN EN WHILE /-
+while (BETWEEN(a,[2;4]))
+	i:=5-b
+endw
+
+-/ NOT BETWEEN EN WHILE/-
+while (NOT BETWEEN(a,[2;4]))
+	i:=5-b
+endw
+
+-/ BETWEEN DENTRO DE WHILE /-
+while (i < 2)
+	BETWEEN(a,[2;4])
+endw
 
 -/ COMENTARIO SIMPLE MAS DE UNA LINEA
 -//-
 /-
 
--/COMENTARIOS CON CARACTER ESPECIAL "·$"% /-
+-/COMENTARIOS CON CARACTER ESPECIAL "ï¿½$"% /-
 
 -//-
 
@@ -89,45 +130,6 @@ write "@%asdr"
 write "@% > = FA <asdr"
 
 
--/ BETWEEN EN SELECCION /-
-if(BETWEEN (a,[2;a*(b+4)])) then
-	i:=i+2
-endif
-
-
--/ ASIGNACION MULTIPLE CON EXPRESION/-
-
-a:=b:=i:=8+5
-
-
--/ IF CON BETWEEN /-
-if (BETWEEN(a,[2;a*(b+4)])) THEN
-	i:=16+a
-ENDIF
-
--/ IF CON NOT BETWEEN /-
-if ( NOT BETWEEN(a,[2;a*(b+4)])) THEN
-	i:=16+a
-ENDIF
-
--/ IF CON BETWEEN Y ELSE /-
-if (BETWEEN(a,[2;a*(b+4)])) THEN
-	i:=16
-else 
-    i:=17	
-ENDIF
-
-s:="asdad"
-
--/ WHILE CON BETWEEN /-
-while (BETWEEN(a,[2;b+4]))
-	i:=5 - b
-endw
-
--/ WHILE CON NOT BETWEEN /-
-while (NOT BETWEEN(a,[2;b+4]))
-	i:=5 - b
-endw
 
 endp
 

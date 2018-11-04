@@ -215,7 +215,7 @@ sentencia:
 	 |seleccion  
 	 |asignacion
 	 |entrada_salida
-	 |between	{insertarEnLista(":="); } 
+	 |between 
 	 ;
 
 ciclo:
@@ -343,7 +343,7 @@ asignacion:
 			
 		}
 		| lista_id OP_ASIG 
-			between
+			between { insertarEnLista(":="); }
 	  ;
 
 lista_id:		
@@ -476,7 +476,7 @@ seleccion:
 				sprintf(sPosActualTrue, "CELDA %s", posTrue);
 				escribirEnLista(x,sPosActualTrue);
 				
-				x=desapilar(PILA_IF); // Tercero que desapilo -> apunta a la posicion actual
+				x=desapilar(PILA_IF); // Tercero que desapilo -> apunta a la parte falsa
 				sprintf(sPosActualFalse, "CELDA %s", posFalse);
 				escribirEnLista(x,sPosActualFalse);
 				
