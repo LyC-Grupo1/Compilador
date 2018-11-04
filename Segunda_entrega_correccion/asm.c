@@ -224,14 +224,14 @@ void imprimirInstruccionPolaca(char* linea){
 					}					
 				}*/
 		case "/":
-				fprintf(pfASM,"\t;MULTIPLICACION\n");
+				fprintf(pfASM,"\t;DIVISION\n");
 	            if(sacar_de_pila(&pila,op2,255) != PILA_VACIA)
 	            {
 	                if(sacar_de_pila(&pila,op1,255) != PILA_VACIA)
 	                {
 	                    fprintf(pfASM, "\tfld %s\n",op1);
 	                    fprintf(pfASM, "\tfld %s\n",op2);
-	                    fprintf(pfASM, "\tfmul\n");
+	                    fprintf(pfASM, "\tfdiv\n");
 	                    //fprintf(pfASM, "\tlocal %s\n",aux); // Variable local en vez de los aux de arriba
 
 	                    //guardar valor en aux
