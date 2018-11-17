@@ -162,35 +162,49 @@ void generarCodigo() {
 void imprimirInstruccionPolaca(char* linea){
 	char op1[STR_VALUE];
     char op2[STR_VALUE] = "";
-
-    char* opp1;
+    
+	char* opp1;
     char* opp2;
-	char aux[STR_VALUE];
-
+	char aux[STR_VALUE]; // usada para las variables auxiliares @aux
+	char opp_aux[STR_VALUE]; //usada solo para apilar
+	int cont_aux=1; // incrementa cada vez que guardo un @aux en pila 
+	
 	// comento switch porque no funciona con variables char*
 
 	//switch(linea){
 	if(strcmp(linea,"+") == 0){
-			fprintf(pfASM,"\t;SUMA\n");
-			if(sacarDePila() != PILA_VACIA)
-			{
-				if(sacarDePila() != PILA_VACIA)
-				{
-					fprintf(pfASM, "\tfld %s\n",op1);
-					fprintf(pfASM, "\tfld %s\n",op2);
-					fprintf(pfASM, "\tfadd\n");
-					//fprintf(pfASM, "\tlocal %s\n",aux); // Variable local en vez de los aux de arriba
-
-					//guardar valor en aux
-					if(strcmp(aux,"@aux2") == 0){
-						fprintf(pfASM, "\tfstp @aux3\n\n");                    
-						ponerEnPila("@aux3");
-					}else{
-						fprintf(pfASM, "\tfstp @aux2\n\n");                    
-						ponerEnPila("@aux2");
-					}
-				}                
-			} 
+	
+		fprintf(pfASM,"\t;SUMA\n");
+		opp1=(char *) malloc(sizeof(char) * 31); 
+		opp2=(char *) malloc(sizeof(char) * 31); 
+		strcpy(opp1, sacarDePila());
+		strcpy(opp2, sacarDePila());
+		
+		// no esta asi en el apunte pero lo dejo x las dudas
+		//fprintf(pfASM, "\tfld %s\n",op1);
+		//fprintf(pfASM, "\tfld %s\n",op2);
+		//fprintf(pfASM, "\tfadd\n");
+		
+		fprintf(pfASM, "\tmov R1, %s\n",opp1);
+		fprintf(pfASM, "\tadd R1, %s\n",opp2);
+		sprintf(aux,"@aux%d",cont_aux);		
+		fprintf(pfASM, "\tmov %s, R1\n",aux); // guardo aux
+		ponerEnPila(aux);
+		cont_aux++;
+		return;
+					
+		/*
+		//fprintf(pfASM, "\tlocal %s\n",aux); // Variable local en vez de los aux de arriba
+		//guardar valor en aux
+		if(strcmp(aux,"@aux2") == 0){
+			fprintf(pfASM, "\tfstp @aux3\n\n");                    
+			ponerEnPila("@aux3");
+		}else{
+			fprintf(pfASM, "\tfstp @aux2\n\n");                    
+			ponerEnPila("@aux2");
+		}*/
+				                
+			
 	}
 			/*if(sacar_de_pila(&pila, op2, 255) != PILA_VACIA){
 				if(sacar_de_pila(&pila, op1, 255) != PILA_VACIA){
@@ -279,12 +293,17 @@ void imprimirInstruccionPolaca(char* linea){
 			}*/
 
 	if(strcmp(linea,":=")==0){
+	
+			fprintf(pfASM,"\t;ASIGNACION\n");
 			opp1=(char *) malloc(sizeof(char) * 31); 
 			opp2=(char *) malloc(sizeof(char) * 31); 
 			strcpy(opp1, sacarDePila());
 			strcpy(opp2, sacarDePila());
-			fprintf(pfASM, "\tmov %s, %s\n", opp2, opp1); 
-			printf("\t\nmov %s, %s\n", opp2, opp1);			
+			fprintf(pfASM,"\tmov R1, %s\n",opp1);
+			fprintf(pfASM,"\tmov %s, R1\n",opp2);
+			//fprintf(pfASM, "\tmov %s, %s\n", opp2, opp1); 
+			printf("\t\nmov %s, %s\n", opp2, opp1);	
+			return;
 	}
 
 	if(strcmp(linea,"CMP")==0){
@@ -337,7 +356,9 @@ void imprimirInstruccionPolaca(char* linea){
 	}else{ //apilo operando 
 		printf("poner en pila %s \n", linea);
 		//poner_en_pila(&pila, linea, 255); //todo lo que sea operando lo apilo, para luego sacarDePila cuando llegue a operador
-		ponerEnPila(linea);//todo lo que sea operando lo apilo, para luego sacarDePila cuando llegue a operador
+		strcpy(opp_aux,"_");
+		strcat(opp_aux,linea);		
+		ponerEnPila(opp_aux);//todo lo que sea operando lo apilo, para luego sacarDePila cuando llegue a operador
 
 	}		
 	

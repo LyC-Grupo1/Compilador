@@ -13,8 +13,19 @@ INCLUDE number.asm		 ;incluye el asm para impresion de numeros
 START: 		 ;Código assembler resultante de compilar el programa fuente.
 	mov AX,@DATA 		 ;Inicializa el segmento de datos
 	mov DS,AX
-	mov i, 1
-	mov b, 10
+	;ASIGNACION
+	mov R1, _1
+	mov _i, R1
+	;ASIGNACION
+	mov R1, _10
+	mov _b, R1
+	;SUMA
+	mov R1, _i
+	add R1, _b
+	mov @aux1, R1
+	;ASIGNACION
+	mov R1, @aux1
+	mov _a, R1
 
 TERMINAR: ;Fin de ejecución.
 	mov ax, 4C00h ; termina la ejecución.
