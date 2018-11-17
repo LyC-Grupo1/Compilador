@@ -233,7 +233,7 @@ ciclo:
 		flagREPEAT = TRUE; 
 		printf("REPEAT\n");
 		
-		sprintf(inicioCuerpoRepeat, "CELDA %d", puntero_tokens);
+		sprintf(inicioCuerpoRepeat, "%d", puntero_tokens);
 		//itoa(puntero_tokens,sPosActual,10);
 		//apilar(PILA_REPEAT,inicioCuerpo);
 	} bloque UNTIL 
@@ -245,7 +245,7 @@ ciclo:
 			escribirEnLista(puntero_tokens-1,inicioCuerpoRepeat);
 			x = desapilar(PILA_REPEAT);
 			
-			sprintf(sPosActual, "CELDA %d", puntero_tokens);
+			sprintf(sPosActual, "%d", puntero_tokens);
 			
 			escribirEnLista(x,sPosActual);	
 			
@@ -255,7 +255,7 @@ ciclo:
 	 { 
 		 free(inicioWhilePos);
 		 inicioWhilePos = (char *) malloc(sizeof(char) * (sizeof(int) + 1));
-		 sprintf(inicioWhilePos,"CELDA %d",puntero_tokens);
+		 sprintf(inicioWhilePos,"%d",puntero_tokens);
 		
 		 flagWHILE = TRUE; 
 		 printf("WHILE\n");
@@ -270,11 +270,11 @@ endw_: ENDW {
 			insertarEnLista(inicioWhilePos);			
 			
 			x=desapilar(PILA_WHILE); // Primero que desapilo -> apunta a la parte verdadera
-			sprintf(wPosActualTrue, "CELDA %s", posTrue);
+			sprintf(wPosActualTrue, "%s", posTrue);
 			escribirEnLista(x,wPosActualTrue);
 			
 			x=desapilar(PILA_WHILE); // Segundo que desapilo -> apunta al final
-			sprintf(wPosActual, "CELDA %d", puntero_tokens);
+			sprintf(wPosActual, "%d", puntero_tokens);
 			escribirEnLista(x,wPosActual);
 			//debugPila(PILA_WHILE,tope_pila_while);
 			
@@ -283,11 +283,11 @@ endw_: ENDW {
 				if(pilaVacia(tope_pila_while) == FALSE){
 					
 					x=desapilar(PILA_WHILE); // Tercero que desapilo -> apunta a la segunda condicion
-					sprintf(wPosCondDos, "CELDA %s", posCondDos);
+					sprintf(wPosCondDos, "%s", posCondDos);
 					escribirEnLista(x,wPosCondDos);
 					
 					x=desapilar(PILA_WHILE); // Cuarto que desapilo -> apunta al final
-					sprintf(wPosActual, "CELDA %d", puntero_tokens);
+					sprintf(wPosActual, "%d", puntero_tokens);
 					escribirEnLista(x,wPosActual);
 				}
 			
@@ -296,11 +296,11 @@ endw_: ENDW {
 				if(pilaVacia(tope_pila_while) == FALSE){
 					
 					x=desapilar(PILA_WHILE);// Tercero que desapilo -> apunta a la parte verdadera
-					sprintf(wPosActualTrue, "CELDA %s", posTrue);
+					sprintf(wPosActualTrue, "%s", posTrue);
 					escribirEnLista(x,wPosActualTrue);
 					
 					x=desapilar(PILA_WHILE);// Tercero que desapilo -> apunta a la segunda condicion
-					sprintf(wPosCondDos, "CELDA %s", posCondDos);
+					sprintf(wPosCondDos, "%s", posCondDos);
 					escribirEnLista(x,wPosCondDos);
 				}			
 				
@@ -411,11 +411,13 @@ entrada_salida:
 
 seleccion: 
     	IF CAR_PA condicion CAR_PC then_ bloque { 
+				
 				char sPosActual[5];
 				insertarEnLista("BI");
 				insertarEnLista("###");
 				sprintf(sPosActual, "%d", puntero_tokens-1);
 				apilar(PILA_IF,sPosActual);
+				
 			} 
 			ENDIF {
 				
@@ -423,15 +425,15 @@ seleccion:
 				char sPosActual[5], sPosActualTrue[5], sPosActualFalse[5], sPosCondDos[5];
 				
 				x=desapilar(PILA_IF); // Primero que desapilo -> apunta a la posicion actual
-				sprintf(sPosActual, "CELDA %d", puntero_tokens);
+				sprintf(sPosActual, "%d", puntero_tokens);
 				escribirEnLista(x,sPosActual);
 				
 				x=desapilar(PILA_IF);// Segundo que desapilo -> apunta a la parte verdadera
-				sprintf(sPosActualTrue, "CELDA %s", posTrue);
+				sprintf(sPosActualTrue, "%s", posTrue);
 				escribirEnLista(x,sPosActualTrue);
 				
 				x=desapilar(PILA_IF); // Tercero que desapilo -> apunta al final
-				sprintf(sPosActual, "CELDA %d", puntero_tokens);
+				sprintf(sPosActual, "%d", puntero_tokens);
 				escribirEnLista(x,sPosActual);
 				
 					
@@ -440,12 +442,12 @@ seleccion:
 					escribirEnLista(x,sPosActualTrue);
 					
 					x=desapilar(PILA_IF); // Quinto que desapilo -> apunta a la segunda condicion
-					sprintf(sPosCondDos, "CELDA %s", posCondDos);
+					sprintf(sPosCondDos, "%s", posCondDos);
 					escribirEnLista(x,sPosCondDos);
 					
 				} else if (flagIFAND == TRUE){
 					x=desapilar(PILA_IF); // Cuarto que desapilo -> apunta a la segunda condicion
-					sprintf(sPosCondDos, "CELDA %s", posCondDos);
+					sprintf(sPosCondDos, "%s", posCondDos);
 					escribirEnLista(x,sPosCondDos);
 					
 					x=desapilar(PILA_IF);// Quinto que desapilo -> apunta a la parte falsa
@@ -470,7 +472,8 @@ seleccion:
 				insertarEnLista("BI");
 				insertarEnLista("###");
 				sprintf(sPosActual, "%d", puntero_tokens-1);
-				apilar(PILA_IF,sPosActual);} 
+				apilar(PILA_IF,sPosActual);
+			} 
 				
 			else_ bloque  				
 			ENDIF {
@@ -478,35 +481,35 @@ seleccion:
 				char sPosActual[5], sPosActualTrue[5], sPosActualFalse[5], sPosCondDos[5];
 				
 				x=desapilar(PILA_IF); // Primero que desapilo -> apunta a la posicion actual
-				sprintf(sPosActual, "CELDA %d", puntero_tokens);
+				sprintf(sPosActual, "%d", puntero_tokens);
 				escribirEnLista(x,sPosActual);
 				
 				x=desapilar(PILA_IF); // Segundo que desapilo -> apunta a la parte verdadera
-				sprintf(sPosActualTrue, "CELDA %s", posTrue);
+				sprintf(sPosActualTrue, "%s", posTrue);
 				escribirEnLista(x,sPosActualTrue);
 				
 				x=desapilar(PILA_IF); // Tercero que desapilo -> apunta a la parte falsa
-				sprintf(sPosActualFalse, "CELDA %s", posFalse);
+				sprintf(sPosActualFalse, "%s", posFalse);
 				escribirEnLista(x,sPosActualFalse);
 				
 				if(flagIFOR == TRUE){
 					
 					x=desapilar(PILA_IF); // Cuarto que desapilo -> apunta a la parte verdadera
-					sprintf(sPosActualTrue, "CELDA %s", posTrue);
+					sprintf(sPosActualTrue, "%s", posTrue);
 					escribirEnLista(x,sPosActualTrue);
 					
 					x=desapilar(PILA_IF); // Quinto que desapilo -> apunta a la segunda condicion
-					sprintf(sPosCondDos, "CELDA %s", posCondDos);
+					sprintf(sPosCondDos, "%s", posCondDos);
 					escribirEnLista(x,sPosCondDos);
 					
 				} else if (flagIFAND == TRUE){
 					
 					x=desapilar(PILA_IF); // Cuarto que desapilo -> apunta a la segunda condicion
-					sprintf(sPosCondDos, "CELDA %s", posCondDos);
+					sprintf(sPosCondDos, "%s", posCondDos);
 					escribirEnLista(x,sPosCondDos);
 					
 					x=desapilar(PILA_IF); // Quinto que desapilo -> apunta a la parte falsa
-					sprintf(sPosActualFalse, "CELDA %s", posFalse);
+					sprintf(sPosActualFalse, "%s", posFalse);
 					escribirEnLista(x,sPosActualFalse);
 				} else {
 					// NO HAGO NADA - IF DE CONDICION SIMPLE	
@@ -827,23 +830,23 @@ between:
 											posFalse = puntero_tokens-1;
 											
 											x=desapilar(PILA_BETWEEN); // Primero que desapilo -> apunta a la posicion actual
-											sprintf(sPosActual, "CELDA %d", puntero_tokens);
+											sprintf(sPosActual, "%d", puntero_tokens);
 											escribirEnLista(x,sPosActual);
 											
 											x=desapilar(PILA_BETWEEN); // Segundo que desapilo -> apunta a la parte verdadera
-											sprintf(sPosActualTrue, "CELDA %d", posTrue);
+											sprintf(sPosActualTrue, "%d", posTrue);
 											escribirEnLista(x,sPosActualTrue);
 											
 											x=desapilar(PILA_BETWEEN); // Tercero que desapilo -> apunta a la posicion actual
-											sprintf(sPosActualFalse, "CELDA %d", posFalse);
+											sprintf(sPosActualFalse, "%d", posFalse);
 											escribirEnLista(x,sPosActualFalse);
 											
 											x=desapilar(PILA_BETWEEN); // Cuarto que desapilo -> apunta a la segunda condicion
-											sprintf(sPosCondDos, "CELDA %d", iPosCondDos);
+											sprintf(sPosCondDos, "%d", iPosCondDos);
 											escribirEnLista(x,sPosCondDos);
 												
 											x=desapilar(PILA_BETWEEN); // Quinto que desapilo -> apunta a la parte falsa
-											sprintf(sPosActualFalse, "CELDA %d", posFalse);
+											sprintf(sPosActualFalse, "%d", posFalse);
 											escribirEnLista(x,sPosActualFalse);
 											
 										} CAR_CC CAR_PC {printf("\t\tFIN BETWEEN\n");}

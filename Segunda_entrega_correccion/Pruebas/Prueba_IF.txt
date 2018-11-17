@@ -21,20 +21,6 @@ else
     i:=17
 ENDIF
 
--/ IF DOBLE CON AND Y ELSE /-
-if (i=15 AND a=4) THEN
-	i:=16
-else 
-    i:=17	
-ENDIF
-
--/ IF DOBLE CON AND Y ELSE /-
-if (i=15 or a=4) THEN
-	i:=16
-else 
-    i:=17	
-ENDIF
-
 
 endp
 

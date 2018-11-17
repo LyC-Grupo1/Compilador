@@ -19,27 +19,22 @@ START: 		 ;Código assembler resultante de compilar el programa fuente.
 	;ASIGNACION
 	mov R1, _10
 	mov _b, R1
-	;SUMA
-	mov R1, _i
-	add R1, _b
-	mov @aux1, R1
+	;CMP
+	fld _15
+	fld _i
+	fcomp
+	fstsw ax
+	ffree st(0)
+	sahf
+
+	jne _etiq15
 	;ASIGNACION
-	mov R1, @aux1
-	mov _a, R1
-	;DIVISION
-	mov R1, _i
-	div R1, _b
-	mov @aux2, R1
+	mov R1, _16
+	mov _i, R1
+_etiq15:
 	;ASIGNACION
-	mov R1, @aux2
-	mov _a, R1
-	;MULTIPLICACION
-	mov R1, _i
-	mul R1, _b
-	mov @aux3, R1
-	;ASIGNACION
-	mov R1, @aux3
-	mov _a, R1
+	mov R1, _15
+	mov _i, R1
 
 TERMINAR: ;Fin de ejecución.
 	mov ax, 4C00h ; termina la ejecución.

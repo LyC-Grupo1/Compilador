@@ -11,13 +11,21 @@ FILE *pfASM; //Final.asm
 char * pila[TAM_PILA];       // pila 5
 int topePila=0;             // pila 0
 
+char* pila_saltos[TAM_PILA];
+int topePilaSaltos=0;
+
 int cont_aux=1; // incrementa cada vez que guardo un @aux en pila 
+int celda_actual=0; //utilizado para los saltos
+int flag_leer_salto=0;
 
 void ponerEnPila(char * str);
 char* sacarDePila();
 int pVacia(int tope);
 int pLlena(int tope);
 void debugP(int tope);
+
+void apilarPilaSaltos(char* str);
+char* desapilarPilaSaltos();
 
 void generarASM() {
 
@@ -132,7 +140,7 @@ void generarCodigo() {
     char linea[30];
 		
     //Abrir archivo intermedia.txt
-    if(!(pfINT = fopen("intermedia.txt", "rt"))) {
+    if(!(pfINT = fopen("intermedia_asm.txt", "rt"))) {
          informeError("Error al abrir el archivo intermedia.txt, verifique los permisos de escritura.");
     }
 
@@ -155,7 +163,7 @@ void generarCodigo() {
     	lin = strlen(linea)-1;
     	if (linea[lin] == '\n')     
     		linea[lin] = '\0';
-        printf("LINEA: %s FIN_DE_LINEA\n", linea);
+        //printf("LINEA: %s FIN_DE_LINEA\n", linea);
         imprimirInstruccionPolaca(linea);
     }
     debugP(topePila);
@@ -170,10 +178,30 @@ void imprimirInstruccionPolaca(char* linea){
     char* opp2;
 	char aux[STR_VALUE]; // usada para las variables auxiliares @aux
 	char opp_aux[STR_VALUE]; //usada solo para apilar
-		
-	// comento switch porque no funciona con variables char*
-
-	//switch(linea){
+	char branch_aux[STR_VALUE];  // cuando leo branch guardo instruccion para ejecutarlo en el siguiente paso
+	//char etiq[STR_VALUE];
+	
+	// Logica para los saltos	
+	celda_actual++;		
+	
+	// verifico si llegue a la celda para agregar la etiqueta
+	if(topePilaSaltos>0){
+		printf("comparo %d = %d ?",atoi(pila_saltos[topePilaSaltos-1]),celda_actual);
+		if(atoi(pila_saltos[topePilaSaltos-1])==celda_actual){
+			sprintf(aux,"_etiq%s",desapilarPilaSaltos()); // armo string _etiq
+			fprintf(pfASM, "%s:\n",aux);
+		}		
+	}
+	
+	// siempre despues de un branch viene una celda a la que salto.
+	if(flag_leer_salto==1){
+		apilarPilaSaltos(linea);
+		fprintf(pfASM, "\t%s _etiq%s\n",branch_aux,linea); // armo instruccion
+		flag_leer_salto=0;
+		return;
+	}
+	
+	//continuo leyendo instrucciones
 	if(strcmp(linea,"+") == 0){
 	
 		fprintf(pfASM,"\t;SUMA\n");
@@ -282,43 +310,53 @@ void imprimirInstruccionPolaca(char* linea){
 		fprintf(pfASM, "\tfld %s\n",opp2);                    
 		fprintf(pfASM, "\tfcomp\n");
 		fprintf(pfASM, "\tfstsw ax\n");
-		fprintf(pfASM, "\tfwait\n");
+		//fprintf(pfASM, "\tfwait\n");
+		fprintf(pfASM, "\tffree st(0)\n");
 		fprintf(pfASM, "\tsahf\n\n");                            
-			
+		return;
 		           
 	}
-	/*case TERC_ETIQ:
-		sprintf(aux,"ETIQUETA%d:",nTerc);                            
-		fprintf(pfASM,"ETIQUETA%d:\n",nTerc);                
-		strcpy(last,aux);            
-		break;*/
-	if(strcmp(linea,"BI")==0){
-		//sprintf(op1,"ETIQUETA%d", terc.opIzq);
-		fprintf(pfASM, "\tjmp %s\n",op1);
+	
+	if(strcmp(linea,"BI")==0){	
+		printf("ASM: Leo BI\n");
+		strcpy(branch_aux,"jmp");
+		flag_leer_salto=1;
+		return;
 	}
 	if(strcmp(linea,"BEQ")==0){
-		//sprintf(op1,"ETIQUETA%d", terc.opDer);
-		fprintf(pfASM, "\tje %s\n",op1); //JE	Jump if Equal	salta si igual	A=B
+		strcpy(branch_aux,"je");
+		flag_leer_salto=1;
+		return;
+		//fprintf(pfASM, "\tje %s\n",op1); //JE	Jump if Equal	salta si igual	A=B
 	}
 	if(strcmp(linea,"BNE")==0){
-		//sprintf(aux,"ETIQUETA%d", terc.opDer);
-		fprintf(pfASM, "\tjne %s\n",op1);
+		strcpy(branch_aux,"jne");
+		flag_leer_salto=1;
+		return;
+		//fprintf(pfASM, "\tjne %s\n",op1);
 	}
 	if(strcmp(linea,"BLT")==0){
-		//sprintf(aux,"ETIQUETA%d", terc.opDer);
-		fprintf(pfASM, "\tjl %s\n",op1); //JL	Jump if Less	salta si menor	A<B (con signo)
+		strcpy(branch_aux,"jl");
+		flag_leer_salto=1;
+		return;
+		//fprintf(pfASM, "\tjl %s\n",op1); //JL	Jump if Less	salta si menor	A<B (con signo)
 	}
 	if(strcmp(linea,"BLE")==0){
-		//sprintf(aux,"ETIQUETA%d", terc.opDer);
-		fprintf(pfASM, "\tjle %s\n",op1); //JLE	Jump if Less or Equal	salta si menor o igual
+		strcpy(branch_aux,"jle");
+		flag_leer_salto=1;
+		return;
+		//fprintf(pfASM, "\tjle %s\n",op1); //JLE	Jump if Less or Equal	salta si menor o igual
 	}
 	if(strcmp(linea,"BGT")==0){
-		//sprintf(aux,"ETIQUETA%d", terc.opDer);
-		fprintf(pfASM, "\tjg %s\n",op1); //JG	Jump if Greater	salta si mayor	A>B (con signo)
+		strcpy(branch_aux,"jg");
+		flag_leer_salto=1;
+		return;
+		//fprintf(pfASM, "\tjg %s\n",op1); //JG	Jump if Greater	salta si mayor	A>B (con signo)
 	}                           
 	if(strcmp(linea,"BGE")==0){
-		//sprintf(aux,"ETIQUETA%d", terc.opDer);
-		fprintf(pfASM, "\tjge %s\n",op1);  //JGE	Jump if Greater or Equal	salta si mayor o igual	A>=B (con signo)  
+		strcpy(branch_aux,"jge");
+		flag_leer_salto=1;
+		//fprintf(pfASM, "\tjge %s\n",op1);  //JGE	Jump if Greater or Equal	salta si mayor o igual	A>=B (con signo)  
 	}else{ //apilo operando 
 		printf("poner en pila %s \n", linea);
 		//poner_en_pila(&pila, linea, 255); //todo lo que sea operando lo apilo, para luego sacarDePila cuando llegue a operador
@@ -635,6 +673,33 @@ char* sacarDePila()
         char * dato = pila[topePila-1];
         topePila--; 
         printf("\tsacarDePila en ASM -> %s\n",dato);
+        return dato;      
+    } else {
+        printf("Error: La pila esta vacia.\n");
+        system ("Pause");
+        exit (1);
+    }
+}
+
+void apilarPilaSaltos(char * str)
+{
+    char *aux = (char *) malloc(sizeof(char) * (strlen(str) + 1));     
+	strcpy(aux, str);
+	pila_saltos[topePilaSaltos] = aux;
+	//free(aux);
+
+	topePilaSaltos++;
+    printf("\tASM: Apilo Celda Saltos -> %s\n",str);
+        
+}
+
+char* desapilarPilaSaltos()
+{
+    if(topePilaSaltos > 0)
+    {
+        char * dato = pila_saltos[topePilaSaltos-1];
+        topePilaSaltos--; 
+        printf("\tASM: Desapilo Celda Saltos -> %s\n",dato);
         return dato;      
     } else {
         printf("Error: La pila esta vacia.\n");
