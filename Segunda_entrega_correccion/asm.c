@@ -11,6 +11,8 @@ FILE *pfASM; //Final.asm
 char * pila[TAM_PILA];       // pila 5
 int topePila=0;             // pila 0
 
+int cont_aux=1; // incrementa cada vez que guardo un @aux en pila 
+
 void ponerEnPila(char * str);
 char* sacarDePila();
 int pVacia(int tope);
@@ -128,6 +130,7 @@ void imprimirFuncString(){
 void generarCodigo() {
     FILE *pfINT;
     char linea[30];
+		
     //Abrir archivo intermedia.txt
     if(!(pfINT = fopen("intermedia.txt", "rt"))) {
          informeError("Error al abrir el archivo intermedia.txt, verifique los permisos de escritura.");
@@ -167,8 +170,7 @@ void imprimirInstruccionPolaca(char* linea){
     char* opp2;
 	char aux[STR_VALUE]; // usada para las variables auxiliares @aux
 	char opp_aux[STR_VALUE]; //usada solo para apilar
-	int cont_aux=1; // incrementa cada vez que guardo un @aux en pila 
-	
+		
 	// comento switch porque no funciona con variables char*
 
 	//switch(linea){
@@ -271,18 +273,19 @@ void imprimirInstruccionPolaca(char* linea){
 
 	if(strcmp(linea,"CMP")==0){
 		fprintf(pfASM,"\t;CMP\n");
-		if(sacarDePila() != PILA_VACIA)
-		{
-			if(sacarDePila() != PILA_VACIA)
-			{
-				fprintf(pfASM, "\tfld %s\n",op1);
-				fprintf(pfASM, "\tfld %s\n",op2);                    
-				fprintf(pfASM, "\tfcomp\n");
-				fprintf(pfASM, "\tfstsw ax\n");
-				fprintf(pfASM, "\tfwait\n");
-				fprintf(pfASM, "\tsahf\n\n");                            
-			}
-		}            
+		opp1=(char *) malloc(sizeof(char) * 31); 
+		opp2=(char *) malloc(sizeof(char) * 31); 
+		strcpy(opp1, sacarDePila());
+		strcpy(opp2, sacarDePila());
+		
+		fprintf(pfASM, "\tfld %s\n",opp1);
+		fprintf(pfASM, "\tfld %s\n",opp2);                    
+		fprintf(pfASM, "\tfcomp\n");
+		fprintf(pfASM, "\tfstsw ax\n");
+		fprintf(pfASM, "\tfwait\n");
+		fprintf(pfASM, "\tsahf\n\n");                            
+			
+		           
 	}
 	/*case TERC_ETIQ:
 		sprintf(aux,"ETIQUETA%d:",nTerc);                            

@@ -10,6 +10,7 @@ beginp
 i:=1	
 b:=10
 a:=b+i
-
+a:=b/i
+a:=b*i
 endp
 
