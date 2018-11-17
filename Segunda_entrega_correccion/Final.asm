@@ -10,11 +10,11 @@ INCLUDE number.asm		 ;incluye el asm para impresion de numeros
 .STACK 200h ; bytes en el stack
 
 .CODE ;Comienzo de la zona de codigo
-START: ;Código assembler resultante de compilar el programa fuente.
-	mov AX,@DATA ;Inicializa el segmento de datos
+START: 		 ;Código assembler resultante de compilar el programa fuente.
+	mov AX,@DATA 		 ;Inicializa el segmento de datos
 	mov DS,AX
-	finit
-
+	mov i, 1
+	mov b, 10
 
 TERMINAR: ;Fin de ejecución.
 	mov ax, 4C00h ; termina la ejecución.

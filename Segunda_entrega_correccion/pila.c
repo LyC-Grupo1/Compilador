@@ -1,5 +1,5 @@
 #include "pila.h"
-void crear_pila(t_pila * pp){
+/*void crear_pila(t_pila * pp){
     *pp = NULL;
 }
 
@@ -15,7 +15,7 @@ int pila_llena(const t_pila *pp)
 
 }
 
-int poner_en_pila(t_pila * pp,const void *dato ,int tam)
+int poner_en_pila(t_pila * pp,const char *dato ,int tam)
 {
     t_nodo *nue = (t_nodo*)malloc(sizeof(t_nodo));
     if(!nue)
@@ -24,11 +24,10 @@ int poner_en_pila(t_pila * pp,const void *dato ,int tam)
     memcpy(nue->dato,dato,tam);
     nue->psig = *pp;
     *pp = nue;
-
     return TODO_OK;
 }
 
-int sacar_de_pila(t_pila *pp, void *dato,int tam){
+int sacar_de_pila(t_pila *pp, char *dato,int tam){
     t_nodo *aux = *pp;
     if(!*pp)
         return PILA_VACIA;
@@ -55,4 +54,12 @@ void vaciar_pila(t_pila *pp){
         *pp = (*pp)->psig;
         free(aux);
     }
-}
+}*/
+
+
+
+
+
+int tope_pila=0; 
+// FUNCIONES DE PILA
+

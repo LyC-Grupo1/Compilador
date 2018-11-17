@@ -1,7 +1,21 @@
 #include "asm.h"
+#define TRUE 1
+#define FALSE 0
+#define PILA_LLENA -1
+#define PILA_VACIA 0
+#define TAM_PILA 100
 
 FILE *pfASM; //Final.asm
-t_pila pila; //pila operandos
+//t_pila pila; //pila operandos
+
+char * pila[TAM_PILA];       // pila 5
+int topePila=0;             // pila 0
+
+void ponerEnPila(char * str);
+char* sacarDePila();
+int pVacia(int tope);
+int pLlena(int tope);
+void debugP(int tope);
 
 void generarASM() {
 
@@ -12,8 +26,8 @@ void generarASM() {
         }
     }
 	
-    //Crear pila para apilar operandos
-    crear_pila(&pila);
+    //Crear pila para ponerEnPila operandos
+    //crear_pila(&pila);
 
     //Generar archivo ASM
     fprintf(pfASM, ";\n;ARCHIVO FINAL.ASM\n;\n");
@@ -113,7 +127,7 @@ void imprimirFuncString(){
 
 void generarCodigo() {
     FILE *pfINT;
-    char linea[1024];
+    char linea[30];
     //Abrir archivo intermedia.txt
     if(!(pfINT = fopen("intermedia.txt", "rt"))) {
          informeError("Error al abrir el archivo intermedia.txt, verifique los permisos de escritura.");
@@ -126,36 +140,41 @@ void generarCodigo() {
     //imprimirFuncString();
 
     //Inicio codigo usuario
-    fprintf(pfASM, "START: ;Código assembler resultante de compilar el programa fuente.\n");
-    fprintf(pfASM, "\tmov AX,@DATA ;Inicializa el segmento de datos\n");
+    fprintf(pfASM, "START: \t\t ;Código assembler resultante de compilar el programa fuente.\n");
+    fprintf(pfASM, "\tmov AX,@DATA \t\t ;Inicializa el segmento de datos\n");
     fprintf(pfASM, "\tmov DS,AX\n");
-    fprintf(pfASM, "\tfinit\n\n");
+    //fprintf(pfASM, "\tfinit\n\n");
 
     //Leer de archivo y generar assembler
 
-
-    while(fgets(linea, 1024, (FILE*) pfINT)) {
+    size_t lin;
+    while(fgets(linea, 30, pfINT) != NULL) {
+    	lin = strlen(linea)-1;
+    	if (linea[lin] == '\n')     
+    		linea[lin] = '\0';
         printf("LINEA: %s FIN_DE_LINEA\n", linea);
         imprimirInstruccionPolaca(linea);
     }
-
-    
-
+    debugP(topePila);
 }
 
 
 void imprimirInstruccionPolaca(char* linea){
 	char op1[STR_VALUE];
     char op2[STR_VALUE] = "";
+
+    char* opp1;
+    char* opp2;
 	char aux[STR_VALUE];
 
 	// comento switch porque no funciona con variables char*
+
 	//switch(linea){
 	if(strcmp(linea,"+") == 0){
 			fprintf(pfASM,"\t;SUMA\n");
-			if(sacar_de_pila(&pila,op2,255) != PILA_VACIA)
+			if(sacarDePila() != PILA_VACIA)
 			{
-				if(sacar_de_pila(&pila,op1,255) != PILA_VACIA)
+				if(sacarDePila() != PILA_VACIA)
 				{
 					fprintf(pfASM, "\tfld %s\n",op1);
 					fprintf(pfASM, "\tfld %s\n",op2);
@@ -165,10 +184,10 @@ void imprimirInstruccionPolaca(char* linea){
 					//guardar valor en aux
 					if(strcmp(aux,"@aux2") == 0){
 						fprintf(pfASM, "\tfstp @aux3\n\n");                    
-						poner_en_pila(&pila,"@aux3",255);
+						ponerEnPila("@aux3");
 					}else{
 						fprintf(pfASM, "\tfstp @aux2\n\n");                    
-						poner_en_pila(&pila,"@aux2",255);
+						ponerEnPila("@aux2");
 					}
 				}                
 			} 
@@ -181,8 +200,8 @@ void imprimirInstruccionPolaca(char* linea){
 			}*/
 	if(strcmp(linea,"-") == 0){
 			fprintf(pfASM,"\t;RESTA\n");
-			if(sacar_de_pila(&pila, op2, 255) != PILA_VACIA){
-				if(sacar_de_pila(&pila, op1, 255) != PILA_VACIA){
+			if(sacarDePila() != PILA_VACIA){
+				if(sacarDePila() != PILA_VACIA){
 					fprintf(pfASM, "\tfld %s\n",op2);
 					fprintf(pfASM, "\tfld %s\n",op1);                   
 					fprintf(pfASM, "\tfsub\n");
@@ -191,10 +210,10 @@ void imprimirInstruccionPolaca(char* linea){
 					//guardar valor en aux
 					if(strcmp(aux,"@aux2") == 0){
 						fprintf(pfASM, "\tfstp @aux3\n\n");                    
-						poner_en_pila(&pila,"@aux3",255);
+						ponerEnPila("@aux3");
 					}else{
 						fprintf(pfASM, "\tfstp @aux2\n\n");                    
-						poner_en_pila(&pila,"@aux2",255);
+						ponerEnPila("@aux2");
 					}
 					fprintf(pfASM, "\t\nmov %s, %s\n", op1, op2); 
 					printf("\t\nmov %s, %s\n", op1, op2);	
@@ -204,9 +223,9 @@ void imprimirInstruccionPolaca(char* linea){
 	
 	if(strcmp(linea,"*")==0){
 			fprintf(pfASM,"\t;MULTIPLICACION\n");
-			if(sacar_de_pila(&pila,op2,255) != PILA_VACIA)
+			if(sacarDePila() != PILA_VACIA)
 			{
-				if(sacar_de_pila(&pila,op1,255) != PILA_VACIA)
+				if(sacarDePila() != PILA_VACIA)
 				{
 					fprintf(pfASM, "\tfld %s\n",op1);
 					fprintf(pfASM, "\tfld %s\n",op2);
@@ -216,10 +235,10 @@ void imprimirInstruccionPolaca(char* linea){
 					//guardar valor en aux
 					if(strcmp(op1,"@aux2") == 0){
 						fprintf(pfASM, "\tfstp @aux3\n\n");                    
-						poner_en_pila(&pila,"@aux3",255);
+						ponerEnPila("@aux3");
 					}else{
 						fprintf(pfASM, "\tfstp @aux2\n\n");                    
-						poner_en_pila(&pila,"@aux2",255);
+						ponerEnPila("@aux2");
 					}
 				}                
 			}  
@@ -232,9 +251,9 @@ void imprimirInstruccionPolaca(char* linea){
 			}*/
 	if(strcmp(linea,"/")==0){
 			fprintf(pfASM,"\t;DIVISION\n");
-			if(sacar_de_pila(&pila,op2,255) != PILA_VACIA)
+			if(sacarDePila() != PILA_VACIA)
 			{
-				if(sacar_de_pila(&pila,op1,255) != PILA_VACIA)
+				if(sacarDePila() != PILA_VACIA)
 				{
 					fprintf(pfASM, "\tfld %s\n",op1);
 					fprintf(pfASM, "\tfld %s\n",op2);
@@ -244,10 +263,10 @@ void imprimirInstruccionPolaca(char* linea){
 					//guardar valor en aux
 					if(strcmp(op1,"@aux2") == 0){
 						fprintf(pfASM, "\tfstp @aux3\n\n");                    
-						poner_en_pila(&pila,"@aux3",255);
+						ponerEnPila("@aux3");
 					}else{
 						fprintf(pfASM, "\tfstp @aux2\n\n");                    
-						poner_en_pila(&pila,"@aux2",255);
+						ponerEnPila("@aux2");
 					}
 				}                
 			}  
@@ -258,20 +277,21 @@ void imprimirInstruccionPolaca(char* linea){
 					printf("\t\nmov %s" + ", " + "%s\n", op1, op2);	
 				}					
 			}*/
-	if(strcmp(linea,"=")==0){
-			if(sacar_de_pila(&pila, op2, 255) != PILA_VACIA){
-				if(sacar_de_pila(&pila, op1, 255) != PILA_VACIA){
-					fprintf(pfASM, "\t\nmov %s, %s\n", op1, op2); 
-					printf("\t\nmov %s, %s\n", op1, op2);	
-				}					
-			}	
+
+	if(strcmp(linea,":=")==0){
+			opp1=(char *) malloc(sizeof(char) * 31); 
+			opp2=(char *) malloc(sizeof(char) * 31); 
+			strcpy(opp1, sacarDePila());
+			strcpy(opp2, sacarDePila());
+			fprintf(pfASM, "\tmov %s, %s\n", opp2, opp1); 
+			printf("\t\nmov %s, %s\n", opp2, opp1);			
 	}
 
 	if(strcmp(linea,"CMP")==0){
 		fprintf(pfASM,"\t;CMP\n");
-		if(sacar_de_pila(&pila,op1,255) != PILA_VACIA)
+		if(sacarDePila() != PILA_VACIA)
 		{
-			if(sacar_de_pila(&pila,op2,255) != PILA_VACIA)
+			if(sacarDePila() != PILA_VACIA)
 			{
 				fprintf(pfASM, "\tfld %s\n",op1);
 				fprintf(pfASM, "\tfld %s\n",op2);                    
@@ -315,7 +335,10 @@ void imprimirInstruccionPolaca(char* linea){
 		//sprintf(aux,"ETIQUETA%d", terc.opDer);
 		fprintf(pfASM, "\tjge %s\n",op1);  //JGE	Jump if Greater or Equal	salta si mayor o igual	A>=B (con signo)  
 	}else{ //apilo operando 
-		poner_en_pila(&pila, linea, 255); //todo lo que sea operando lo apilo, para luego desapilar cuando llegue a operador
+		printf("poner en pila %s \n", linea);
+		//poner_en_pila(&pila, linea, 255); //todo lo que sea operando lo apilo, para luego sacarDePila cuando llegue a operador
+		ponerEnPila(linea);//todo lo que sea operando lo apilo, para luego sacarDePila cuando llegue a operador
+
 	}		
 	
 }
@@ -597,4 +620,68 @@ int informeError(char * error){
 		printf("\n%s",error);
 		getchar();
 		exit(1);
+}
+
+void ponerEnPila(char * str)
+{
+    if(pLlena(topePila) == TRUE){
+        printf("Error: Se excedio el tamano de la pila.\n");
+        system ("Pause");
+        exit (1);
+    }
+    
+
+    char *aux = (char *) malloc(sizeof(char) * (strlen(str) + 1));     
+	strcpy(aux, str);
+	pila[topePila] = aux;
+	//free(aux);
+
+	topePila++;
+    printf("\tponerEnPila en ASM -> %s\n",str);
+        
+}
+
+char* sacarDePila()
+{
+    if(pVacia(topePila) == 0)
+    {
+        char * dato = pila[topePila-1];
+        topePila--; 
+        printf("\tsacarDePila en ASM -> %s\n",dato);
+        return dato;      
+    } else {
+        printf("Error: La pila esta vacia.\n");
+        system ("Pause");
+        exit (1);
+    }
+}
+
+int pVacia(int tope)
+{
+    if (tope-1 == -1){
+        return TRUE;
+    } 
+    return FALSE;
+}
+
+int pLlena(int tope)
+{
+    if (tope-1 == TAM_PILA-1){
+        return TRUE;
+    } 
+    return FALSE;
+}
+
+void debugP(int tope)
+{
+    int i,e;
+    e=tope;
+    printf("====== DEBUG PILA ======\n\n");
+    printf("El tope de la pila es %d \n",tope);        
+    printf("Lista de elementos: \n");           
+    for (i=0; i<e;i++){
+        printf("%d => %s\n",i,pila[i]);      
+    }                    
+    printf("\n====== FIN DEBUG PILA ======\n\n");   
+    
 }
