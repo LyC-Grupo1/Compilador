@@ -8,6 +8,7 @@ ENDDEC
 beginp 
 i:=1	
 b:=10
+b:=i:=8+5
 
 -/ IF SIMPLE /-
 if (i=15) THEN
