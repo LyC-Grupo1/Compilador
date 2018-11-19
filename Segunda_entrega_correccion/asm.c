@@ -91,7 +91,6 @@ void generarDatos() {
     	lin = strlen(linea)-1;
     	if(linea[lin] == '\n'){linea[lin] = '\0';}
         
-					sprintf(tipo_elemento,"%s",token);
 		if(nro_linea>1){
 			token = strtok (linea,"\t\t");
 			pos=1;
