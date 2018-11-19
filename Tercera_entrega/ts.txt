@@ -1,6 +1,7 @@
 Nombre		Tipo		Valor		Longitud
 i		INTEGER		-		-
 b		INTEGER		-		-
+a		INTEGER		-		-
 cadena		STRING		-		-
 s		STRING		-		-
 _1		CONST_INT		1		-

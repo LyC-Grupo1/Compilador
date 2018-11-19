@@ -14,6 +14,9 @@ int topePila=0;             // pila 0
 char* pila_saltos[TAM_PILA];
 int topePilaSaltos=0;
 
+char* pila_auxiliares[TAM_PILA];
+int topePilaAuxiliares=0;
+
 int cont_aux=1; // incrementa cada vez que guardo un @aux en pila 
 int celda_actual=0; //utilizado para los saltos
 int flag_leer_salto=0;
@@ -79,7 +82,13 @@ void generarDatos() {
     fprintf(pfASM, "\tTRUE equ 1\n");
     fprintf(pfASM, "\tFALSE equ 0\n");
     fprintf(pfASM, "\tMAXTEXTSIZE equ %d\n",200); //cota STR
-    
+	
+    fprintf(pfASM, "\tR1 dd ?\n",200);	
+	int cant_aux = 1;
+	while(cant_aux<=15){	
+		fprintf(pfASM, "\t@aux%d dd ?\n",cant_aux);
+		cant_aux++;
+	}    
 	
 	if(!(pfTS = fopen("ts.txt", "r+"))) {
          informeError("Error al abrir el archivo ts.txt, verifique los permisos de escritura.");
@@ -149,38 +158,7 @@ void generarDatos() {
 		nro_linea++;
 		
     }
-
-	/*
-    //Recorrer tabla de simbolos y armar el sector .data
-    for(i = 0; i < getTopeTS(); i++){
-        elemento = getItemTS(i);        
-        switch(elemento.tipo){                        
-            case CTE_INT:
-                fprintf(pfASM, "\t");            
-                fprintf(pfASM, "%s dd %.6f\n",elemento.nombre,elemento.valor);        
-                break;
-            case CTE_STR:
-                fprintf(pfASM, "\t");
-                if(strcmp(elemento.valorString,"-") == 0)
-                    fprintf(pfASM, "%s db MAXTEXTSIZE dup(?), '$'\n", elemento.nombre, elemento.valorString, (COTA_STR - elemento.longitud));
-                else
-                    fprintf(pfASM, "%s db \"%s\", '$', %d dup(?)\n", elemento.nombre, elemento.valorString, (COTA_STR - elemento.longitud));
-                break;
-            case CTE_FLT:
-                fprintf(pfASM, "\t");
-                fprintf(pfASM, "%s dd %.10f\n",elemento.nombre,elemento.valor);
-                break;
-            case VRBL_AUX:
-                if(strcmp(elemento.nombre,"@aux4STR") == 0){ //variable aux para strings.
-                    fprintf(pfASM, "\t%s db MAXTEXTSIZE dup(?), '$'\n", elemento.nombre, elemento.valorString, (COTA_STR - elemento.longitud));
-                    break;                
-                }
-                fprintf(pfASM, "\t");
-                fprintf(pfASM, "%s dd %.10f\n",elemento.nombre,elemento.valor);
-                break;
-        }
-    }    
-	*/
+	
 	
 }
 
@@ -306,22 +284,13 @@ void imprimirInstruccionPolaca(char* linea){
 		
 		//fprintf(pfASM, "\tmov R1, %s\n",opp1);
 		//fprintf(pfASM, "\tadd R1, %s\n",opp2);
-		sprintf(aux,"@aux%d",cont_aux); // armo string @aux		
-		fprintf(pfASM, "\tmov %s, R1\n",aux); // guardo aux
+		sprintf(aux,"@aux%d",cont_aux); // armo string @aux	
+		fprintf(pfASM, "\tfstp %s\n",aux); 
 		ponerEnPila(aux);
 		cont_aux++;
 		return;
 					
-		/*
-		//fprintf(pfASM, "\tlocal %s\n",aux); // Variable local en vez de los aux de arriba
-		//guardar valor en aux
-		if(strcmp(aux,"@aux2") == 0){
-			fprintf(pfASM, "\tfstp @aux3\n\n");                    
-			ponerEnPila("@aux3");
-		}else{
-			fprintf(pfASM, "\tfstp @aux2\n\n");                    
-			ponerEnPila("@aux2");
-		}*/
+		
 				                
 			
 	}
@@ -333,10 +302,11 @@ void imprimirInstruccionPolaca(char* linea){
 		strcpy(opp1, sacarDePila());
 		strcpy(opp2, sacarDePila());
 				
-		fprintf(pfASM, "\tmov R1, %s\n",opp1);
-		fprintf(pfASM, "\tsub R1, %s\n",opp2);
+		fprintf(pfASM, "\tfld %s\n",opp1);
+		fprintf(pfASM, "\tfld %s\n",opp2);
+		fprintf(pfASM, "\tfsub\n");
 		sprintf(aux,"@aux%d",cont_aux); // armo string @aux		
-		fprintf(pfASM, "\tmov %s, R1\n",aux); // guardo aux
+		fprintf(pfASM, "\tfstp %s\n",aux); 
 		ponerEnPila(aux);
 		cont_aux++;
 		return;
@@ -349,10 +319,11 @@ void imprimirInstruccionPolaca(char* linea){
 		strcpy(opp1, sacarDePila());
 		strcpy(opp2, sacarDePila());
 						
-		fprintf(pfASM, "\tmov R1, %s\n",opp1);
-		fprintf(pfASM, "\tmul R1, %s\n",opp2);
+		fprintf(pfASM, "\tfld %s\n",opp1);
+		fprintf(pfASM, "\tfld %s\n",opp2);
+		fprintf(pfASM, "\tfmul\n");
 		sprintf(aux,"@aux%d",cont_aux); // armo string @aux		
-		fprintf(pfASM, "\tmov %s, R1\n",aux); // guardo aux
+		fprintf(pfASM, "\tfstp %s\n",aux); 
 		ponerEnPila(aux);
 		cont_aux++;
 		return;
@@ -365,10 +336,11 @@ void imprimirInstruccionPolaca(char* linea){
 		strcpy(opp1, sacarDePila());
 		strcpy(opp2, sacarDePila());
 						
-		fprintf(pfASM, "\tmov R1, %s\n",opp1);
-		fprintf(pfASM, "\tdiv R1, %s\n",opp2);
+		fprintf(pfASM, "\tfld %s\n",opp1);
+		fprintf(pfASM, "\tfld %s\n",opp2);
+		fprintf(pfASM, "\tfdiv\n");
 		sprintf(aux,"@aux%d",cont_aux); // armo string @aux		
-		fprintf(pfASM, "\tmov %s, R1\n",aux); // guardo aux
+		fprintf(pfASM, "\tfstp %s\n",aux); 
 		ponerEnPila(aux);
 		cont_aux++;
 		return;  
@@ -537,6 +509,7 @@ char* desapilarPilaSaltos()
         exit (1);
     }
 }
+
 
 int pVacia(int tope)
 {

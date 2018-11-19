@@ -1,6 +1,6 @@
 ﻿program  
 DECVAR	
- i,b : INTEGER
+ i,b,a : INTEGER
  cadena, s : STRING
 ENDDEC
 
@@ -15,7 +15,6 @@ if (i=15) THEN
 	i:=16	
 ENDIF
 
-
-
+WRITE "hole"
 endp
 
