@@ -15,6 +15,9 @@ if (i=15) THEN
 	i:=16	
 ENDIF
 
-WRITE "hole"
+-/ BETWEEN /-
+BETWEEN(a,[2;a*(b+4)])
+
+
 endp
 

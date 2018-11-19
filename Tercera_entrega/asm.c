@@ -11,8 +11,8 @@ FILE *pfASM; //Final.asm
 char * pila[TAM_PILA];       // pila 5
 int topePila=0;             // pila 0
 
-char* pila_saltos[TAM_PILA];
-int topePilaSaltos=0;
+char* vec_etiquetas[100];
+int cant_elementos_etiq=0;
 
 char* pila_auxiliares[TAM_PILA];
 int topePilaAuxiliares=0;
@@ -27,8 +27,7 @@ int pVacia(int tope);
 int pLlena(int tope);
 void debugP(int tope);
 
-void apilarPilaSaltos(char* str);
-char* desapilarPilaSaltos();
+void insertarEtiqueta(char* str);
 
 void generarASM() {
 
@@ -225,12 +224,19 @@ void generarCodigo() {
         imprimirInstruccionPolaca(linea);
     }
 	
-	// x si quedaron etiquetas en la pila 
-	char aux_eti[STR_VALUE];
-	while(topePilaSaltos>0){
-		sprintf(aux_eti,"_etiq%s",desapilarPilaSaltos()); // armo string _etiq
-		fprintf(pfASM, "%s:\n",aux_eti);
-		//printf("\tPILA SALTOS TOPE = %d",topePilaSaltos)	;	
+	// verifico una vez mas
+	int i=1;
+	int salir=0;
+	char aux[STR_VALUE];
+	celda_actual++;	
+	while(i<=cant_elementos_etiq && salir==0){
+		//printf("\n%s\n",vec_etiquetas[i]);
+		if(atoi(vec_etiquetas[i])==celda_actual){
+			sprintf(aux,"_etiq%s",vec_etiquetas[i]); // armo string _etiq
+			fprintf(pfASM, "%s:\n",aux);
+			salir=1;
+		}
+		i++;
 	}
 	
     //debugP(topePila);
@@ -252,17 +258,29 @@ void imprimirInstruccionPolaca(char* linea){
 	celda_actual++;		
 	
 	// verifico si llegue a la celda para agregar la etiqueta
-	if(topePilaSaltos>0){
+	
+	int i=1;
+	int salir=0;
+	while(i<=cant_elementos_etiq && salir==0){
+		if(atoi(vec_etiquetas[i])==celda_actual){
+			sprintf(aux,"_etiq%s",vec_etiquetas[i]); // armo string _etiq
+			fprintf(pfASM, "%s:\n",aux);
+			salir=1;
+		}
+		i++;
+	}
+	
+	/*if(topePilaSaltos>0){
 		//printf("comparo %d = %d ?",atoi(pila_saltos[topePilaSaltos-1]),celda_actual);
 		if(atoi(pila_saltos[topePilaSaltos-1])==celda_actual){
 			sprintf(aux,"_etiq%s",desapilarPilaSaltos()); // armo string _etiq
 			fprintf(pfASM, "%s:\n",aux);
 		}		
-	}
+	}*/
 	
 	// siempre despues de un branch viene una celda a la que salto.
 	if(flag_leer_salto==1){
-		apilarPilaSaltos(linea);
+		insertarEtiqueta(linea);
 		fprintf(pfASM, "\t%s _etiq%s\n",branch_aux,linea); // armo instruccion
 		flag_leer_salto=0;
 		return;
@@ -483,31 +501,18 @@ char* sacarDePila()
     }
 }
 
-void apilarPilaSaltos(char * str)
+void insertarEtiqueta(char * str)
 {
 	char *aux = (char *) malloc(sizeof(char) * (strlen(str) + 1));     
 	strcpy(aux, str);
-	pila_saltos[topePilaSaltos] = aux;
-	//free(aux);
-	topePilaSaltos++;
-
-    //printf("\tASM: Apilo Celda Saltos -> %s\n",str);
-        
-}
-
-char* desapilarPilaSaltos()
-{
-    if(topePilaSaltos > 0)
-    {
-        char * dato = pila_saltos[topePilaSaltos-1];
-        topePilaSaltos--; 
-        //printf("\tASM: Desapilo Celda Saltos -> %s\n",dato);
-        return dato;      
-    } else {
-        printf("Error: La pila esta vacia.\n");
-        system ("Pause");
-        exit (1);
-    }
+	
+	printf("\tInserto etiqueta nro. %s\n",aux);
+	// verifico que no exista
+	//for
+	
+	cant_elementos_etiq++;
+	vec_etiquetas[cant_elementos_etiq] = aux;
+	
 }
 
 
