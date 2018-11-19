@@ -998,7 +998,7 @@ int crearArchivoTS()
 
 	if (!archivo){	return ERROR; }
 
-	fprintf(archivo, "Nombre                        Tipo                  Valor                Longitud\n");
+	/*fprintf(archivo, "Nombre                        Tipo                  Valor                Longitud\n");
 	
 	for (i = 0; i < puntero_ts; i++)
 	{
@@ -1019,6 +1019,29 @@ int crearArchivoTS()
 			fprintf(archivo,"%-30s%-10s                                %-30s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
 		}
 	}
+	*/
+	fprintf(archivo, "Nombre\t\tTipo\t\tValor\t\tLongitud\n");
+	for (i = 0; i < puntero_ts; i++)
+	{
+		if (strcmp(tablaSimbolos[i].tipo, "INTEGER") == 0 || strcmp(tablaSimbolos[i].tipo, "REAL") == 0  || strcmp(tablaSimbolos[i].tipo, "STRING") == 0 )
+		{  
+			fprintf(archivo,"%s\t\t%s\t\t-\t\t-\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo);
+		}
+		else if(strcmp(tablaSimbolos[i].tipo, "CONST_STR") == 0 )
+		{
+			fprintf(archivo,"%s\t\t%s\t\t-\t\t%d\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,strlen(tablaSimbolos[i].nombre) - 2);
+		}
+		else if(strcmp(tablaSimbolos[i].tipo, "CONST_INT") == 0 || strcmp(tablaSimbolos[i].tipo, "CONST_REAL") == 0)
+		{
+			fprintf(archivo,"_%s\t\t%s\t\t%s\t\t-\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
+		}
+		else 
+		{
+			fprintf(archivo,"%s\t\t%s\t\t%s\t\t-\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
+		}
+	}
+	
+	
 	fclose(archivo); 
 
 	return TODO_OK;

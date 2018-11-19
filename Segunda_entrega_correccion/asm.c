@@ -43,7 +43,7 @@ void generarASM() {
     fprintf(pfASM, ";\n;ARCHIVO FINAL.ASM\n;\n");
 
     generarEncabezado();
-    //generarDatos();
+    generarDatos();
     generarCodigo();
     generarFin();
 	
@@ -61,18 +61,82 @@ void generarEncabezado() {
     fprintf(pfASM, ".STACK 200h ; bytes en el stack\n"); 
 }
 
-/*
+
 void generarDatos() {
+	FILE *pfTS;
+    char linea[30];
     int i = 0;
-    TS elemento;
+    //TS elemento;
     char aux[STR_VALUE];
+	char* token; // para el split de linea
+	char nombre_elemento[STR_VALUE];
+	char tipo_elemento[STR_VALUE];
+	char valor_elemento[STR_VALUE];
+	char longitud_elemento[STR_VALUE];
     //Encabezado del sector de datos
     fprintf(pfASM, "\t\n.DATA ; comienzo de la zona de datos.\n");    
     fprintf(pfASM, "\tTRUE equ 1\n");
     fprintf(pfASM, "\tFALSE equ 0\n");
     fprintf(pfASM, "\tMAXTEXTSIZE equ %d\n",200); //cota STR
     
+	
+	if(!(pfTS = fopen("ts.txt", "rt"))) {
+         informeError("Error al abrir el archivo ts.txt, verifique los permisos de escritura.");
+    }
+	
+	int pos=1; //1=nombre/2=tipo/3=valor
+	size_t lin;
+	 while(fgets(linea, 30, pfTS) != NULL) {
+    	lin = strlen(linea)-1;
+    	if(linea[lin] == '\n'){linea[lin] = '\0';}
+        
+		token = strtok (linea,"\t\t");
+		pos=1;
+		while(token){
+			if(pos==1){
+				sprintf(nombre_elemento,"%s",token);
+			}else{
+				if(pos==2){
+					sprintf(tipo_elemento,"%s",token);
+				}else{
+					if(pos==3){
+						sprintf(valor_elemento,"%s",token);
+					}else{
+						if(pos==4){
+							sprintf(longitud_elemento,"%s",token);
+						}
+					}
+				}
+			}			
+			pos++;
+			printf("\tTOKEN LEIDO: %s\n",token);
+			token = strtok(NULL, "\t\t");
+						
+		}
+		
+		// analizo elemento
+		//printf("\n\nNOMBRE: %s\n",nombre_elemento);
+		//printf("TIPO: %s\n",tipo_elemento);
+		if(strcmp(tipo_elemento,"CONST_INT")==0){
+			fprintf(pfASM, "\t%s dd %s\n",nombre_elemento,valor_elemento); 
+		}else{
+			if(strcmp(tipo_elemento,"CONST_STR")==0){
+				if(strcmp(valor_elemento,"-") == 0){
+					fprintf(pfASM, "\t%s db MAXTEXTSIZE dup(?), '$'\n",nombre_elemento, valor_elemento, longitud_elemento);
+				}else{	
+					fprintf(pfASM, "\t%s db \"%s\", '$', %s dup(?)\n", nombre_elemento, valor_elemento, longitud_elemento);
+				}
+			}else{
+				if(strcmp(tipo_elemento,"CONST_REAL")==0){
+					fprintf(pfASM, "\t%s dd %s\n",nombre_elemento,valor_elemento);
+				}
+			
+			}
+		}
+		
+    }
 
+	/*
     //Recorrer tabla de simbolos y armar el sector .data
     for(i = 0; i < getTopeTS(); i++){
         elemento = getItemTS(i);        
@@ -102,8 +166,10 @@ void generarDatos() {
                 break;
         }
     }    
+	*/
+	
 }
-*/
+
 
 /*
 void imprimirFuncString(){
@@ -140,7 +206,7 @@ void generarCodigo() {
     char linea[30];
 		
     //Abrir archivo intermedia.txt
-    if(!(pfINT = fopen("intermedia_asm.txt", "rt"))) {
+    if(!(pfINT = fopen("intermedia.txt", "rt"))) {
          informeError("Error al abrir el archivo intermedia.txt, verifique los permisos de escritura.");
     }
 
@@ -166,6 +232,15 @@ void generarCodigo() {
         //printf("LINEA: %s FIN_DE_LINEA\n", linea);
         imprimirInstruccionPolaca(linea);
     }
+	
+	// x si quedaron etiquetas en la pila 
+	char aux_eti[STR_VALUE];
+	while(topePilaSaltos>0){
+		sprintf(aux_eti,"_etiq%s",desapilarPilaSaltos()); // armo string _etiq
+		fprintf(pfASM, "%s:\n",aux_eti);
+		printf("\tPILA SALTOS TOPE = %d",topePilaSaltos)	;	
+	}
+	
     debugP(topePila);
 }
 
@@ -683,12 +758,12 @@ char* sacarDePila()
 
 void apilarPilaSaltos(char * str)
 {
-    char *aux = (char *) malloc(sizeof(char) * (strlen(str) + 1));     
+	char *aux = (char *) malloc(sizeof(char) * (strlen(str) + 1));     
 	strcpy(aux, str);
 	pila_saltos[topePilaSaltos] = aux;
 	//free(aux);
-
 	topePilaSaltos++;
+
     printf("\tASM: Apilo Celda Saltos -> %s\n",str);
         
 }
