@@ -13,6 +13,7 @@ INCLUDE number.asm		 ;incluye el asm para impresion de numeros
 	TRUE equ 1
 	FALSE equ 0
 	MAXTEXTSIZE equ 200
+	_z dd ?
 	_i dd ?
 	_b dd ?
 	_cadena dd ?

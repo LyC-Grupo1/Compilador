@@ -30,7 +30,7 @@ char* desapilarPilaSaltos();
 void generarASM() {
 
     //Abrir archivo Final.asm
-    if(!(pfASM = fopen("bin/Final.asm", "wt+"))) {
+    if(!(pfASM = fopen("Final.asm", "wt+"))) {
         if(!(pfASM = fopen("Final.asm", "wt+"))) {
             informeError("Error al crear el archivo Final.asm, verifique los permisos de escritura.");
         }
@@ -64,6 +64,7 @@ void generarEncabezado() {
 
 void generarDatos() {
 	FILE *pfTS;
+	int nro_linea=1;
     char linea[30];
     int i = 0;
     //TS elemento;
@@ -90,49 +91,56 @@ void generarDatos() {
     	lin = strlen(linea)-1;
     	if(linea[lin] == '\n'){linea[lin] = '\0';}
         
-		token = strtok (linea,"\t\t");
-		pos=1;
-		while(token){
-			if(pos==1){
-				sprintf(nombre_elemento,"%s",token);
-			}else{
-				if(pos==2){
 					sprintf(tipo_elemento,"%s",token);
+		if(nro_linea>1){
+			token = strtok (linea,"\t\t");
+			pos=1;
+			while(token){
+				if(pos==1){
+					sprintf(nombre_elemento,"%s",token);
 				}else{
-					if(pos==3){
-						sprintf(valor_elemento,"%s",token);
+					if(pos==2){
+						sprintf(tipo_elemento,"%s",token);
 					}else{
-						if(pos==4){
-							sprintf(longitud_elemento,"%s",token);
+						if(pos==3){
+							sprintf(valor_elemento,"%s",token);
+						}else{
+							if(pos==4){
+								sprintf(longitud_elemento,"%s",token);
+							}
 						}
 					}
-				}
-			}			
-			pos++;
-			printf("\tTOKEN LEIDO: %s\n",token);
-			token = strtok(NULL, "\t\t");
-						
-		}
-		
-		// analizo elemento
-		//printf("\n\nNOMBRE: %s\n",nombre_elemento);
-		//printf("TIPO: %s\n",tipo_elemento);
-		if(strcmp(tipo_elemento,"CONST_INT")==0){
-			fprintf(pfASM, "\t%s dd %s\n",nombre_elemento,valor_elemento); 
-		}else{
-			if(strcmp(tipo_elemento,"CONST_STR")==0){
-				if(strcmp(valor_elemento,"-") == 0){
-					fprintf(pfASM, "\t%s db MAXTEXTSIZE dup(?), '$'\n",nombre_elemento, valor_elemento, longitud_elemento);
-				}else{	
-					fprintf(pfASM, "\t%s db \"%s\", '$', %s dup(?)\n", nombre_elemento, valor_elemento, longitud_elemento);
-				}
-			}else{
-				if(strcmp(tipo_elemento,"CONST_REAL")==0){
-					fprintf(pfASM, "\t%s dd %s\n",nombre_elemento,valor_elemento);
-				}
+				}			
+				pos++;
+				printf("\tTOKEN LEIDO: %s\n",token);
+				token = strtok(NULL, "\t\t");
+							
+			}
 			
+			// analizo elemento
+			printf("\n\nNOMBRE: %s\n",nombre_elemento);
+			//printf("TIPO: %s\n",tipo_elemento);
+			
+			if(strcmp(tipo_elemento,"CONST_INT")==0){
+				fprintf(pfASM, "\t%s dd %s\n",nombre_elemento,valor_elemento); 
+			}else{
+				if(strcmp(tipo_elemento,"CONST_STR")==0){
+					if(strcmp(valor_elemento,"-") == 0){
+						fprintf(pfASM, "\t%s db MAXTEXTSIZE dup(?), '$'\n",nombre_elemento, valor_elemento, longitud_elemento);
+					}else{	
+						fprintf(pfASM, "\t%s db \"%s\", '$', %s dup(?)\n", nombre_elemento, valor_elemento, longitud_elemento);
+					}
+				}else{
+					if(strcmp(tipo_elemento,"CONST_REAL")==0){
+						fprintf(pfASM, "\t%s dd %s\n",nombre_elemento,valor_elemento);
+					}else{
+						fprintf(pfASM, "\t_%s dd ?\n",nombre_elemento); //IDs
+					}
+				
+				}
 			}
 		}
+		nro_linea++;
 		
     }
 
@@ -286,12 +294,12 @@ void imprimirInstruccionPolaca(char* linea){
 		strcpy(opp2, sacarDePila());
 		
 		// no esta asi en el apunte pero lo dejo x las dudas
-		//fprintf(pfASM, "\tfld %s\n",op1);
-		//fprintf(pfASM, "\tfld %s\n",op2);
-		//fprintf(pfASM, "\tfadd\n");
+		fprintf(pfASM, "\tfld %s\n",opp1);
+		fprintf(pfASM, "\tfld %s\n",opp2);
+		fprintf(pfASM, "\tfadd\n");
 		
-		fprintf(pfASM, "\tmov R1, %s\n",opp1);
-		fprintf(pfASM, "\tadd R1, %s\n",opp2);
+		//fprintf(pfASM, "\tmov R1, %s\n",opp1);
+		//fprintf(pfASM, "\tadd R1, %s\n",opp2);
 		sprintf(aux,"@aux%d",cont_aux); // armo string @aux		
 		fprintf(pfASM, "\tmov %s, R1\n",aux); // guardo aux
 		ponerEnPila(aux);
@@ -367,10 +375,15 @@ void imprimirInstruccionPolaca(char* linea){
 		opp2=(char *) malloc(sizeof(char) * 31); 
 		strcpy(opp1, sacarDePila());
 		strcpy(opp2, sacarDePila());
-		fprintf(pfASM,"\tmov R1, %s\n",opp1);
-		fprintf(pfASM,"\tmov %s, R1\n",opp2);
+		
+		fprintf(pfASM, "\tfld %s\n",opp1);
+		fprintf(pfASM, "\tfstp %s\n",opp2); 
+		//fprintf(pfASM, "\t\nfmov\n");
+		
+		//fprintf(pfASM,"\tmov R1, %s\n",opp1);
+		//fprintf(pfASM,"\tmov %s, R1\n",opp2);
 		//fprintf(pfASM, "\tmov %s, %s\n", opp2, opp1); 
-		printf("\t\nmov %s, %s\n", opp2, opp1);	
+		//printf("\t\nmov %s, %s\n", opp2, opp1);	
 		return;
 	}
 
