@@ -70,6 +70,7 @@ int flagCondicion=0;
 int ladoDerCondi=0;
 char* AuxTipoLI_condi;
 char* AuxTipoLD_condi;
+int flagEsAsignacion=0;
 
 
 // PILAS 
@@ -338,6 +339,7 @@ asignacion:
 			
 			//debugListaAsignacion();
 			
+			
 			// OBTENGO EL TIPO DE DATO DEL PRIMER ELEMENTO A ASIGNAR
 			free(auxTipoAsignacion);
 			auxTipoAsignacion = (char *) malloc(sizeof(char) * (sizeof(char) + 1));
@@ -360,10 +362,17 @@ asignacion:
 			
 					
 			// COMPARO ESE TIPO CON EL TIPO DE TODOS LOS DEMAS ELEMENTOS A ASIGNAR MEDIANTE UN FOR
+			// valido la primer asignacion 
+			if (strcmp(recuperarTipoTS(yylval.str_val),auxTipoAsignacion) != 0)
+			{
+				printf("\n");
+				
+				finAnormal("Error","No puede asignar IDs con distinto tipo\n");
+			}
 			
 			for (x=1;x<limit;x++)
 			{
-				//printf("Voy a comparar el tipo de %s",recuperarTipoTS(listaAsignacion[x]));
+				//printf("Voy a comparar el tipo de %s > %s",listaAsignacion[x],recuperarTipoTS(listaAsignacion[x]));
 				//printf(" con %s\n",auxTipoAsignacion);
 				if (strcmp(recuperarTipoTS(listaAsignacion[x]),auxTipoAsignacion) != 0)
 				{
@@ -411,12 +420,18 @@ asignacion:
 		}
 		| lista_id OP_ASIG 
 			between { insertarEnLista(":="); }
-	  ;
+	  ; 
 
 lista_id:		
 			lista_id OP_ASIG ID {
 				
 				// VERIFICO EL TIPO DE DATO
+			
+				//free(auxTipoAsignacion);
+				//AuxTipoAsignacionSimple = (char *) malloc(sizeof(char) * (sizeof(char) + 1));
+				//strcpy(AuxTipoAsignacionSimple, recuperarTipoTS($3));
+				
+				printf("Ultimo asignacion %s \n",$3);
 			
 				//printf("Voy a comparar el tipo de %s",$3);
 				//printf(" con %s\n",auxTipoAsignacion);
@@ -427,6 +442,8 @@ lista_id:
 					
 					// finAnormal("Error","No puede asignar IDs con distinto tipo\n");
 				// }
+				
+				
 				
 				flagAsigMul = TRUE;
 				

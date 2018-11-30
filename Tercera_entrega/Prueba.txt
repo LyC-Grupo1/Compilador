@@ -27,7 +27,7 @@ if (i=2) THEN
 	write i
 ENDIF
 
-while (i<30.1)
+while (i<30)
 	write i
 	i:=i+1
 endw

@@ -10,7 +10,6 @@ _8^CONST_INT^-^8
 _5^CONST_INT^-^5
 _2^CONST_INT^-^2
 cteStr2^CONST_STR^22^"comienzo de Programa"
-_15^CONST_INT^-^15
 cteStr3^CONST_STR^15^"IF Afirmativo"
 _30^CONST_INT^-^30
 cteStr4^CONST_STR^17^"Fin de Programa"

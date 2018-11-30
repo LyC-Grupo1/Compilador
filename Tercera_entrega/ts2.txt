@@ -58,11 +58,6 @@ CONST_STR
 22
 "comienzo de Programa"
 *****
-_15
-CONST_INT
--
-15
-*****
 cteStr3
 CONST_STR
 15
