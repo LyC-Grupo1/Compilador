@@ -98,6 +98,9 @@ START: 		 ;Código assembler resultante de compilar el programa fuente.
 	;ASIGNACION
 	fld @aux6
 	fstp _b
+	;ASIGNACION
+	fld _s
+	fstp _i
 	;WRITE
 	displayString _cteStr2
 	newLine 1
@@ -111,9 +114,9 @@ START: 		 ;Código assembler resultante de compilar el programa fuente.
 	ffree st(0)
 	sahf
 
-	JNE _etiq46
-	JMP _etiq40
-_etiq40:
+	JNE _etiq49
+	JMP _etiq43
+_etiq43:
 	;WRITE
 	displayString _cteStr3
 	newLine 1
@@ -122,8 +125,8 @@ _etiq40:
 	DisplayInteger _i 2
 	newLine 1
 
-	JMP _etiq46
-_etiq46:
+	JMP _etiq49
+_etiq49:
 	;CMP
 	fld _30
 	fld _i
@@ -133,9 +136,9 @@ _etiq46:
 	ffree st(0)
 	sahf
 
-	JBE _etiq62
-	JMP _etiq53
-_etiq53:
+	JBE _etiq65
+	JMP _etiq56
+_etiq56:
 	;WRITE
 	DisplayInteger _i 2
 	newLine 1
@@ -148,8 +151,8 @@ _etiq53:
 	;ASIGNACION
 	fld @aux7
 	fstp _i
-	JMP _etiq46
-_etiq62:
+	JMP _etiq49
+_etiq65:
 	;CMP
 	fld _2
 	fld _a
@@ -159,9 +162,9 @@ _etiq62:
 	ffree st(0)
 	sahf
 
-	JA _etiq79
-	JMP _etiq69
-_etiq69:
+	JA _etiq82
+	JMP _etiq72
+_etiq72:
 	;CMP
 	fld _b
 	fld _a
@@ -171,12 +174,12 @@ _etiq69:
 	ffree st(0)
 	sahf
 
-	JB _etiq79
-	JMP _etiq76
-_etiq76:
-	JMP _etiq80
+	JB _etiq82
+	JMP _etiq79
 _etiq79:
-_etiq80:
+	JMP _etiq83
+_etiq82:
+_etiq83:
 	;WRITE
 	displayString _cteStr4
 	newLine 1

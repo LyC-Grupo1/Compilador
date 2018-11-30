@@ -11,6 +11,8 @@ b:=10
 s:="asd"
 i:=b:=8+5+2
 
+-/ i:=s /-
+
 
 -/ s:=b:=8+5+2 /-
 -/ i:=s:=8+5+2 /-
@@ -20,12 +22,12 @@ WRITE "comienzo de Programa"
 
 
 -/ IF SIMPLE /-
-if (i=15) THEN
+if (i=2) THEN
 	write "IF Afirmativo"
 	write i
 ENDIF
 
-while (i<30)
+while (i<30.1)
 	write i
 	i:=i+1
 endw

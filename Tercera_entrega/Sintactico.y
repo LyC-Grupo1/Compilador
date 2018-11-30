@@ -66,6 +66,11 @@ void escribirEnLista(int, char*);
 char * valorComparacion(char * );
 char comparador_usado[2];
 
+int flagCondicion=0;
+int ladoDerCondi=0;
+char* AuxTipoLI_condi;
+char* AuxTipoLD_condi;
+
 
 // PILAS 
 char * pilaIF[TAM_PILA];			// pila 0
@@ -184,7 +189,7 @@ FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 programa:  	   
 	PROGRAM { if(DEBUG){printf("\t**Inicia el compilador**\n");} } est_declaracion algoritmo    
 	{
-		if(DEBUG){printf("\t**Compilacion exitoza**\n"); }
+		if(DEBUG){printf("\t**Compilacion exitosa**\n"); }
 		if(crearArchivoIntermedia()==TODO_OK) {
 			printf("\nArchivo con intermedia generado\n");
 			generarASM();
@@ -243,7 +248,7 @@ ciclo:
 		sprintf(inicioCuerpoRepeat, "%d", puntero_tokens);
 		//itoa(puntero_tokens,sPosActual,10);
 		//apilar(PILA_REPEAT,inicioCuerpo);
-	} bloque UNTIL 
+	} bloque UNTIL  {flagCondicion=1;}
 		condicion 
 		{ 
 			//debugPila(PILA_REPEAT,tope_pila_repeat);
@@ -260,8 +265,9 @@ ciclo:
 		}
 	 | WHILE 
 	 { 
+		flagCondicion=1;
 		 if(DEBUG){printf("\t**Incio WHILE**\n");}
-		 
+		 		 
 		 free(inicioWhilePos);
 		 inicioWhilePos = (char *) malloc(sizeof(char) * (sizeof(int) + 1));
 		 sprintf(inicioWhilePos,"%d",puntero_tokens);
@@ -463,7 +469,7 @@ lista_id:
 		;
 	  
 entrada_salida: 
-	READ{printf("\t\tREAD\n"); } ID { char sAux[5];
+	READ{if(DEBUG){printf("\t\tREAD\n");} } ID { char sAux[5];
 									  sprintf(sAux,yylval.str_val); 
 									  insertarEnLista("READ"); insertarEnLista(sAux);
 										printf("\t\tREAD %s\n",sAux); }
@@ -497,7 +503,7 @@ entrada_salida:
 ;
 
 seleccion: 
-    	IF CAR_PA condicion CAR_PC then_ bloque { 
+    	if_ CAR_PA condicion CAR_PC then_ bloque { 
 				
 				char sPosActual[5];
 				insertarEnLista("BI");
@@ -554,7 +560,7 @@ seleccion:
 				
 			}
 				
-		| IF CAR_PA condicion CAR_PC then_ bloque { 
+		| if_ CAR_PA condicion CAR_PC then_ bloque { 
 				char sPosActual[5];
 				insertarEnLista("BI");
 				insertarEnLista("###");
@@ -613,6 +619,9 @@ seleccion:
 		}	
 ;
 
+if_: IF {flagCondicion=1;}
+;
+
 then_: THEN {
 				insertarEnLista("CMP");
 				insertarEnLista(valorComparacion(comparador_usado));
@@ -636,7 +645,8 @@ else_: ELSE {	sprintf(posFalse, "%d", puntero_tokens); /*guardo la posicion del 
 ;
 
 condicion:
-         comparacion {
+          comparacion {
+			 		  
 			 if(flagWHILE == TRUE){ //Manejo del While
 				insertarEnLista("CMP");
 				insertarEnLista(valorComparacion(comparador_usado));
@@ -682,7 +692,7 @@ condicion:
          |OP_NOT comparacion{ if(DEBUG){printf("NOT CONDICION\n");}}
          |comparacion op_and_ {sprintf(posCondDos, "%d", puntero_tokens);}  
 			comparacion {
-			 
+			 flagCondicion=1;
 			 if(flagWHILE == TRUE){
 				flagWHILEAND = TRUE;
 				insertarEnLista("CMP");
@@ -702,7 +712,8 @@ condicion:
 			 }
 			}
 		 |comparacion op_or_ { sprintf(posCondDos, "%d", puntero_tokens); } 
-			comparacion { 
+			comparacion {
+				
 				if(flagWHILE == TRUE){
 					// flagWHILEOR = TRUE;
 					insertarEnLista("CMP");
@@ -722,8 +733,8 @@ condicion:
 				 }
 				printf("CONDICION DOBLE OR\n"); 
 			}
-		 |OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC {printf("NOT CONDICION DOBLE AND\n");}
-		 |OP_NOT CAR_PA comparacion OP_OR  comparacion  CAR_PC{printf("NOT CONDICION DOBLE OR\n");}
+		 |OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC { if(DEBUG){printf("NOT CONDICION DOBLE AND\n");}}
+		 |OP_NOT CAR_PA comparacion OP_OR  comparacion  CAR_PC{ if(DEBUG){printf("NOT CONDICION DOBLE OR\n");}}
 		 |between 
 		 {
 			 insertarEnLista("1"); 
@@ -850,7 +861,40 @@ op_or_: OP_OR{
 	 
 comparacion:
 	   expresion OP_COMPARACION { 
-								strcpy(comparador_usado,$2);}  expresion {if(DEBUG){printf("\tSe uso comparador '%s'\n",$2);}}
+								ladoDerCondi=1;
+								strcpy(comparador_usado,$2);}  expresion {
+																		
+																		if(DEBUG){printf("\tSe uso comparador '%s'\n",$2);}
+																		
+																		//printf("COMPARO: Lado izq %s , lado derecho %s\n",AuxTipoLI_condi,AuxTipoLD_condi);
+																		if(strcmp(AuxTipoLI_condi,AuxTipoLD_condi) != 0){
+																			
+																			// int con otro tipo
+																			if( (strcmp(AuxTipoLI_condi,"INTEGER")==0 || strcmp(AuxTipoLI_condi,"CONST_INT")==0) &&
+																					(strcmp(AuxTipoLD_condi,"INTEGER")!=0 && strcmp(AuxTipoLD_condi,"CONST_INT")!=0) )
+																			{
+																				printf("\n\n[ERROR EN CONDICIONAL] - No puede comparar un %s con un %s\n\n",AuxTipoLI_condi,AuxTipoLD_condi);
+																				exit(1);
+																			}
+																			
+																			//real con otro tipo
+																			if( (strcmp(AuxTipoLI_condi,"CONST_REAL")==0 ) &&
+																					(strcmp(AuxTipoLD_condi,"CONST_REAL")!=0 ) )
+																			{
+																				printf("\n\n[ERROR] - No puede comparar un %s con tipo %s\n\n",AuxTipoLI_condi,AuxTipoLD_condi);
+																				exit(1);	
+																			}
+																			
+																		
+																		}
+																		
+																		
+																		ladoDerCondi=0;
+																		//free(AuxTipoLI_condi);
+																		//free(AuxTipoLD_condi);
+																			
+																		
+																		}
 	   ;
 
 expresion:
@@ -971,9 +1015,21 @@ factor:
 			} 
 			insertarEnLista(yylval.str_val);
 			
-			if(strcmp(recuperarValorTS(yylval.str_val),"STRING"))
+			if(strcmp(recuperarTipoTS(yylval.str_val),"STRING"))
 			{
 				flagCTESTRING = TRUE; 
+			}
+			
+			if(flagCondicion==1){
+				if(ladoDerCondi==0){
+					AuxTipoLI_condi = (char *) malloc(sizeof(char) * (strlen(yylval.str_val) + 1));
+					sprintf(AuxTipoLI_condi,"%s",recuperarTipoTS(yylval.str_val));
+					//printf("[ld==%d] LI = %s\n",ladoDerCondi,recuperarTipoTS(yylval.str_val));
+				}else{
+					AuxTipoLD_condi = (char *) malloc(sizeof(char) * (strlen(yylval.str_val) + 1));
+					sprintf(AuxTipoLD_condi,"%s",recuperarTipoTS(yylval.str_val));
+					//printf("[ld==%d]  LD = %s\n",yylval.str_val);
+				}
 			}
 			
 			
@@ -985,6 +1041,19 @@ factor:
 						} 
 					  insertarEnLista(yylval.int_val); 
 					  sprintf(valorFactor,"%s",yylval.int_val);
+					  
+					  
+						if(flagCondicion==1){
+							if(ladoDerCondi==0){
+								AuxTipoLI_condi = (char *) malloc(sizeof(char) * (strlen(yylval.str_val) + 1));
+								sprintf(AuxTipoLI_condi,"%s",recuperarTipoTS(yylval.str_val));
+							}else{
+								AuxTipoLD_condi = (char *) malloc(sizeof(char) * (strlen(yylval.str_val) + 1));
+								sprintf(AuxTipoLD_condi,"%s",recuperarTipoTS(yylval.str_val));
+							}
+						}
+					  
+					  
 				  }
       | CONST_REAL 
 		{
@@ -994,6 +1063,19 @@ factor:
 			} 
 			insertarEnLista(yylval.real_val); 
 			sprintf(valorFactor,"%s",yylval.real_val);
+			
+			if(flagCondicion==1){
+				if(ladoDerCondi==0){
+					AuxTipoLI_condi = (char *) malloc(sizeof(char) * (strlen(yylval.str_val) + 1));
+					sprintf(AuxTipoLI_condi,"%s",recuperarTipoTS(yylval.str_val));
+				}else{
+					AuxTipoLD_condi = (char *) malloc(sizeof(char) * (strlen(yylval.str_val) + 1));
+					sprintf(AuxTipoLD_condi,"%s",recuperarTipoTS(yylval.str_val));
+				}
+			}
+			
+			
+			
 		}
 					 
       | CONST_STR  
@@ -1011,6 +1093,16 @@ factor:
 			sprintf(sAux,"cteStr%d",cont_cte_str-1);
 			insertarEnLista(sAux); 
 			sprintf(valorFactor,"%s",yylval.str_val);
+			
+			if(flagCondicion==1){
+				if(ladoDerCondi==0){
+					AuxTipoLI_condi = (char *) malloc(sizeof(char) * (strlen(yylval.str_val) + 1));
+					sprintf(AuxTipoLI_condi,"%s",recuperarValorTS(yylval.str_val));
+				}else{
+					AuxTipoLD_condi = (char *) malloc(sizeof(char) * (strlen(yylval.str_val) + 1));
+					sprintf(AuxTipoLD_condi,"%s",recuperarValorTS(yylval.str_val));
+				}
+			}
 			
 		}
 	  | CAR_PA expresion CAR_PC 	  
@@ -1090,6 +1182,7 @@ char * recuperarValorTS(char* nombre)
 
 char * recuperarTipoTS(char* nombre)
 {
+	//printf("Recuperando: %s\n",nombre);
 	int i;
 	for (i=0;i < puntero_ts;i++)
 	{
