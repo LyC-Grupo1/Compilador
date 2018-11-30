@@ -104,6 +104,8 @@ int flagIFAND = FALSE;
 int flagWHILEOR = FALSE;
 int flagWHILEAND = FALSE;
 int flagELSE = FALSE;
+int flagCTESTRING = FALSE;		// Para saber en asignacion y asig mult si estoy asginando una expresion a un string
+//int flagEXPRESION = FALSE;		// Para saber en asignacion y asig mult si estoy asginando una expresion a un string
 int flagPrimero = FALSE;		// para identificar los token en asign multiple
 int flagREPEAT = FALSE;
 int flagAsigMul = FALSE;
@@ -320,18 +322,61 @@ endw_: ENDW {
 ;	 
 asignacion: 
 		lista_id OP_ASIG 
-		expresion {
+		expresion 
+		{
 			finExpre = puntero_tokens;
-			int i,j,limit;
+			int i,j,x, limit;
 			char sAux[5];
 			sprintf(sAux,yylval.str_val);
+			limit = puntero_asignacion;
+			
+			//debugListaAsignacion();
+			
+			// OBTENGO EL TIPO DE DATO DEL PRIMER ELEMENTO A ASIGNAR
+			free(auxTipoAsignacion);
+			auxTipoAsignacion = (char *) malloc(sizeof(char) * (sizeof(char) + 1));
+			strcpy(auxTipoAsignacion, recuperarTipoTS(listaAsignacion[0]));
+			
+			// CHEQUEO SI ES UN STRING ASIGNADO A UNA CUENTA
+			//printf("Token a comparar: %s \n",listaAsignacion[0]);
+			//printf("Tipo de dato del token: %s \n",recuperarTipoTS(listaAsignacion[0]));
+			//printf("Estado de flagCTESTRING: %d \n",flagCTESTRING);
+			
+			if((strcmp(recuperarTipoTS(listaAsignacion[0]),"CONST_STR") == 0 || strcmp(recuperarTipoTS(listaAsignacion[0]),"STRING") == 0))
+			{
+				//printf("Voy a analizar un STRING \n");
+				if(flagCTESTRING == FALSE)
+				{
+					finAnormal("Error","No puede asignar IDs STRING con distinto tipo\n");
+				}
+				
+			}
+			
+					
+			// COMPARO ESE TIPO CON EL TIPO DE TODOS LOS DEMAS ELEMENTOS A ASIGNAR MEDIANTE UN FOR
+			
+			for (x=1;x<limit;x++)
+			{
+				//printf("Voy a comparar el tipo de %s",recuperarTipoTS(listaAsignacion[x]));
+				//printf(" con %s\n",auxTipoAsignacion);
+				if (strcmp(recuperarTipoTS(listaAsignacion[x]),auxTipoAsignacion) != 0)
+				{
+					printf("\n");
+					
+					finAnormal("Error","No puede asignar IDs con distinto tipo\n");
+				}
+			}
+			
+			// valido ultimo elemento
+			//printf("Ultimo elemento --- %s\n\n\n",yylval.str_val);
+			
 			
 			if(flagAsigMul == TRUE)
 			{
 				if(DEBUG){printf("\t**Asignacion Multiple**\n");}
 				insertarEnLista(":=");
 							
-				limit = puntero_asignacion;
+				
 				
 				for (i=0; i < limit;i++)
 				{
@@ -356,7 +401,7 @@ asignacion:
 			
 			flagAsigMul = FALSE;
 			//if(DEBUG){printf("FIN LINEA ASIGNACION\n");}
-			
+			flagCTESTRING = FALSE;
 		}
 		| lista_id OP_ASIG 
 			between { insertarEnLista(":="); }
@@ -366,11 +411,16 @@ lista_id:
 			lista_id OP_ASIG ID {
 				
 				// VERIFICO EL TIPO DE DATO
+			
+				//printf("Voy a comparar el tipo de %s",$3);
+				//printf(" con %s\n",auxTipoAsignacion);
 				
-				if (strcmp(recuperarTipoTS($3),auxTipoAsignacion) != 0)
-				{
-					finAnormal("Error","No puede asignar IDs con distinto tipo\n");
-				}
+				// if (strcmp(recuperarTipoTS($3),auxTipoAsignacion) != 0)
+				// {
+					// printf("\n");
+					
+					// finAnormal("Error","No puede asignar IDs con distinto tipo\n");
+				// }
 				
 				flagAsigMul = TRUE;
 				
@@ -389,10 +439,11 @@ lista_id:
 				}
 			}
 			| ID {
-				//printf("Lei el ID B %s  \n",$1);
+				//printf("Lei el ID %s  \n",$1);
 				if(verificarExistencia($1) == EXISTE)
 				{
 					insertarEnLista($1);
+					insertarEnListaAsig($1);
 					flagPrimero = TRUE;
 								
 					free(auxTipoAsignacion);
@@ -402,6 +453,7 @@ lista_id:
 					// medio jugado ponerlo aca pero bueno.
 					// es para tomar donde inicia la expresion que luego asignare
 					iniExpre = puntero_tokens;
+					
 				} else {
 					// No existe en la tabla de simbolos
 					finAnormal("Syntax Error","Variable no declarada");
@@ -802,8 +854,8 @@ comparacion:
 	   ;
 
 expresion:
-		expresion OP_SUM termino {insertarEnLista("+"); }
-		|  expresion OP_RES termino {insertarEnLista("-"); }
+		expresion OP_SUM termino { insertarEnLista("+"); }
+		|  expresion OP_RES termino { insertarEnLista("-"); }
         | termino 
  	 ;
 	 
@@ -919,6 +971,10 @@ factor:
 			} 
 			insertarEnLista(yylval.str_val);
 			
+			if(strcmp(recuperarValorTS(yylval.str_val),"STRING"))
+			{
+				flagCTESTRING = TRUE; 
+			}
 			
 			
 		}
@@ -943,8 +999,8 @@ factor:
       | CONST_STR  
 		{
 			
-			
-			printf("String %s\n",yylval.str_val);
+			flagCTESTRING = TRUE; 
+			//printf("String %s\n",yylval.str_val);
 			// comentado para no generar errores.
 			if(verificarExistencia(yylval.str_val) == NO_EXISTE)
 			{ 
