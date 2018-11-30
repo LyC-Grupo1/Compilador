@@ -5,15 +5,11 @@ DEFVAR
  cadena, s : STRING
 enddef
 
-
 beginp 
 i:=1	
 a:=15
-n:=99.99
-n:=.99
-n:=99.
-n:=-542.43
-s:=""
+
+s:="HOLA"
 
 while (a<7)
 	i:=5 + b
@@ -66,12 +62,12 @@ ENDIF
 
 -/ CONDICION 7 /-
 if (NOT BETWEEN (a,[2;a*(b+4)])) THEN
-	i:=n
+	i:=a
 ENDIF
 
 -/ CONDICION 7 /-
 if (NOT i=15) THEN
-	i:=n
+	i:=a
 ENDIF
 
 -/ ASIGNACION MULTIPLE /-

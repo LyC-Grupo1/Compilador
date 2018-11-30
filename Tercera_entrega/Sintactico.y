@@ -71,6 +71,7 @@ int ladoDerCondi=0;
 char* AuxTipoLI_condi;
 char* AuxTipoLD_condi;
 int flagEsAsignacion=0;
+char AuxTipoFactor[15];
 
 
 // PILAS 
@@ -129,6 +130,7 @@ int iniExpre, finExpre;
 int DEBUG=0;
 
 int cont_cte_str=1;
+extern int yylineno;
 
 FILE *yyin;
 FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
@@ -363,11 +365,34 @@ asignacion:
 					
 			// COMPARO ESE TIPO CON EL TIPO DE TODOS LOS DEMAS ELEMENTOS A ASIGNAR MEDIANTE UN FOR
 			// valido la primer asignacion 
-			if (strcmp(recuperarTipoTS(yylval.str_val),auxTipoAsignacion) != 0)
+			printf("Tipo ASigna %s - TIPO FACTOR %s\n",auxTipoAsignacion,AuxTipoFactor);
+			if (strcmp(AuxTipoFactor,auxTipoAsignacion) != 0)
 			{
-				printf("\n");
+				// int con otro tipo
+				if( (strcmp(auxTipoAsignacion,"INTEGER")==0 || strcmp(auxTipoAsignacion,"CONST_INT")==0) &&
+						(strcmp(AuxTipoFactor,"INTEGER")!=0 && strcmp(AuxTipoFactor,"CONST_INT")!=0) )
+				{
+					printf("\n\n[ERROR] - No puede asignar un %s a un %s\n\n",AuxTipoFactor,auxTipoAsignacion);
+					exit(1);
+				}
 				
-				finAnormal("Error","No puede asignar IDs con distinto tipo\n");
+				//real con otro tipo
+				if( (strcmp(auxTipoAsignacion,"CONST_REAL")==0 ) &&
+						(strcmp(AuxTipoFactor,"CONST_REAL")!=0 ) )
+				{
+					printf("\n\n[ERROR] - No puede asignar un %s a un %s\n\n",AuxTipoFactor,auxTipoAsignacion);
+					exit(1);	
+				}
+				
+				// string con otro tipo
+				if( strcmp(auxTipoAsignacion,"STRING")==0 &&
+						(strcmp(AuxTipoFactor,"STRING")!=0 && strcmp(AuxTipoFactor,"CONST_STR")!=0) )
+				{
+					printf("\n");
+					printf("[Error] - No puede asignar un %s a un %s\n ",AuxTipoFactor,auxTipoAsignacion);
+					exit(1);
+					//finAnormal("Error","No puede asignar IDs con distinto tipo\n");
+				}
 			}
 			
 			for (x=1;x<limit;x++)
@@ -378,7 +403,9 @@ asignacion:
 				{
 					printf("\n");
 					
-					finAnormal("Error","No puede asignar IDs con distinto tipo\n");
+					printf("No puede asignar IDs con distinto tipo [variable %s]\n ", listaAsignacion[x]);
+					exit(1);
+					//finAnormal("Error","No puede asignar IDs con distinto tipo\n");
 				}
 			}
 			
@@ -1037,6 +1064,10 @@ factor:
 				flagCTESTRING = TRUE; 
 			}
 			
+			//AuxTipoFactor = (char *) malloc(sizeof(char) * (sizeof(char) + 1));
+			//sprintf(AuxTipoFactor,"%s",recuperarTipoTS(yylval.str_val));
+			strcpy(AuxTipoFactor,recuperarTipoTS(yylval.str_val));
+			
 			if(flagCondicion==1){
 				if(ladoDerCondi==0){
 					AuxTipoLI_condi = (char *) malloc(sizeof(char) * (strlen(yylval.str_val) + 1));
@@ -1059,6 +1090,8 @@ factor:
 					  insertarEnLista(yylval.int_val); 
 					  sprintf(valorFactor,"%s",yylval.int_val);
 					  
+					  //AuxTipoFactor = (char *) malloc(sizeof(char) * (sizeof(char) + 1));
+					  strcpy(AuxTipoFactor,"CONST_INT");
 					  
 						if(flagCondicion==1){
 							if(ladoDerCondi==0){
@@ -1080,6 +1113,9 @@ factor:
 			} 
 			insertarEnLista(yylval.real_val); 
 			sprintf(valorFactor,"%s",yylval.real_val);
+			
+			//AuxTipoFactor = (char *) malloc(sizeof(char) * (sizeof(char) + 1));
+			strcpy(AuxTipoFactor,"CONST_REAL");
 			
 			if(flagCondicion==1){
 				if(ladoDerCondi==0){
@@ -1110,6 +1146,9 @@ factor:
 			sprintf(sAux,"cteStr%d",cont_cte_str-1);
 			insertarEnLista(sAux); 
 			sprintf(valorFactor,"%s",yylval.str_val);
+			
+			//AuxTipoFactor = (char *) malloc(sizeof(char) * (sizeof(char) + 1));
+			strcpy(AuxTipoFactor,"CONST_STR");
 			
 			if(flagCondicion==1){
 				if(ladoDerCondi==0){
@@ -1668,8 +1707,7 @@ char * valorComparacion(char * val){
 
 int yyerror() 
 {
-	extern int yylineno;
-	extern char yytext[];
+	
 	printf("\n\nSyntax error. Linea %d cerca de <%s> \n\n",yylineno,yylval.str_val);
 	getchar();
 	system ("Pause");
