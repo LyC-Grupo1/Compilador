@@ -39,13 +39,14 @@ struct struct_tablaSimbolos
 {
 	char nombre[100];
 	char tipo[100];
-	char valor[50];
+	char valor[100];
 	char longitud[100];
 };
 
 int puntero_ts = 0;
 struct struct_tablaSimbolos tablaSimbolos[10000];
 ////////////////////////////
+int crearArchivoTS2();
 int insertar_TS(char*, char*);
 char * recuperarTipoTS(char* );
 int crearArchivoTS();
@@ -117,6 +118,10 @@ int pos_actual=0;
 int yystopparser=0;
 int iniExpre, finExpre;
 
+int DEBUG=0;
+
+int cont_cte_str=1;
+
 FILE *yyin;
 FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 
@@ -175,9 +180,9 @@ FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 
 %%
 programa:  	   
-	PROGRAM {printf("\tInicia el COMPILADOR\n");} est_declaracion algoritmo    
+	PROGRAM { if(DEBUG){printf("\t**Inicia el compilador**\n");} } est_declaracion algoritmo    
 	{
-		printf("\tFin COMPILADOR ok\n"); 
+		if(DEBUG){printf("\t**Compilacion exitoza**\n"); }
 		if(crearArchivoIntermedia()==TODO_OK) {
 			printf("\nArchivo con intermedia generado\n");
 			generarASM();
@@ -187,11 +192,11 @@ programa:
 	};
 
 est_declaracion:
-	DECVAR {printf("\t\tDECLARACIONES\n");} declaraciones ENDDEC {printf("\tFin de las Declaraciones\n");}
+	DECVAR { if(DEBUG){printf("\t**Inicio DECLARACIONES DECVAR**\n");}} declaraciones ENDDEC {if(DEBUG){printf("\t**Fin Declaraciones**\n");}}
         ;
 		
 est_declaracion:
-	DEFVAR {printf("\t\tDECLARACIONES DEF\n");} declaraciones ENDDEF {printf("\tFin de las Declaraciones DEF\n");}
+	DEFVAR { if(DEBUG){printf("\t**Inicio DECLARACIONES DEFVAR\n");}} declaraciones ENDDEF {if(DEBUG){printf("\tFin de las Declaraciones DEF\n");}}
         ;
 
 declaraciones:         	        	
@@ -211,7 +216,7 @@ lista_var:
  	 ;
 	 
 algoritmo: 
-         BEGINP{printf("COMIENZO de BLOQUES\n");} bloque ENDP
+         BEGINP bloque ENDP
          ;
 
 bloque:  
@@ -231,7 +236,7 @@ ciclo:
      REPEAT 
 	 { 
 		flagREPEAT = TRUE; 
-		printf("REPEAT\n");
+		if(DEBUG){printf("REPEAT\n");}
 		
 		sprintf(inicioCuerpoRepeat, "%d", puntero_tokens);
 		//itoa(puntero_tokens,sPosActual,10);
@@ -253,14 +258,16 @@ ciclo:
 		}
 	 | WHILE 
 	 { 
+		 if(DEBUG){printf("\t**Incio WHILE**\n");}
+		 
 		 free(inicioWhilePos);
 		 inicioWhilePos = (char *) malloc(sizeof(char) * (sizeof(int) + 1));
 		 sprintf(inicioWhilePos,"%d",puntero_tokens);
 		
-		 flagWHILE = TRUE; 
-		 printf("WHILE\n");
+		 flagWHILE = TRUE; 		 
 	 
-	 } CAR_PA  condicion CAR_PC bloque endw_
+	 } CAR_PA  condicion CAR_PC bloque endw_ {if(DEBUG){printf("\t** Fin While**\n");}}
+	;
 
 endw_: ENDW {
 			int x, i, iPosActual;
@@ -310,7 +317,7 @@ endw_: ENDW {
 			flagWHILE = FALSE;
 
 		}
-	 
+;	 
 asignacion: 
 		lista_id OP_ASIG 
 		expresion {
@@ -321,7 +328,7 @@ asignacion:
 			
 			if(flagAsigMul == TRUE)
 			{
-				printf("\n\n ASIGNACION MULTIPLE \n\n");
+				if(DEBUG){printf("\t**Asignacion Multiple**\n");}
 				insertarEnLista(":=");
 							
 				limit = puntero_asignacion;
@@ -330,9 +337,9 @@ asignacion:
 				{
 					
 					insertarEnLista(listaAsignacion[i]);
-					printf("\n\n INICIO EXPRE: %d - FIN EXPRE %d \n\n",iniExpre,finExpre);
+					//if(DEBUG){printf("\n\n INICIO EXPRE: %d - FIN EXPRE %d \n\n",iniExpre,finExpre);}
 					for(j=iniExpre ; j<finExpre; j++){
-						printf("Entre en el For \n");
+						//printf("Entre en el For \n");
 						insertarEnLista(listaTokens[j]);
 					}
 				
@@ -348,7 +355,7 @@ asignacion:
 			puntero_asignacion = 0;	// reset
 			
 			flagAsigMul = FALSE;
-			printf("FIN LINEA ASIGNACION\n");
+			//if(DEBUG){printf("FIN LINEA ASIGNACION\n");}
 			
 		}
 		| lista_id OP_ASIG 
@@ -404,9 +411,37 @@ lista_id:
 		;
 	  
 entrada_salida: 
-	READ{printf("\t\tREAD\n"); } ID 
-	|WRITE{printf("\t\tWRITE\n");} ID 
-	|WRITE{printf("\t\tWRITE\n");} CONST_STR
+	READ{printf("\t\tREAD\n"); } ID { char sAux[5];
+									  sprintf(sAux,yylval.str_val); 
+									  insertarEnLista("READ"); insertarEnLista(sAux);
+										printf("\t\tREAD %s\n",sAux); }
+	|WRITE ID { char sAux[5];
+									    sprintf(sAux,yylval.str_val);
+										insertarEnLista("WRITE"); 
+										insertarEnLista(sAux); 
+										//if(DEBUG){printf("\t\tWRITE %s\n",sAux);}
+										}
+										
+										
+										
+	|WRITE CONST_STR { 
+										
+										if(verificarExistencia(yylval.str_val) == NO_EXISTE)
+										{ 
+											insertar_TS("CONST_STR",yylval.str_val);
+										} 
+										char sAux[5];
+									    sprintf(sAux,"cteStr%d",cont_cte_str-1);
+										insertarEnLista("WRITE"); 
+										insertarEnLista(sAux); 
+	
+										/*char sAux[5];
+									    sprintf(sAux,yylval.str_val);
+										insertarEnLista("WRITE"); insertarEnLista(sAux); 
+										printf("\t\tWRITE %s\n",sAux);*/ }
+	
+	
+										
 ;
 
 seleccion: 
@@ -464,7 +499,7 @@ seleccion:
 				sprintf(posFalse, "-1");
 				sprintf(posTrue, "-1");
 				
-				printf("FIN DEL IF\n"); 
+				
 			}
 				
 		| IF CAR_PA condicion CAR_PC then_ bloque { 
@@ -565,7 +600,8 @@ condicion:
 				apilar(PILA_WHILE,sPosActualB);	
 				sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true						
 			 
-				flagWHILE = FALSE; //agregado lucas (dsp fijate mauro es para q no vuelva a entrar)
+				
+				flagWHILE = FALSE; 
 			 }
 			 
 			 if(flagREPEAT == TRUE){
@@ -591,7 +627,7 @@ condicion:
 			 
 			 
 		 }
-         |OP_NOT comparacion{printf("NOT CONDICION\n");}
+         |OP_NOT comparacion{ if(DEBUG){printf("NOT CONDICION\n");}}
          |comparacion op_and_ {sprintf(posCondDos, "%d", puntero_tokens);}  
 			comparacion {
 			 
@@ -653,7 +689,7 @@ condicion:
 				sprintf(sPosActualB, "%d", puntero_tokens-1);
 				apilar(PILA_WHILE,sPosActualB);	
 				sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true						
-				flagWHILE = FALSE; //agregado lucas (dsp fijate mauro es para q no vuelva a entrar)
+				//flagWHILE = FALSE; //agregado lucas (dsp fijate mauro es para q no vuelva a entrar)
 			} else {
 		 		strcpy(comparador_usado,"=");
 			}
@@ -677,7 +713,7 @@ condicion:
 				apilar(PILA_WHILE,sPosActualB);	
 				sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true						
 					
-				flagWHILE = FALSE; //agregado lucas (dsp fijate mauro es para q no vuelva a entrar)
+				//flagWHILE = FALSE; //agregado lucas (dsp fijate mauro es para q no vuelva a entrar)
 			} else {
 		 		strcpy(comparador_usado,"=");
 			}
@@ -761,7 +797,8 @@ op_or_: OP_OR{
 
 	 
 comparacion:
-	   expresion OP_COMPARACION { strcpy(comparador_usado,yylval.cmp_val);}  expresion
+	   expresion OP_COMPARACION { 
+								strcpy(comparador_usado,$2);}  expresion {if(DEBUG){printf("\tSe uso comparador '%s'\n",$2);}}
 	   ;
 
 expresion:
@@ -771,8 +808,8 @@ expresion:
  	 ;
 	 
 between: 
-	{
-		printf("INICIO BETWEEN\n");}BETWEEN CAR_PA ID 
+	
+		 BETWEEN {if(DEBUG){printf("\t**Inicio BETWEEN**\n");}} CAR_PA ID 
 		{
 			int iPosID = insertarEnLista(yylval.str_val);
 			char * sPosID = (char *) malloc(sizeof(char) * (sizeof(int) + 1));
@@ -849,7 +886,7 @@ between:
 											sprintf(sPosActualFalse, "%d", posFalse);
 											escribirEnLista(x,sPosActualFalse);
 											
-										} CAR_CC CAR_PC {printf("\t\tFIN BETWEEN\n");}
+										} CAR_CC CAR_PC 
 	 ;
 	 
 termino: 
@@ -905,12 +942,20 @@ factor:
 					 
       | CONST_STR  
 		{
+			
+			
+			printf("String %s\n",yylval.str_val);
+			// comentado para no generar errores.
 			if(verificarExistencia(yylval.str_val) == NO_EXISTE)
 			{ 
 				insertar_TS("CONST_STR",yylval.str_val);
 			} 
-			insertarEnLista(yylval.str_val); 
+
+			char sAux[5];
+			sprintf(sAux,"cteStr%d",cont_cte_str-1);
+			insertarEnLista(sAux); 
 			sprintf(valorFactor,"%s",yylval.str_val);
+			
 		}
 	  | CAR_PA expresion CAR_PC 	  
       ;
@@ -928,15 +973,27 @@ int insertar_TS(char* tipo, char* nombre)
 			return i;
 		}
 	}
+	
+		
+	if(strcmp(tipo,"CONST_STR") == 0)
+	{
+		sprintf(tablaSimbolos[puntero_ts].nombre, "cteStr%d", cont_cte_str);
+		cont_cte_str++;
+		
+	}else{
+		strcpy(tablaSimbolos[puntero_ts].nombre, nombre);
+	}
+	
 	strcpy(tablaSimbolos[puntero_ts].tipo, tipo);
-	strcpy(tablaSimbolos[puntero_ts].nombre, nombre);
 	
 	if(strcmp(tipo,"CONST_STR") == 0)
 	{
-		int longitud = strlen(tablaSimbolos[i].nombre);
+		int longitud = strlen(nombre);
 		sprintf(tablaSimbolos[puntero_ts].longitud, "%d", longitud);	
+		//printf("\tVALOR NOMBRE TS: %s\n",nombre);
+		sprintf(tablaSimbolos[puntero_ts].valor, "%s",nombre);
 	} 
-	else if (strcmp(tipo,"CONST_INT") == 0  || strcmp(tipo,"CONST_REAL") == 0)
+	else if (strcmp(tipo,"CONST_INT") == 0  || strcmp(tipo,"CONST_REAL") == 0 )
 	{
 		strcpy(tablaSimbolos[puntero_ts].valor, tablaSimbolos[i].nombre);
 	}
@@ -994,50 +1051,65 @@ int crearArchivoTS()
 {
 	FILE *archivo; 
 	int i;
-	archivo = fopen("ts.txt","w"); 
+	archivo = fopen("ts.txt","wt"); 
 
 	if (!archivo){	return ERROR; }
 
-	/*fprintf(archivo, "Nombre                        Tipo                  Valor                Longitud\n");
 	
+	fprintf(archivo, "Nombre^Tipo^Longitud^Valorn");
 	for (i = 0; i < puntero_ts; i++)
 	{
 		if (strcmp(tablaSimbolos[i].tipo, "INTEGER") == 0 || strcmp(tablaSimbolos[i].tipo, "REAL") == 0  || strcmp(tablaSimbolos[i].tipo, "STRING") == 0 )
 		{  
-			fprintf(archivo,"%-30s%-10s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo);
+			fprintf(archivo,"%s^%s^-^-\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo);
 		}
 		else if(strcmp(tablaSimbolos[i].tipo, "CONST_STR") == 0 )
 		{
-			fprintf(archivo,"%-29s%-10s                                    %-30d\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,strlen(tablaSimbolos[i].nombre) - 2);
+			fprintf(archivo,"%s^%s^%s^%s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].longitud,tablaSimbolos[i].valor);
 		}
 		else if(strcmp(tablaSimbolos[i].tipo, "CONST_INT") == 0 || strcmp(tablaSimbolos[i].tipo, "CONST_REAL") == 0)
 		{
-			fprintf(archivo,"_%-29s%-10s           %-30s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
+			fprintf(archivo,"_%s^%s^-^%s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
 		}
 		else 
 		{
-			fprintf(archivo,"%-30s%-10s                                %-30s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
+			fprintf(archivo,"%s^%s^-^%s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
 		}
 	}
-	*/
-	fprintf(archivo, "Nombre\t\tTipo\t\tValor\t\tLongitud\n");
+	
+	
+	fclose(archivo); 
+
+	return TODO_OK;
+}
+
+int crearArchivoTS2()
+{
+	FILE *archivo; 
+	int i;
+	archivo = fopen("ts2.txt","wt"); 
+
+	if (!archivo){	return ERROR; }
+
+	
+	//fprintf(archivo, "Nombre^Tipo^Longitud^Valorn");
 	for (i = 0; i < puntero_ts; i++)
 	{
 		if (strcmp(tablaSimbolos[i].tipo, "INTEGER") == 0 || strcmp(tablaSimbolos[i].tipo, "REAL") == 0  || strcmp(tablaSimbolos[i].tipo, "STRING") == 0 )
 		{  
-			fprintf(archivo,"%s\t\t%s\t\t-\t\t-\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo);
+			fprintf(archivo,"%s\n%s\n-\n-\n*****\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo);
 		}
 		else if(strcmp(tablaSimbolos[i].tipo, "CONST_STR") == 0 )
 		{
-			fprintf(archivo,"%s\t\t%s\t\t-\t\t%d\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,strlen(tablaSimbolos[i].nombre) - 2);
+			fprintf(archivo,"%s\n%s\n%s\n%s\n*****\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].longitud,tablaSimbolos[i].valor);
 		}
 		else if(strcmp(tablaSimbolos[i].tipo, "CONST_INT") == 0 || strcmp(tablaSimbolos[i].tipo, "CONST_REAL") == 0)
 		{
-			fprintf(archivo,"_%s\t\t%s\t\t%s\t\t-\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
+			fprintf(archivo,"_%s\n%s\n-\n%s\n*****\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
 		}
 		else 
 		{
-			fprintf(archivo,"%s\t\t%s\t\t%s\t\t-\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
+			fprintf(archivo,"%s\n%s\n-\n%s\n*****\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
 		}
 	}
 	
@@ -1061,7 +1133,7 @@ void apilar(int nroPila, char * val)
 				exit (1);
 			}
 			pilaIF[tope_pila_if]=val;
-			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
+			//printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
 			tope_pila_if++;
 			break;
 		
@@ -1073,7 +1145,7 @@ void apilar(int nroPila, char * val)
 				exit (1);
 			}
 			pilaWhile[tope_pila_while]=val;
-			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
+			//printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
 			tope_pila_while++;
 			break;
 		case PILA_ASIGNACION:
@@ -1084,7 +1156,7 @@ void apilar(int nroPila, char * val)
 				exit (1);
 			}
 			pilaAsignacion[tope_pila_asignacion]=val;
-			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
+			//printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
 			tope_pila_asignacion++;
 			break;	
 		case PILA_REPEAT:
@@ -1094,7 +1166,7 @@ void apilar(int nroPila, char * val)
 				exit (1);
 			}
 			pilaRepeat[tope_pila_repeat]=val;
-			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
+			//printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
 			tope_pila_repeat++;
 			break;	
 			
@@ -1105,7 +1177,7 @@ void apilar(int nroPila, char * val)
 				exit (1);
 			}
 			pilaBetween[tope_pila_between]=val;
-			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
+			//printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
 			tope_pila_between++;
 			break;	
 		
@@ -1126,7 +1198,7 @@ int desapilar(int nroPila)
 			{
 				char * dato = pilaIF[tope_pila_if-1];
 				tope_pila_if--;	
-				printf("\tDESAPILAR #CELDA -> %s\n",dato);
+				//printf("\tDESAPILAR #CELDA -> %s\n",dato);
 				return atoi(dato);		
 			} else {
 				printf("Error: La pila esta vacia.\n");
@@ -1142,7 +1214,7 @@ int desapilar(int nroPila)
 			{
 				char * dato = pilaWhile[tope_pila_while-1];
 				tope_pila_while--;	
-				printf("\tDESAPILAR #CELDA -> %s\n",dato);
+				//printf("\tDESAPILAR #CELDA -> %s\n",dato);
 				return atoi(dato);		
 			} else {
 				finAnormal("Stack Error","La pila esta vacia");
@@ -1155,7 +1227,7 @@ int desapilar(int nroPila)
 			{
 				char * dato = pilaAsignacion[tope_pila_asignacion-1];
 				tope_pila_asignacion--;	
-				printf("\tDESAPILAR #CELDA -> %s\n",dato);
+				//printf("\tDESAPILAR #CELDA -> %s\n",dato);
 				return (tope_pila_asignacion);			// ESTA PILA EN VEZ DE DEVOLVER EL DATO DEVUELVE LA POSICION, SINO TENGO QUE HACER UNA FUNCION NUEVA
 			} else {
 				finAnormal("Stack Error","La pila esta vacia");
@@ -1168,7 +1240,7 @@ int desapilar(int nroPila)
 			{
 				char * dato = pilaRepeat[tope_pila_repeat-1];
 				tope_pila_repeat--;	
-				printf("\tDESAPILAR #CELDA -> %s\n",dato);
+				//printf("\tDESAPILAR #CELDA -> %s\n",dato);
 				return atoi(dato);		
 			} else {
 				finAnormal("Stack Error","La pila esta vacia");
@@ -1182,7 +1254,7 @@ int desapilar(int nroPila)
 			{
 				char * dato = pilaBetween[tope_pila_between-1];
 				tope_pila_between--;	
-				printf("\tDESAPILAR #CELDA -> %s\n",dato);
+				//printf("\tDESAPILAR #CELDA -> %s\n",dato);
 				return atoi(dato);		
 			} else {
 				finAnormal("Stack Error","La pila esta vacia");
@@ -1297,8 +1369,10 @@ int insertarEnLista(char * val)
 	//fprintf(fintermedia,"%s\n",aux);
 	
 	// DEBUG por consola
-	if(strcmp(aux,"###")!=0){
-		printf("\tinsertar_en_polaca(%s)\n", aux);
+	if(DEBUG){
+		if(strcmp(aux,"###")!=0){
+			printf("\tinsertar_en_polaca(%s)\n", aux);
+		}
 	}
 	return (puntero_tokens-1); // devuelvo posicion
 }
@@ -1384,7 +1458,7 @@ void escribirEnLista(int pos, char * val)
 	// escribo en vector
 	listaTokens[pos] = aux;
 	
-	printf("\tEscribio en %i el valor %s\n",pos,aux);
+	//printf("\tEscribio en %i el valor %s\n",pos,aux);
 	
 }
 
@@ -1426,16 +1500,19 @@ char * valorComparacion(char * val){
 	}
 }
 
-int yyerror()
+int yyerror() 
 {
-	printf("** FIN DEL PROGRAMA **\n\n");
+	extern int yylineno;
+	extern char yytext[];
+	printf("\n\nSyntax error. Linea %d cerca de <%s> \n\n",yylineno,yylval.str_val);
+	getchar();
 	system ("Pause");
 	exit (1);
 }
 
 void finAnormal(char * tipo, char * mensaje)
 {
-	printf("[ERROR]: %s - %s\n",tipo,mensaje);
+	printf("\n[ERROR]: %s - %s\n",tipo,mensaje);
 	yyerror();
 }
 
@@ -1497,6 +1574,17 @@ int main(int argc,char *argv[])
 	if(crearArchivoTS() == TODO_OK)
 	{
 		printf("Se genero el archivo de tabla de simbolos\n");
+	}
+	else 
+	{
+		printf("ERROR - Syntax error\n");
+		system ("Pause");
+		exit(1);
+	}
+	
+	if(crearArchivoTS2() == TODO_OK)
+	{
+		printf("Se genero el archivo de tabla de simbolos 2\n");
 	}
 	else 
 	{

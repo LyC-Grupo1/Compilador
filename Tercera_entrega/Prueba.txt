@@ -1,4 +1,4 @@
-﻿program  
+﻿﻿program  
 DECVAR	
  i,b,a : INTEGER
  cadena, s : STRING
@@ -8,16 +8,27 @@ ENDDEC
 beginp 
 i:=1	
 b:=10
-b:=i:=8+5
+b:=i:=8+5+2
+
+
+
+WRITE "comienzo de Programa"
+
 
 -/ IF SIMPLE /-
 if (i=15) THEN
-	i:=16	
+	write "IF Afirmativo"
+	write i
 ENDIF
 
--/ BETWEEN /-
-BETWEEN(a,[2;a*(b+4)])
+while (i<30)
+	write i
+	i:=i+1
+endw
 
+-/ BETWEEN /-
+BETWEEN(a,[2;b])
+
+write "Fin de Programa"
 
 endp
-
