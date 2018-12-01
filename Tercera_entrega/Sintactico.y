@@ -365,7 +365,7 @@ asignacion:
 					
 			// COMPARO ESE TIPO CON EL TIPO DE TODOS LOS DEMAS ELEMENTOS A ASIGNAR MEDIANTE UN FOR
 			// valido la primer asignacion 
-			printf("Tipo ASigna %s - TIPO FACTOR %s\n",auxTipoAsignacion,AuxTipoFactor);
+			//printf("Tipo ASigna %s - TIPO FACTOR %s\n",auxTipoAsignacion,AuxTipoFactor);
 			if (strcmp(AuxTipoFactor,auxTipoAsignacion) != 0)
 			{
 				// int con otro tipo
@@ -451,26 +451,6 @@ asignacion:
 
 lista_id:		
 			lista_id OP_ASIG ID {
-				
-				// VERIFICO EL TIPO DE DATO
-			
-				//free(auxTipoAsignacion);
-				//AuxTipoAsignacionSimple = (char *) malloc(sizeof(char) * (sizeof(char) + 1));
-				//strcpy(AuxTipoAsignacionSimple, recuperarTipoTS($3));
-				
-				printf("Ultimo asignacion %s \n",$3);
-			
-				//printf("Voy a comparar el tipo de %s",$3);
-				//printf(" con %s\n",auxTipoAsignacion);
-				
-				// if (strcmp(recuperarTipoTS($3),auxTipoAsignacion) != 0)
-				// {
-					// printf("\n");
-					
-					// finAnormal("Error","No puede asignar IDs con distinto tipo\n");
-				// }
-				
-				
 				
 				flagAsigMul = TRUE;
 				

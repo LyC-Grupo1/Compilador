@@ -121,7 +121,7 @@ void generarDatos() {
 			}else{
 				if(strcmp(tipo_elemento,"CONST_STR")==0){
 					if(strcmp(valor_elemento,"-") == 0){
-						fprintf(pfASM, "\t_%s db MAXTEXTSIZE dup(?), '$'\n",nombre_elemento, valor_elemento, longitud_elemento);
+						fprintf(pfASM, "\t_%s db MAXTEXTSIZE dup(?), '$'\n",nombre_elemento);
 					}else{	
 						fprintf(pfASM, "\t_%s db %s, '$', %s dup(?)\n", nombre_elemento, valor_elemento, longitud_elemento);
 					}
@@ -129,7 +129,11 @@ void generarDatos() {
 					if(strcmp(tipo_elemento,"CONST_REAL")==0){
 						fprintf(pfASM, "\t%s dd %s\n",nombre_elemento,valor_elemento);
 					}else{
-						fprintf(pfASM, "\t_%s dd ?\n",nombre_elemento); //IDs
+						if(strcmp(tipo_elemento,"STRING")==0){
+							fprintf(pfASM, "\t_%s db MAXTEXTSIZE dup(?), '$'\n",nombre_elemento);
+						}else{
+							fprintf(pfASM, "\t_%s dd ?\n",nombre_elemento); //IDs
+						}
 					}
 				
 				}

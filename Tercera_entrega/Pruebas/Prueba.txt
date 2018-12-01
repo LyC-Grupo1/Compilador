@@ -8,8 +8,7 @@ enddef
 beginp 
 i:=1	
 a:=15
-
-s:="HOLA"
+n:=99.99
 
 while (a<7)
 	i:=5 + b

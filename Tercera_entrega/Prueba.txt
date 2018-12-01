@@ -8,22 +8,19 @@ ENDDEC
 beginp 
 i:=1	
 b:=10
-s:="asd"
 i:=b:=8+5+2
 
 -/ i:=s /-
 
-
--/  s:="HOLA":=b:=8+5+2 /-
 -/ i:=s:=8+5+2 /-
 -/ s:=1+1 /-
-a:=2:=3
+
 
 WRITE "comienzo de Programa"
 
 
 -/ IF SIMPLE /-
-if (i=2) THEN
+if (i=1.) THEN
 	write "IF Afirmativo"
 	write i
 ENDIF
