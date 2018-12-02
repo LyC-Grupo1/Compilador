@@ -1,0 +1,1682 @@
+Terminals unused in grammar
+
+   FOR
+   TO
+   DO
+   ENDFOR
+   CAR_PUNTO
+   LONG
+   IN
+
+
+Gramática
+
+    0 $accept: programa $end
+
+    1 $@1: /* vacío */
+
+    2 programa: PROGRAM $@1 est_declaracion algoritmo
+
+    3 $@2: /* vacío */
+
+    4 est_declaracion: DECVAR $@2 declaraciones ENDDEC
+
+    5 $@3: /* vacío */
+
+    6 est_declaracion: DEFVAR $@3 declaraciones ENDDEF
+
+    7 declaraciones: declaracion
+    8              | declaraciones declaracion
+
+    9 declaracion: lista_var OP_DOSP REAL
+   10            | lista_var OP_DOSP STRING
+   11            | lista_var OP_DOSP INTEGER
+
+   12 lista_var: ID
+   13          | lista_var CAR_COMA ID
+
+   14 algoritmo: BEGINP bloque ENDP
+
+   15 bloque: bloque sentencia
+   16       | sentencia
+
+   17 sentencia: ciclo
+   18          | seleccion
+   19          | asignacion
+   20          | entrada_salida
+   21          | between
+
+   22 $@4: /* vacío */
+
+   23 $@5: /* vacío */
+
+   24 ciclo: REPEAT $@4 bloque UNTIL $@5 condicion
+
+   25 $@6: /* vacío */
+
+   26 ciclo: WHILE $@6 CAR_PA condicion CAR_PC bloque endw_
+
+   27 endw_: ENDW
+
+   28 asignacion: lista_id OP_ASIG expresion
+   29           | lista_id OP_ASIG between
+
+   30 lista_id: lista_id OP_ASIG ID
+   31         | ID
+
+   32 $@7: /* vacío */
+
+   33 entrada_salida: READ $@7 ID
+   34               | WRITE ID
+   35               | WRITE CONST_STR
+
+   36 $@8: /* vacío */
+
+   37 seleccion: if_ CAR_PA condicion CAR_PC then_ bloque $@8 ENDIF
+
+   38 $@9: /* vacío */
+
+   39 seleccion: if_ CAR_PA condicion CAR_PC then_ bloque $@9 else_ bloque ENDIF
+
+   40 if_: IF
+
+   41 then_: THEN
+
+   42 else_: ELSE
+
+   43 condicion: comparacion
+   44          | OP_NOT comparacion
+
+   45 $@10: /* vacío */
+
+   46 condicion: comparacion op_and_ $@10 comparacion
+
+   47 $@11: /* vacío */
+
+   48 condicion: comparacion op_or_ $@11 comparacion
+   49          | OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC
+   50          | OP_NOT CAR_PA comparacion OP_OR comparacion CAR_PC
+   51          | between
+   52          | OP_NOT between
+
+   53 op_and_: OP_AND
+
+   54 op_or_: OP_OR
+
+   55 $@12: /* vacío */
+
+   56 comparacion: expresion OP_COMPARACION $@12 expresion
+
+   57 expresion: expresion OP_SUM termino
+   58          | expresion OP_RES termino
+   59          | termino
+
+   60 $@13: /* vacío */
+
+   61 $@14: /* vacío */
+
+   62 $@15: /* vacío */
+
+   63 $@16: /* vacío */
+
+   64 between: BETWEEN $@13 CAR_PA ID $@14 CAR_COMA CAR_CA expresion $@15 CAR_PYC expresion $@16 CAR_CC CAR_PC
+
+   65 termino: termino OP_MUL factor
+   66        | termino OP_DIV factor
+   67        | factor
+
+   68 factor: ID
+   69       | CONST_INT
+   70       | CONST_REAL
+   71       | CONST_STR
+   72       | CAR_PA expresion CAR_PC
+
+
+Terminales con las reglas donde aparecen
+
+$end (0) 0
+error (256)
+ID (258) 12 13 30 31 33 34 64 68
+CONST_INT (259) 69
+CONST_STR (260) 35 71
+CONST_REAL (261) 70
+PROGRAM (262) 2
+DECVAR (263) 4
+ENDDEC (264) 4
+DEFVAR (265) 6
+ENDDEF (266) 6
+REAL (267) 9
+INTEGER (268) 11
+STRING (269) 10
+BEGINP (270) 14
+ENDP (271) 14
+IF (272) 40
+THEN (273) 41
+ELSE (274) 42
+ENDIF (275) 37 39
+FOR (276)
+TO (277)
+DO (278)
+ENDFOR (279)
+WHILE (280) 26
+ENDW (281) 27
+REPEAT (282) 24
+UNTIL (283) 24
+OP_AND (284) 49 53
+OP_OR (285) 50 54
+OP_NOT (286) 44 49 50 52
+OP_COMPARACION (287) 56
+OP_ASIG (288) 28 29 30
+OP_DOSP (289) 9 10 11
+OP_SUM (290) 57
+OP_RES (291) 58
+OP_MUL (292) 65
+OP_DIV (293) 66
+CAR_COMA (294) 13 64
+CAR_PUNTO (295)
+CAR_PYC (296) 64
+CAR_PA (297) 26 37 39 49 50 64 72
+CAR_PC (298) 26 37 39 49 50 64 72
+CAR_CA (299) 64
+CAR_CC (300) 64
+LONG (301)
+BETWEEN (302) 64
+IN (303)
+WRITE (304) 34 35
+READ (305) 33
+
+
+No terminales con las reglas donde aparecen
+
+$accept (51)
+    en la izquierda: 0
+programa (52)
+    en la izquierda: 2, en la derecha: 0
+$@1 (53)
+    en la izquierda: 1, en la derecha: 2
+est_declaracion (54)
+    en la izquierda: 4 6, en la derecha: 2
+$@2 (55)
+    en la izquierda: 3, en la derecha: 4
+$@3 (56)
+    en la izquierda: 5, en la derecha: 6
+declaraciones (57)
+    en la izquierda: 7 8, en la derecha: 4 6 8
+declaracion (58)
+    en la izquierda: 9 10 11, en la derecha: 7 8
+lista_var (59)
+    en la izquierda: 12 13, en la derecha: 9 10 11 13
+algoritmo (60)
+    en la izquierda: 14, en la derecha: 2
+bloque (61)
+    en la izquierda: 15 16, en la derecha: 14 15 24 26 37 39
+sentencia (62)
+    en la izquierda: 17 18 19 20 21, en la derecha: 15 16
+ciclo (63)
+    en la izquierda: 24 26, en la derecha: 17
+$@4 (64)
+    en la izquierda: 22, en la derecha: 24
+$@5 (65)
+    en la izquierda: 23, en la derecha: 24
+$@6 (66)
+    en la izquierda: 25, en la derecha: 26
+endw_ (67)
+    en la izquierda: 27, en la derecha: 26
+asignacion (68)
+    en la izquierda: 28 29, en la derecha: 19
+lista_id (69)
+    en la izquierda: 30 31, en la derecha: 28 29 30
+entrada_salida (70)
+    en la izquierda: 33 34 35, en la derecha: 20
+$@7 (71)
+    en la izquierda: 32, en la derecha: 33
+seleccion (72)
+    en la izquierda: 37 39, en la derecha: 18
+$@8 (73)
+    en la izquierda: 36, en la derecha: 37
+$@9 (74)
+    en la izquierda: 38, en la derecha: 39
+if_ (75)
+    en la izquierda: 40, en la derecha: 37 39
+then_ (76)
+    en la izquierda: 41, en la derecha: 37 39
+else_ (77)
+    en la izquierda: 42, en la derecha: 39
+condicion (78)
+    en la izquierda: 43 44 46 48 49 50 51 52, en la derecha: 24 26
+    37 39
+$@10 (79)
+    en la izquierda: 45, en la derecha: 46
+$@11 (80)
+    en la izquierda: 47, en la derecha: 48
+op_and_ (81)
+    en la izquierda: 53, en la derecha: 46
+op_or_ (82)
+    en la izquierda: 54, en la derecha: 48
+comparacion (83)
+    en la izquierda: 56, en la derecha: 43 44 46 48 49 50
+$@12 (84)
+    en la izquierda: 55, en la derecha: 56
+expresion (85)
+    en la izquierda: 57 58 59, en la derecha: 28 56 57 58 64 72
+between (86)
+    en la izquierda: 64, en la derecha: 21 29 51 52
+$@13 (87)
+    en la izquierda: 60, en la derecha: 64
+$@14 (88)
+    en la izquierda: 61, en la derecha: 64
+$@15 (89)
+    en la izquierda: 62, en la derecha: 64
+$@16 (90)
+    en la izquierda: 63, en la derecha: 64
+termino (91)
+    en la izquierda: 65 66 67, en la derecha: 57 58 59 65 66
+factor (92)
+    en la izquierda: 68 69 70 71 72, en la derecha: 65 66 67
+
+
+estado 0
+
+    0 $accept: . programa $end
+
+    PROGRAM  desplazar e ir al estado 1
+
+    programa  ir al estado 2
+
+
+estado 1
+
+    2 programa: PROGRAM . $@1 est_declaracion algoritmo
+
+    $default  reduce usando la regla 1 ($@1)
+
+    $@1  ir al estado 3
+
+
+estado 2
+
+    0 $accept: programa . $end
+
+    $end  desplazar e ir al estado 4
+
+
+estado 3
+
+    2 programa: PROGRAM $@1 . est_declaracion algoritmo
+
+    DECVAR  desplazar e ir al estado 5
+    DEFVAR  desplazar e ir al estado 6
+
+    est_declaracion  ir al estado 7
+
+
+estado 4
+
+    0 $accept: programa $end .
+
+    $default  aceptar
+
+
+estado 5
+
+    4 est_declaracion: DECVAR . $@2 declaraciones ENDDEC
+
+    $default  reduce usando la regla 3 ($@2)
+
+    $@2  ir al estado 8
+
+
+estado 6
+
+    6 est_declaracion: DEFVAR . $@3 declaraciones ENDDEF
+
+    $default  reduce usando la regla 5 ($@3)
+
+    $@3  ir al estado 9
+
+
+estado 7
+
+    2 programa: PROGRAM $@1 est_declaracion . algoritmo
+
+    BEGINP  desplazar e ir al estado 10
+
+    algoritmo  ir al estado 11
+
+
+estado 8
+
+    4 est_declaracion: DECVAR $@2 . declaraciones ENDDEC
+
+    ID  desplazar e ir al estado 12
+
+    declaraciones  ir al estado 13
+    declaracion    ir al estado 14
+    lista_var      ir al estado 15
+
+
+estado 9
+
+    6 est_declaracion: DEFVAR $@3 . declaraciones ENDDEF
+
+    ID  desplazar e ir al estado 12
+
+    declaraciones  ir al estado 16
+    declaracion    ir al estado 14
+    lista_var      ir al estado 15
+
+
+estado 10
+
+   14 algoritmo: BEGINP . bloque ENDP
+
+    ID       desplazar e ir al estado 17
+    IF       desplazar e ir al estado 18
+    WHILE    desplazar e ir al estado 19
+    REPEAT   desplazar e ir al estado 20
+    BETWEEN  desplazar e ir al estado 21
+    WRITE    desplazar e ir al estado 22
+    READ     desplazar e ir al estado 23
+
+    bloque          ir al estado 24
+    sentencia       ir al estado 25
+    ciclo           ir al estado 26
+    asignacion      ir al estado 27
+    lista_id        ir al estado 28
+    entrada_salida  ir al estado 29
+    seleccion       ir al estado 30
+    if_             ir al estado 31
+    between         ir al estado 32
+
+
+estado 11
+
+    2 programa: PROGRAM $@1 est_declaracion algoritmo .
+
+    $default  reduce usando la regla 2 (programa)
+
+
+estado 12
+
+   12 lista_var: ID .
+
+    $default  reduce usando la regla 12 (lista_var)
+
+
+estado 13
+
+    4 est_declaracion: DECVAR $@2 declaraciones . ENDDEC
+    8 declaraciones: declaraciones . declaracion
+
+    ID      desplazar e ir al estado 12
+    ENDDEC  desplazar e ir al estado 33
+
+    declaracion  ir al estado 34
+    lista_var    ir al estado 15
+
+
+estado 14
+
+    7 declaraciones: declaracion .
+
+    $default  reduce usando la regla 7 (declaraciones)
+
+
+estado 15
+
+    9 declaracion: lista_var . OP_DOSP REAL
+   10            | lista_var . OP_DOSP STRING
+   11            | lista_var . OP_DOSP INTEGER
+   13 lista_var: lista_var . CAR_COMA ID
+
+    OP_DOSP   desplazar e ir al estado 35
+    CAR_COMA  desplazar e ir al estado 36
+
+
+estado 16
+
+    6 est_declaracion: DEFVAR $@3 declaraciones . ENDDEF
+    8 declaraciones: declaraciones . declaracion
+
+    ID      desplazar e ir al estado 12
+    ENDDEF  desplazar e ir al estado 37
+
+    declaracion  ir al estado 34
+    lista_var    ir al estado 15
+
+
+estado 17
+
+   31 lista_id: ID .
+
+    $default  reduce usando la regla 31 (lista_id)
+
+
+estado 18
+
+   40 if_: IF .
+
+    $default  reduce usando la regla 40 (if_)
+
+
+estado 19
+
+   26 ciclo: WHILE . $@6 CAR_PA condicion CAR_PC bloque endw_
+
+    $default  reduce usando la regla 25 ($@6)
+
+    $@6  ir al estado 38
+
+
+estado 20
+
+   24 ciclo: REPEAT . $@4 bloque UNTIL $@5 condicion
+
+    $default  reduce usando la regla 22 ($@4)
+
+    $@4  ir al estado 39
+
+
+estado 21
+
+   64 between: BETWEEN . $@13 CAR_PA ID $@14 CAR_COMA CAR_CA expresion $@15 CAR_PYC expresion $@16 CAR_CC CAR_PC
+
+    $default  reduce usando la regla 60 ($@13)
+
+    $@13  ir al estado 40
+
+
+estado 22
+
+   34 entrada_salida: WRITE . ID
+   35               | WRITE . CONST_STR
+
+    ID         desplazar e ir al estado 41
+    CONST_STR  desplazar e ir al estado 42
+
+
+estado 23
+
+   33 entrada_salida: READ . $@7 ID
+
+    $default  reduce usando la regla 32 ($@7)
+
+    $@7  ir al estado 43
+
+
+estado 24
+
+   14 algoritmo: BEGINP bloque . ENDP
+   15 bloque: bloque . sentencia
+
+    ID       desplazar e ir al estado 17
+    ENDP     desplazar e ir al estado 44
+    IF       desplazar e ir al estado 18
+    WHILE    desplazar e ir al estado 19
+    REPEAT   desplazar e ir al estado 20
+    BETWEEN  desplazar e ir al estado 21
+    WRITE    desplazar e ir al estado 22
+    READ     desplazar e ir al estado 23
+
+    sentencia       ir al estado 45
+    ciclo           ir al estado 26
+    asignacion      ir al estado 27
+    lista_id        ir al estado 28
+    entrada_salida  ir al estado 29
+    seleccion       ir al estado 30
+    if_             ir al estado 31
+    between         ir al estado 32
+
+
+estado 25
+
+   16 bloque: sentencia .
+
+    $default  reduce usando la regla 16 (bloque)
+
+
+estado 26
+
+   17 sentencia: ciclo .
+
+    $default  reduce usando la regla 17 (sentencia)
+
+
+estado 27
+
+   19 sentencia: asignacion .
+
+    $default  reduce usando la regla 19 (sentencia)
+
+
+estado 28
+
+   28 asignacion: lista_id . OP_ASIG expresion
+   29           | lista_id . OP_ASIG between
+   30 lista_id: lista_id . OP_ASIG ID
+
+    OP_ASIG  desplazar e ir al estado 46
+
+
+estado 29
+
+   20 sentencia: entrada_salida .
+
+    $default  reduce usando la regla 20 (sentencia)
+
+
+estado 30
+
+   18 sentencia: seleccion .
+
+    $default  reduce usando la regla 18 (sentencia)
+
+
+estado 31
+
+   37 seleccion: if_ . CAR_PA condicion CAR_PC then_ bloque $@8 ENDIF
+   39          | if_ . CAR_PA condicion CAR_PC then_ bloque $@9 else_ bloque ENDIF
+
+    CAR_PA  desplazar e ir al estado 47
+
+
+estado 32
+
+   21 sentencia: between .
+
+    $default  reduce usando la regla 21 (sentencia)
+
+
+estado 33
+
+    4 est_declaracion: DECVAR $@2 declaraciones ENDDEC .
+
+    $default  reduce usando la regla 4 (est_declaracion)
+
+
+estado 34
+
+    8 declaraciones: declaraciones declaracion .
+
+    $default  reduce usando la regla 8 (declaraciones)
+
+
+estado 35
+
+    9 declaracion: lista_var OP_DOSP . REAL
+   10            | lista_var OP_DOSP . STRING
+   11            | lista_var OP_DOSP . INTEGER
+
+    REAL     desplazar e ir al estado 48
+    INTEGER  desplazar e ir al estado 49
+    STRING   desplazar e ir al estado 50
+
+
+estado 36
+
+   13 lista_var: lista_var CAR_COMA . ID
+
+    ID  desplazar e ir al estado 51
+
+
+estado 37
+
+    6 est_declaracion: DEFVAR $@3 declaraciones ENDDEF .
+
+    $default  reduce usando la regla 6 (est_declaracion)
+
+
+estado 38
+
+   26 ciclo: WHILE $@6 . CAR_PA condicion CAR_PC bloque endw_
+
+    CAR_PA  desplazar e ir al estado 52
+
+
+estado 39
+
+   24 ciclo: REPEAT $@4 . bloque UNTIL $@5 condicion
+
+    ID       desplazar e ir al estado 17
+    IF       desplazar e ir al estado 18
+    WHILE    desplazar e ir al estado 19
+    REPEAT   desplazar e ir al estado 20
+    BETWEEN  desplazar e ir al estado 21
+    WRITE    desplazar e ir al estado 22
+    READ     desplazar e ir al estado 23
+
+    bloque          ir al estado 53
+    sentencia       ir al estado 25
+    ciclo           ir al estado 26
+    asignacion      ir al estado 27
+    lista_id        ir al estado 28
+    entrada_salida  ir al estado 29
+    seleccion       ir al estado 30
+    if_             ir al estado 31
+    between         ir al estado 32
+
+
+estado 40
+
+   64 between: BETWEEN $@13 . CAR_PA ID $@14 CAR_COMA CAR_CA expresion $@15 CAR_PYC expresion $@16 CAR_CC CAR_PC
+
+    CAR_PA  desplazar e ir al estado 54
+
+
+estado 41
+
+   34 entrada_salida: WRITE ID .
+
+    $default  reduce usando la regla 34 (entrada_salida)
+
+
+estado 42
+
+   35 entrada_salida: WRITE CONST_STR .
+
+    $default  reduce usando la regla 35 (entrada_salida)
+
+
+estado 43
+
+   33 entrada_salida: READ $@7 . ID
+
+    ID  desplazar e ir al estado 55
+
+
+estado 44
+
+   14 algoritmo: BEGINP bloque ENDP .
+
+    $default  reduce usando la regla 14 (algoritmo)
+
+
+estado 45
+
+   15 bloque: bloque sentencia .
+
+    $default  reduce usando la regla 15 (bloque)
+
+
+estado 46
+
+   28 asignacion: lista_id OP_ASIG . expresion
+   29           | lista_id OP_ASIG . between
+   30 lista_id: lista_id OP_ASIG . ID
+
+    ID          desplazar e ir al estado 56
+    CONST_INT   desplazar e ir al estado 57
+    CONST_STR   desplazar e ir al estado 58
+    CONST_REAL  desplazar e ir al estado 59
+    CAR_PA      desplazar e ir al estado 60
+    BETWEEN     desplazar e ir al estado 21
+
+    expresion  ir al estado 61
+    between    ir al estado 62
+    termino    ir al estado 63
+    factor     ir al estado 64
+
+
+estado 47
+
+   37 seleccion: if_ CAR_PA . condicion CAR_PC then_ bloque $@8 ENDIF
+   39          | if_ CAR_PA . condicion CAR_PC then_ bloque $@9 else_ bloque ENDIF
+
+    ID          desplazar e ir al estado 65
+    CONST_INT   desplazar e ir al estado 57
+    CONST_STR   desplazar e ir al estado 58
+    CONST_REAL  desplazar e ir al estado 59
+    OP_NOT      desplazar e ir al estado 66
+    CAR_PA      desplazar e ir al estado 60
+    BETWEEN     desplazar e ir al estado 21
+
+    condicion    ir al estado 67
+    comparacion  ir al estado 68
+    expresion    ir al estado 69
+    between      ir al estado 70
+    termino      ir al estado 63
+    factor       ir al estado 64
+
+
+estado 48
+
+    9 declaracion: lista_var OP_DOSP REAL .
+
+    $default  reduce usando la regla 9 (declaracion)
+
+
+estado 49
+
+   11 declaracion: lista_var OP_DOSP INTEGER .
+
+    $default  reduce usando la regla 11 (declaracion)
+
+
+estado 50
+
+   10 declaracion: lista_var OP_DOSP STRING .
+
+    $default  reduce usando la regla 10 (declaracion)
+
+
+estado 51
+
+   13 lista_var: lista_var CAR_COMA ID .
+
+    $default  reduce usando la regla 13 (lista_var)
+
+
+estado 52
+
+   26 ciclo: WHILE $@6 CAR_PA . condicion CAR_PC bloque endw_
+
+    ID          desplazar e ir al estado 65
+    CONST_INT   desplazar e ir al estado 57
+    CONST_STR   desplazar e ir al estado 58
+    CONST_REAL  desplazar e ir al estado 59
+    OP_NOT      desplazar e ir al estado 66
+    CAR_PA      desplazar e ir al estado 60
+    BETWEEN     desplazar e ir al estado 21
+
+    condicion    ir al estado 71
+    comparacion  ir al estado 68
+    expresion    ir al estado 69
+    between      ir al estado 70
+    termino      ir al estado 63
+    factor       ir al estado 64
+
+
+estado 53
+
+   15 bloque: bloque . sentencia
+   24 ciclo: REPEAT $@4 bloque . UNTIL $@5 condicion
+
+    ID       desplazar e ir al estado 17
+    IF       desplazar e ir al estado 18
+    WHILE    desplazar e ir al estado 19
+    REPEAT   desplazar e ir al estado 20
+    UNTIL    desplazar e ir al estado 72
+    BETWEEN  desplazar e ir al estado 21
+    WRITE    desplazar e ir al estado 22
+    READ     desplazar e ir al estado 23
+
+    sentencia       ir al estado 45
+    ciclo           ir al estado 26
+    asignacion      ir al estado 27
+    lista_id        ir al estado 28
+    entrada_salida  ir al estado 29
+    seleccion       ir al estado 30
+    if_             ir al estado 31
+    between         ir al estado 32
+
+
+estado 54
+
+   64 between: BETWEEN $@13 CAR_PA . ID $@14 CAR_COMA CAR_CA expresion $@15 CAR_PYC expresion $@16 CAR_CC CAR_PC
+
+    ID  desplazar e ir al estado 73
+
+
+estado 55
+
+   33 entrada_salida: READ $@7 ID .
+
+    $default  reduce usando la regla 33 (entrada_salida)
+
+
+estado 56
+
+   30 lista_id: lista_id OP_ASIG ID .
+   68 factor: ID .
+
+    OP_ASIG   reduce usando la regla 30 (lista_id)
+    $default  reduce usando la regla 68 (factor)
+
+
+estado 57
+
+   69 factor: CONST_INT .
+
+    $default  reduce usando la regla 69 (factor)
+
+
+estado 58
+
+   71 factor: CONST_STR .
+
+    $default  reduce usando la regla 71 (factor)
+
+
+estado 59
+
+   70 factor: CONST_REAL .
+
+    $default  reduce usando la regla 70 (factor)
+
+
+estado 60
+
+   72 factor: CAR_PA . expresion CAR_PC
+
+    ID          desplazar e ir al estado 65
+    CONST_INT   desplazar e ir al estado 57
+    CONST_STR   desplazar e ir al estado 58
+    CONST_REAL  desplazar e ir al estado 59
+    CAR_PA      desplazar e ir al estado 60
+
+    expresion  ir al estado 74
+    termino    ir al estado 63
+    factor     ir al estado 64
+
+
+estado 61
+
+   28 asignacion: lista_id OP_ASIG expresion .
+   57 expresion: expresion . OP_SUM termino
+   58          | expresion . OP_RES termino
+
+    OP_SUM  desplazar e ir al estado 75
+    OP_RES  desplazar e ir al estado 76
+
+    $default  reduce usando la regla 28 (asignacion)
+
+
+estado 62
+
+   29 asignacion: lista_id OP_ASIG between .
+
+    $default  reduce usando la regla 29 (asignacion)
+
+
+estado 63
+
+   59 expresion: termino .
+   65 termino: termino . OP_MUL factor
+   66        | termino . OP_DIV factor
+
+    OP_MUL  desplazar e ir al estado 77
+    OP_DIV  desplazar e ir al estado 78
+
+    $default  reduce usando la regla 59 (expresion)
+
+
+estado 64
+
+   67 termino: factor .
+
+    $default  reduce usando la regla 67 (termino)
+
+
+estado 65
+
+   68 factor: ID .
+
+    $default  reduce usando la regla 68 (factor)
+
+
+estado 66
+
+   44 condicion: OP_NOT . comparacion
+   49          | OP_NOT . CAR_PA comparacion OP_AND comparacion CAR_PC
+   50          | OP_NOT . CAR_PA comparacion OP_OR comparacion CAR_PC
+   52          | OP_NOT . between
+
+    ID          desplazar e ir al estado 65
+    CONST_INT   desplazar e ir al estado 57
+    CONST_STR   desplazar e ir al estado 58
+    CONST_REAL  desplazar e ir al estado 59
+    CAR_PA      desplazar e ir al estado 79
+    BETWEEN     desplazar e ir al estado 21
+
+    comparacion  ir al estado 80
+    expresion    ir al estado 69
+    between      ir al estado 81
+    termino      ir al estado 63
+    factor       ir al estado 64
+
+
+estado 67
+
+   37 seleccion: if_ CAR_PA condicion . CAR_PC then_ bloque $@8 ENDIF
+   39          | if_ CAR_PA condicion . CAR_PC then_ bloque $@9 else_ bloque ENDIF
+
+    CAR_PC  desplazar e ir al estado 82
+
+
+estado 68
+
+   43 condicion: comparacion .
+   46          | comparacion . op_and_ $@10 comparacion
+   48          | comparacion . op_or_ $@11 comparacion
+
+    OP_AND  desplazar e ir al estado 83
+    OP_OR   desplazar e ir al estado 84
+
+    $default  reduce usando la regla 43 (condicion)
+
+    op_and_  ir al estado 85
+    op_or_   ir al estado 86
+
+
+estado 69
+
+   56 comparacion: expresion . OP_COMPARACION $@12 expresion
+   57 expresion: expresion . OP_SUM termino
+   58          | expresion . OP_RES termino
+
+    OP_COMPARACION  desplazar e ir al estado 87
+    OP_SUM          desplazar e ir al estado 75
+    OP_RES          desplazar e ir al estado 76
+
+
+estado 70
+
+   51 condicion: between .
+
+    $default  reduce usando la regla 51 (condicion)
+
+
+estado 71
+
+   26 ciclo: WHILE $@6 CAR_PA condicion . CAR_PC bloque endw_
+
+    CAR_PC  desplazar e ir al estado 88
+
+
+estado 72
+
+   24 ciclo: REPEAT $@4 bloque UNTIL . $@5 condicion
+
+    $default  reduce usando la regla 23 ($@5)
+
+    $@5  ir al estado 89
+
+
+estado 73
+
+   64 between: BETWEEN $@13 CAR_PA ID . $@14 CAR_COMA CAR_CA expresion $@15 CAR_PYC expresion $@16 CAR_CC CAR_PC
+
+    $default  reduce usando la regla 61 ($@14)
+
+    $@14  ir al estado 90
+
+
+estado 74
+
+   57 expresion: expresion . OP_SUM termino
+   58          | expresion . OP_RES termino
+   72 factor: CAR_PA expresion . CAR_PC
+
+    OP_SUM  desplazar e ir al estado 75
+    OP_RES  desplazar e ir al estado 76
+    CAR_PC  desplazar e ir al estado 91
+
+
+estado 75
+
+   57 expresion: expresion OP_SUM . termino
+
+    ID          desplazar e ir al estado 65
+    CONST_INT   desplazar e ir al estado 57
+    CONST_STR   desplazar e ir al estado 58
+    CONST_REAL  desplazar e ir al estado 59
+    CAR_PA      desplazar e ir al estado 60
+
+    termino  ir al estado 92
+    factor   ir al estado 64
+
+
+estado 76
+
+   58 expresion: expresion OP_RES . termino
+
+    ID          desplazar e ir al estado 65
+    CONST_INT   desplazar e ir al estado 57
+    CONST_STR   desplazar e ir al estado 58
+    CONST_REAL  desplazar e ir al estado 59
+    CAR_PA      desplazar e ir al estado 60
+
+    termino  ir al estado 93
+    factor   ir al estado 64
+
+
+estado 77
+
+   65 termino: termino OP_MUL . factor
+
+    ID          desplazar e ir al estado 65
+    CONST_INT   desplazar e ir al estado 57
+    CONST_STR   desplazar e ir al estado 58
+    CONST_REAL  desplazar e ir al estado 59
+    CAR_PA      desplazar e ir al estado 60
+
+    factor  ir al estado 94
+
+
+estado 78
+
+   66 termino: termino OP_DIV . factor
+
+    ID          desplazar e ir al estado 65
+    CONST_INT   desplazar e ir al estado 57
+    CONST_STR   desplazar e ir al estado 58
+    CONST_REAL  desplazar e ir al estado 59
+    CAR_PA      desplazar e ir al estado 60
+
+    factor  ir al estado 95
+
+
+estado 79
+
+   49 condicion: OP_NOT CAR_PA . comparacion OP_AND comparacion CAR_PC
+   50          | OP_NOT CAR_PA . comparacion OP_OR comparacion CAR_PC
+   72 factor: CAR_PA . expresion CAR_PC
+
+    ID          desplazar e ir al estado 65
+    CONST_INT   desplazar e ir al estado 57
+    CONST_STR   desplazar e ir al estado 58
+    CONST_REAL  desplazar e ir al estado 59
+    CAR_PA      desplazar e ir al estado 60
+
+    comparacion  ir al estado 96
+    expresion    ir al estado 97
+    termino      ir al estado 63
+    factor       ir al estado 64
+
+
+estado 80
+
+   44 condicion: OP_NOT comparacion .
+
+    $default  reduce usando la regla 44 (condicion)
+
+
+estado 81
+
+   52 condicion: OP_NOT between .
+
+    $default  reduce usando la regla 52 (condicion)
+
+
+estado 82
+
+   37 seleccion: if_ CAR_PA condicion CAR_PC . then_ bloque $@8 ENDIF
+   39          | if_ CAR_PA condicion CAR_PC . then_ bloque $@9 else_ bloque ENDIF
+
+    THEN  desplazar e ir al estado 98
+
+    then_  ir al estado 99
+
+
+estado 83
+
+   53 op_and_: OP_AND .
+
+    $default  reduce usando la regla 53 (op_and_)
+
+
+estado 84
+
+   54 op_or_: OP_OR .
+
+    $default  reduce usando la regla 54 (op_or_)
+
+
+estado 85
+
+   46 condicion: comparacion op_and_ . $@10 comparacion
+
+    $default  reduce usando la regla 45 ($@10)
+
+    $@10  ir al estado 100
+
+
+estado 86
+
+   48 condicion: comparacion op_or_ . $@11 comparacion
+
+    $default  reduce usando la regla 47 ($@11)
+
+    $@11  ir al estado 101
+
+
+estado 87
+
+   56 comparacion: expresion OP_COMPARACION . $@12 expresion
+
+    $default  reduce usando la regla 55 ($@12)
+
+    $@12  ir al estado 102
+
+
+estado 88
+
+   26 ciclo: WHILE $@6 CAR_PA condicion CAR_PC . bloque endw_
+
+    ID       desplazar e ir al estado 17
+    IF       desplazar e ir al estado 18
+    WHILE    desplazar e ir al estado 19
+    REPEAT   desplazar e ir al estado 20
+    BETWEEN  desplazar e ir al estado 21
+    WRITE    desplazar e ir al estado 22
+    READ     desplazar e ir al estado 23
+
+    bloque          ir al estado 103
+    sentencia       ir al estado 25
+    ciclo           ir al estado 26
+    asignacion      ir al estado 27
+    lista_id        ir al estado 28
+    entrada_salida  ir al estado 29
+    seleccion       ir al estado 30
+    if_             ir al estado 31
+    between         ir al estado 32
+
+
+estado 89
+
+   24 ciclo: REPEAT $@4 bloque UNTIL $@5 . condicion
+
+    ID          desplazar e ir al estado 65
+    CONST_INT   desplazar e ir al estado 57
+    CONST_STR   desplazar e ir al estado 58
+    CONST_REAL  desplazar e ir al estado 59
+    OP_NOT      desplazar e ir al estado 66
+    CAR_PA      desplazar e ir al estado 60
+    BETWEEN     desplazar e ir al estado 21
+
+    condicion    ir al estado 104
+    comparacion  ir al estado 68
+    expresion    ir al estado 69
+    between      ir al estado 70
+    termino      ir al estado 63
+    factor       ir al estado 64
+
+
+estado 90
+
+   64 between: BETWEEN $@13 CAR_PA ID $@14 . CAR_COMA CAR_CA expresion $@15 CAR_PYC expresion $@16 CAR_CC CAR_PC
+
+    CAR_COMA  desplazar e ir al estado 105
+
+
+estado 91
+
+   72 factor: CAR_PA expresion CAR_PC .
+
+    $default  reduce usando la regla 72 (factor)
+
+
+estado 92
+
+   57 expresion: expresion OP_SUM termino .
+   65 termino: termino . OP_MUL factor
+   66        | termino . OP_DIV factor
+
+    OP_MUL  desplazar e ir al estado 77
+    OP_DIV  desplazar e ir al estado 78
+
+    $default  reduce usando la regla 57 (expresion)
+
+
+estado 93
+
+   58 expresion: expresion OP_RES termino .
+   65 termino: termino . OP_MUL factor
+   66        | termino . OP_DIV factor
+
+    OP_MUL  desplazar e ir al estado 77
+    OP_DIV  desplazar e ir al estado 78
+
+    $default  reduce usando la regla 58 (expresion)
+
+
+estado 94
+
+   65 termino: termino OP_MUL factor .
+
+    $default  reduce usando la regla 65 (termino)
+
+
+estado 95
+
+   66 termino: termino OP_DIV factor .
+
+    $default  reduce usando la regla 66 (termino)
+
+
+estado 96
+
+   49 condicion: OP_NOT CAR_PA comparacion . OP_AND comparacion CAR_PC
+   50          | OP_NOT CAR_PA comparacion . OP_OR comparacion CAR_PC
+
+    OP_AND  desplazar e ir al estado 106
+    OP_OR   desplazar e ir al estado 107
+
+
+estado 97
+
+   56 comparacion: expresion . OP_COMPARACION $@12 expresion
+   57 expresion: expresion . OP_SUM termino
+   58          | expresion . OP_RES termino
+   72 factor: CAR_PA expresion . CAR_PC
+
+    OP_COMPARACION  desplazar e ir al estado 87
+    OP_SUM          desplazar e ir al estado 75
+    OP_RES          desplazar e ir al estado 76
+    CAR_PC          desplazar e ir al estado 91
+
+
+estado 98
+
+   41 then_: THEN .
+
+    $default  reduce usando la regla 41 (then_)
+
+
+estado 99
+
+   37 seleccion: if_ CAR_PA condicion CAR_PC then_ . bloque $@8 ENDIF
+   39          | if_ CAR_PA condicion CAR_PC then_ . bloque $@9 else_ bloque ENDIF
+
+    ID       desplazar e ir al estado 17
+    IF       desplazar e ir al estado 18
+    WHILE    desplazar e ir al estado 19
+    REPEAT   desplazar e ir al estado 20
+    BETWEEN  desplazar e ir al estado 21
+    WRITE    desplazar e ir al estado 22
+    READ     desplazar e ir al estado 23
+
+    bloque          ir al estado 108
+    sentencia       ir al estado 25
+    ciclo           ir al estado 26
+    asignacion      ir al estado 27
+    lista_id        ir al estado 28
+    entrada_salida  ir al estado 29
+    seleccion       ir al estado 30
+    if_             ir al estado 31
+    between         ir al estado 32
+
+
+estado 100
+
+   46 condicion: comparacion op_and_ $@10 . comparacion
+
+    ID          desplazar e ir al estado 65
+    CONST_INT   desplazar e ir al estado 57
+    CONST_STR   desplazar e ir al estado 58
+    CONST_REAL  desplazar e ir al estado 59
+    CAR_PA      desplazar e ir al estado 60
+
+    comparacion  ir al estado 109
+    expresion    ir al estado 69
+    termino      ir al estado 63
+    factor       ir al estado 64
+
+
+estado 101
+
+   48 condicion: comparacion op_or_ $@11 . comparacion
+
+    ID          desplazar e ir al estado 65
+    CONST_INT   desplazar e ir al estado 57
+    CONST_STR   desplazar e ir al estado 58
+    CONST_REAL  desplazar e ir al estado 59
+    CAR_PA      desplazar e ir al estado 60
+
+    comparacion  ir al estado 110
+    expresion    ir al estado 69
+    termino      ir al estado 63
+    factor       ir al estado 64
+
+
+estado 102
+
+   56 comparacion: expresion OP_COMPARACION $@12 . expresion
+
+    ID          desplazar e ir al estado 65
+    CONST_INT   desplazar e ir al estado 57
+    CONST_STR   desplazar e ir al estado 58
+    CONST_REAL  desplazar e ir al estado 59
+    CAR_PA      desplazar e ir al estado 60
+
+    expresion  ir al estado 111
+    termino    ir al estado 63
+    factor     ir al estado 64
+
+
+estado 103
+
+   15 bloque: bloque . sentencia
+   26 ciclo: WHILE $@6 CAR_PA condicion CAR_PC bloque . endw_
+
+    ID       desplazar e ir al estado 17
+    IF       desplazar e ir al estado 18
+    WHILE    desplazar e ir al estado 19
+    ENDW     desplazar e ir al estado 112
+    REPEAT   desplazar e ir al estado 20
+    BETWEEN  desplazar e ir al estado 21
+    WRITE    desplazar e ir al estado 22
+    READ     desplazar e ir al estado 23
+
+    sentencia       ir al estado 45
+    ciclo           ir al estado 26
+    endw_           ir al estado 113
+    asignacion      ir al estado 27
+    lista_id        ir al estado 28
+    entrada_salida  ir al estado 29
+    seleccion       ir al estado 30
+    if_             ir al estado 31
+    between         ir al estado 32
+
+
+estado 104
+
+   24 ciclo: REPEAT $@4 bloque UNTIL $@5 condicion .
+
+    $default  reduce usando la regla 24 (ciclo)
+
+
+estado 105
+
+   64 between: BETWEEN $@13 CAR_PA ID $@14 CAR_COMA . CAR_CA expresion $@15 CAR_PYC expresion $@16 CAR_CC CAR_PC
+
+    CAR_CA  desplazar e ir al estado 114
+
+
+estado 106
+
+   49 condicion: OP_NOT CAR_PA comparacion OP_AND . comparacion CAR_PC
+
+    ID          desplazar e ir al estado 65
+    CONST_INT   desplazar e ir al estado 57
+    CONST_STR   desplazar e ir al estado 58
+    CONST_REAL  desplazar e ir al estado 59
+    CAR_PA      desplazar e ir al estado 60
+
+    comparacion  ir al estado 115
+    expresion    ir al estado 69
+    termino      ir al estado 63
+    factor       ir al estado 64
+
+
+estado 107
+
+   50 condicion: OP_NOT CAR_PA comparacion OP_OR . comparacion CAR_PC
+
+    ID          desplazar e ir al estado 65
+    CONST_INT   desplazar e ir al estado 57
+    CONST_STR   desplazar e ir al estado 58
+    CONST_REAL  desplazar e ir al estado 59
+    CAR_PA      desplazar e ir al estado 60
+
+    comparacion  ir al estado 116
+    expresion    ir al estado 69
+    termino      ir al estado 63
+    factor       ir al estado 64
+
+
+estado 108
+
+   15 bloque: bloque . sentencia
+   37 seleccion: if_ CAR_PA condicion CAR_PC then_ bloque . $@8 ENDIF
+   39          | if_ CAR_PA condicion CAR_PC then_ bloque . $@9 else_ bloque ENDIF
+
+    ID       desplazar e ir al estado 17
+    IF       desplazar e ir al estado 18
+    WHILE    desplazar e ir al estado 19
+    REPEAT   desplazar e ir al estado 20
+    BETWEEN  desplazar e ir al estado 21
+    WRITE    desplazar e ir al estado 22
+    READ     desplazar e ir al estado 23
+
+    ELSE      reduce usando la regla 38 ($@9)
+    $default  reduce usando la regla 36 ($@8)
+
+    sentencia       ir al estado 45
+    ciclo           ir al estado 26
+    asignacion      ir al estado 27
+    lista_id        ir al estado 28
+    entrada_salida  ir al estado 29
+    seleccion       ir al estado 30
+    $@8             ir al estado 117
+    $@9             ir al estado 118
+    if_             ir al estado 31
+    between         ir al estado 32
+
+
+estado 109
+
+   46 condicion: comparacion op_and_ $@10 comparacion .
+
+    $default  reduce usando la regla 46 (condicion)
+
+
+estado 110
+
+   48 condicion: comparacion op_or_ $@11 comparacion .
+
+    $default  reduce usando la regla 48 (condicion)
+
+
+estado 111
+
+   56 comparacion: expresion OP_COMPARACION $@12 expresion .
+   57 expresion: expresion . OP_SUM termino
+   58          | expresion . OP_RES termino
+
+    OP_SUM  desplazar e ir al estado 75
+    OP_RES  desplazar e ir al estado 76
+
+    $default  reduce usando la regla 56 (comparacion)
+
+
+estado 112
+
+   27 endw_: ENDW .
+
+    $default  reduce usando la regla 27 (endw_)
+
+
+estado 113
+
+   26 ciclo: WHILE $@6 CAR_PA condicion CAR_PC bloque endw_ .
+
+    $default  reduce usando la regla 26 (ciclo)
+
+
+estado 114
+
+   64 between: BETWEEN $@13 CAR_PA ID $@14 CAR_COMA CAR_CA . expresion $@15 CAR_PYC expresion $@16 CAR_CC CAR_PC
+
+    ID          desplazar e ir al estado 65
+    CONST_INT   desplazar e ir al estado 57
+    CONST_STR   desplazar e ir al estado 58
+    CONST_REAL  desplazar e ir al estado 59
+    CAR_PA      desplazar e ir al estado 60
+
+    expresion  ir al estado 119
+    termino    ir al estado 63
+    factor     ir al estado 64
+
+
+estado 115
+
+   49 condicion: OP_NOT CAR_PA comparacion OP_AND comparacion . CAR_PC
+
+    CAR_PC  desplazar e ir al estado 120
+
+
+estado 116
+
+   50 condicion: OP_NOT CAR_PA comparacion OP_OR comparacion . CAR_PC
+
+    CAR_PC  desplazar e ir al estado 121
+
+
+estado 117
+
+   37 seleccion: if_ CAR_PA condicion CAR_PC then_ bloque $@8 . ENDIF
+
+    ENDIF  desplazar e ir al estado 122
+
+
+estado 118
+
+   39 seleccion: if_ CAR_PA condicion CAR_PC then_ bloque $@9 . else_ bloque ENDIF
+
+    ELSE  desplazar e ir al estado 123
+
+    else_  ir al estado 124
+
+
+estado 119
+
+   57 expresion: expresion . OP_SUM termino
+   58          | expresion . OP_RES termino
+   64 between: BETWEEN $@13 CAR_PA ID $@14 CAR_COMA CAR_CA expresion . $@15 CAR_PYC expresion $@16 CAR_CC CAR_PC
+
+    OP_SUM  desplazar e ir al estado 75
+    OP_RES  desplazar e ir al estado 76
+
+    $default  reduce usando la regla 62 ($@15)
+
+    $@15  ir al estado 125
+
+
+estado 120
+
+   49 condicion: OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC .
+
+    $default  reduce usando la regla 49 (condicion)
+
+
+estado 121
+
+   50 condicion: OP_NOT CAR_PA comparacion OP_OR comparacion CAR_PC .
+
+    $default  reduce usando la regla 50 (condicion)
+
+
+estado 122
+
+   37 seleccion: if_ CAR_PA condicion CAR_PC then_ bloque $@8 ENDIF .
+
+    $default  reduce usando la regla 37 (seleccion)
+
+
+estado 123
+
+   42 else_: ELSE .
+
+    $default  reduce usando la regla 42 (else_)
+
+
+estado 124
+
+   39 seleccion: if_ CAR_PA condicion CAR_PC then_ bloque $@9 else_ . bloque ENDIF
+
+    ID       desplazar e ir al estado 17
+    IF       desplazar e ir al estado 18
+    WHILE    desplazar e ir al estado 19
+    REPEAT   desplazar e ir al estado 20
+    BETWEEN  desplazar e ir al estado 21
+    WRITE    desplazar e ir al estado 22
+    READ     desplazar e ir al estado 23
+
+    bloque          ir al estado 126
+    sentencia       ir al estado 25
+    ciclo           ir al estado 26
+    asignacion      ir al estado 27
+    lista_id        ir al estado 28
+    entrada_salida  ir al estado 29
+    seleccion       ir al estado 30
+    if_             ir al estado 31
+    between         ir al estado 32
+
+
+estado 125
+
+   64 between: BETWEEN $@13 CAR_PA ID $@14 CAR_COMA CAR_CA expresion $@15 . CAR_PYC expresion $@16 CAR_CC CAR_PC
+
+    CAR_PYC  desplazar e ir al estado 127
+
+
+estado 126
+
+   15 bloque: bloque . sentencia
+   39 seleccion: if_ CAR_PA condicion CAR_PC then_ bloque $@9 else_ bloque . ENDIF
+
+    ID       desplazar e ir al estado 17
+    IF       desplazar e ir al estado 18
+    ENDIF    desplazar e ir al estado 128
+    WHILE    desplazar e ir al estado 19
+    REPEAT   desplazar e ir al estado 20
+    BETWEEN  desplazar e ir al estado 21
+    WRITE    desplazar e ir al estado 22
+    READ     desplazar e ir al estado 23
+
+    sentencia       ir al estado 45
+    ciclo           ir al estado 26
+    asignacion      ir al estado 27
+    lista_id        ir al estado 28
+    entrada_salida  ir al estado 29
+    seleccion       ir al estado 30
+    if_             ir al estado 31
+    between         ir al estado 32
+
+
+estado 127
+
+   64 between: BETWEEN $@13 CAR_PA ID $@14 CAR_COMA CAR_CA expresion $@15 CAR_PYC . expresion $@16 CAR_CC CAR_PC
+
+    ID          desplazar e ir al estado 65
+    CONST_INT   desplazar e ir al estado 57
+    CONST_STR   desplazar e ir al estado 58
+    CONST_REAL  desplazar e ir al estado 59
+    CAR_PA      desplazar e ir al estado 60
+
+    expresion  ir al estado 129
+    termino    ir al estado 63
+    factor     ir al estado 64
+
+
+estado 128
+
+   39 seleccion: if_ CAR_PA condicion CAR_PC then_ bloque $@9 else_ bloque ENDIF .
+
+    $default  reduce usando la regla 39 (seleccion)
+
+
+estado 129
+
+   57 expresion: expresion . OP_SUM termino
+   58          | expresion . OP_RES termino
+   64 between: BETWEEN $@13 CAR_PA ID $@14 CAR_COMA CAR_CA expresion $@15 CAR_PYC expresion . $@16 CAR_CC CAR_PC
+
+    OP_SUM  desplazar e ir al estado 75
+    OP_RES  desplazar e ir al estado 76
+
+    $default  reduce usando la regla 63 ($@16)
+
+    $@16  ir al estado 130
+
+
+estado 130
+
+   64 between: BETWEEN $@13 CAR_PA ID $@14 CAR_COMA CAR_CA expresion $@15 CAR_PYC expresion $@16 . CAR_CC CAR_PC
+
+    CAR_CC  desplazar e ir al estado 131
+
+
+estado 131
+
+   64 between: BETWEEN $@13 CAR_PA ID $@14 CAR_COMA CAR_CA expresion $@15 CAR_PYC expresion $@16 CAR_CC . CAR_PC
+
+    CAR_PC  desplazar e ir al estado 132
+
+
+estado 132
+
+   64 between: BETWEEN $@13 CAR_PA ID $@14 CAR_COMA CAR_CA expresion $@15 CAR_PYC expresion $@16 CAR_CC CAR_PC .
+
+    $default  reduce usando la regla 64 (between)

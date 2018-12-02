@@ -50,8 +50,8 @@ CONST_STR
 *****
 cteStr2
 CONST_STR
-5
-"asd"
+17
+"asd" and 4="asd"
 *****
 cteStr3
 CONST_STR

@@ -20,7 +20,7 @@ WRITE "comienzo de Programa"
 
 
 -/ IF SIMPLE /-
-if (sa=1) THEN
+if (s<"asd" && 4="asd") THEN
 	write "IF Afirmativo"
 	write i
 ENDIF

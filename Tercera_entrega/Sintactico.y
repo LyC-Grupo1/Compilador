@@ -926,8 +926,8 @@ comparacion:
 																		
 																		
 																		ladoDerCondi=0;
-																		//free(AuxTipoLI_condi);
-																		//free(AuxTipoLD_condi);
+																		free(AuxTipoLI_condi);
+																		free(AuxTipoLD_condi);
 																			
 																		
 																		}

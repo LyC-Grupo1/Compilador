@@ -30,7 +30,7 @@ cteStr1
 s
 cteStr2
 CMP
-BNE
+BGE
 43
 BI
 37

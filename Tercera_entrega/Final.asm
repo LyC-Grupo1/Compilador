@@ -106,7 +106,7 @@ START: 		 ;Código assembler resultante de compilar el programa fuente.
 	ffree st(0)
 	sahf
 
-	JNE _etiq43
+	JBE _etiq43
 	JMP _etiq37
 _etiq37:
 	;WRITE
