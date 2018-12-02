@@ -8,7 +8,7 @@ _8^CONST_INT^-^8
 _5^CONST_INT^-^5
 _2^CONST_INT^-^2
 cteStr1^CONST_STR^22^"comienzo de Programa"
-cteStr2^CONST_STR^17^"asd" and 4="asd"
-cteStr3^CONST_STR^15^"IF Afirmativo"
+_4^CONST_INT^-^4
+cteStr2^CONST_STR^15^"IF Afirmativo"
 _30^CONST_INT^-^30
-cteStr4^CONST_STR^17^"Fin de Programa"
+cteStr3^CONST_STR^17^"Fin de Programa"

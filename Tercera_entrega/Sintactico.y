@@ -357,7 +357,7 @@ asignacion:
 				//printf("Voy a analizar un STRING \n");
 				if(flagCTESTRING == FALSE)
 				{
-					finAnormal("Error","No puede asignar IDs STRING con distinto tipo\n");
+					finAnormal("Error","\n\nAsignacion incorrecta a STRING\n\n");
 				}
 				
 			}
@@ -469,7 +469,7 @@ lista_id:
 				}
 			}
 			| ID {
-				//printf("Lei el ID %s  \n",$1);
+				//printf("Lei el ID LI asigna %s  \n",$1);
 				if(verificarExistencia($1) == EXISTE)
 				{
 					insertarEnLista($1);
@@ -1045,29 +1045,31 @@ termino:
 
 factor: 
       ID { 
-			if(verificarExistencia(yylval.str_val) == NO_EXISTE)
+			if(verificarExistencia($1) == NO_EXISTE)
 			{ 
 				finAnormal("Syntax Error","Variable no declarada"); 
 			} 
-			insertarEnLista(yylval.str_val);
 			
-			if(strcmp(recuperarTipoTS(yylval.str_val),"STRING"))
+			printf("Leo ID factor %s\n",$1);
+			insertarEnLista($1);
+			
+			if(strcmp(recuperarTipoTS($1),"STRING"))
 			{
 				flagCTESTRING = TRUE; 
 			}
 			
 			//AuxTipoFactor = (char *) malloc(sizeof(char) * (sizeof(char) + 1));
 			//sprintf(AuxTipoFactor,"%s",recuperarTipoTS(yylval.str_val));
-			strcpy(AuxTipoFactor,recuperarTipoTS(yylval.str_val));
+			strcpy(AuxTipoFactor,recuperarTipoTS($1));
 			
 			if(flagCondicion==1){
 				if(ladoDerCondi==0){
-					AuxTipoLI_condi = (char *) malloc(sizeof(char) * (strlen(yylval.str_val) + 1));
-					sprintf(AuxTipoLI_condi,"%s",recuperarTipoTS(yylval.str_val));
+					AuxTipoLI_condi = (char *) malloc(sizeof(char) * (strlen($1) + 1));
+					sprintf(AuxTipoLI_condi,"%s",recuperarTipoTS($1));
 					//printf("[ld==%d] LI = %s\n",ladoDerCondi,recuperarTipoTS(yylval.str_val));
 				}else{
-					AuxTipoLD_condi = (char *) malloc(sizeof(char) * (strlen(yylval.str_val) + 1));
-					sprintf(AuxTipoLD_condi,"%s",recuperarTipoTS(yylval.str_val));
+					AuxTipoLD_condi = (char *) malloc(sizeof(char) * (strlen($1) + 1));
+					sprintf(AuxTipoLD_condi,"%s",recuperarTipoTS($1));
 					//printf("[ld==%d]  LD = %s\n",yylval.str_val);
 				}
 			}
@@ -1075,23 +1077,23 @@ factor:
 			
 		}
       | CONST_INT {
-					  if(verificarExistencia(yylval.str_val) == NO_EXISTE)
+					  if(verificarExistencia($1) == NO_EXISTE)
 						{ 
-							insertar_TS("CONST_INT",yylval.int_val);
+							insertar_TS("CONST_INT",$1);
 						} 
-					  insertarEnLista(yylval.int_val); 
-					  sprintf(valorFactor,"%s",yylval.int_val);
+					  insertarEnLista($1); 
+					  sprintf(valorFactor,"%s",$1);
 					  
 					  //AuxTipoFactor = (char *) malloc(sizeof(char) * (sizeof(char) + 1));
 					  strcpy(AuxTipoFactor,"CONST_INT");
 					  
 						if(flagCondicion==1){
 							if(ladoDerCondi==0){
-								AuxTipoLI_condi = (char *) malloc(sizeof(char) * (strlen(yylval.str_val) + 1));
-								sprintf(AuxTipoLI_condi,"%s",recuperarTipoTS(yylval.str_val));
+								AuxTipoLI_condi = (char *) malloc(sizeof(char) * (strlen($1) + 1));
+								sprintf(AuxTipoLI_condi,"%s",recuperarTipoTS($1));
 							}else{
-								AuxTipoLD_condi = (char *) malloc(sizeof(char) * (strlen(yylval.str_val) + 1));
-								sprintf(AuxTipoLD_condi,"%s",recuperarTipoTS(yylval.str_val));
+								AuxTipoLD_condi = (char *) malloc(sizeof(char) * (strlen($1) + 1));
+								sprintf(AuxTipoLD_condi,"%s",recuperarTipoTS($1));
 							}
 						}
 					  

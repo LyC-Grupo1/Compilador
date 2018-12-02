@@ -2,7 +2,7 @@ i
 1
 :=
 b
-1
+s
 :=
 i
 8
@@ -27,15 +27,15 @@ b
 :=
 WRITE
 cteStr1
-s
-cteStr2
+a
+4
 CMP
-BGE
+BNE
 43
 BI
 37
 WRITE
-cteStr3
+cteStr2
 WRITE
 i
 BI
@@ -75,4 +75,4 @@ BI
 77
 0
 WRITE
-cteStr4
+cteStr3

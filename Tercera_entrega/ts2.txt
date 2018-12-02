@@ -48,12 +48,12 @@ CONST_STR
 22
 "comienzo de Programa"
 *****
-cteStr2
-CONST_STR
-17
-"asd" and 4="asd"
+_4
+CONST_INT
+-
+4
 *****
-cteStr3
+cteStr2
 CONST_STR
 15
 "IF Afirmativo"
@@ -63,7 +63,7 @@ CONST_INT
 -
 30
 *****
-cteStr4
+cteStr3
 CONST_STR
 17
 "Fin de Programa"

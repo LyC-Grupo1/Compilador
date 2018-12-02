@@ -39,10 +39,10 @@ INCLUDE number.asm		 ;incluye el asm para impresion de numeros
 	_5 dd 5
 	_2 dd 2
 	_cteStr1 db "comienzo de Programa", '$', 22 dup(?)
-	_cteStr2 db "asd", '$', 5 dup(?)
-	_cteStr3 db "IF Afirmativo", '$', 15 dup(?)
+	_4 dd 4
+	_cteStr2 db "IF Afirmativo", '$', 15 dup(?)
 	_30 dd 30
-	_cteStr4 db "Fin de Programa", '$', 17 dup(?)
+	_cteStr3 db "Fin de Programa", '$', 17 dup(?)
 
 .CODE ;Comienzo de la zona de codigo
 START: 		 ;Código assembler resultante de compilar el programa fuente.
@@ -52,7 +52,7 @@ START: 		 ;Código assembler resultante de compilar el programa fuente.
 	fld _1
 	fstp _i
 	;ASIGNACION
-	fld _1
+	fld _s
 	fstp _b
 	;SUMA
 	fld _5
@@ -98,19 +98,19 @@ START: 		 ;Código assembler resultante de compilar el programa fuente.
 	newLine 1
 
 	;CMP
-	fld _cteStr2
-	fld _s
+	fld _4
+	fld _a
 	fxch
 	fcomp
 	fstsw ax
 	ffree st(0)
 	sahf
 
-	JBE _etiq43
+	JNE _etiq43
 	JMP _etiq37
 _etiq37:
 	;WRITE
-	displayString _cteStr3
+	displayString _cteStr2
 	newLine 1
 
 	;WRITE
@@ -173,7 +173,7 @@ _etiq73:
 _etiq76:
 _etiq77:
 	;WRITE
-	displayString _cteStr4
+	displayString _cteStr3
 	newLine 1
 
 
