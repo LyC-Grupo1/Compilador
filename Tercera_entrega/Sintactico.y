@@ -377,8 +377,8 @@ asignacion:
 				}
 				
 				//real con otro tipo
-				if( (strcmp(auxTipoAsignacion,"CONST_REAL")==0 ) &&
-						(strcmp(AuxTipoFactor,"CONST_REAL")!=0 ) )
+				if( (strcmp(auxTipoAsignacion,"REAL")==0 || strcmp(auxTipoAsignacion,"CONST_INT")==0) &&
+						(strcmp(auxTipoAsignacion,"REAL")!=0 || strcmp(AuxTipoFactor,"CONST_REAL")!=0 ) )
 				{
 					printf("\n\n[ERROR] - No puede asignar un %s a un %s\n\n",AuxTipoFactor,auxTipoAsignacion);
 					exit(1);	
