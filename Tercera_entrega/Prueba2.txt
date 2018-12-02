@@ -10,8 +10,8 @@ beginp
 i:=1	
 b:=10
 
--/ CONDICION 1 /-
-if (i=15 && a=4) THEN
+-/ CONDICION 7 /-
+if (NOT i=15) THEN
 	i:=16
 ENDIF
 

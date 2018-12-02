@@ -1,22 +1,14 @@
-Nombre^Tipo^Longitud^Valornn^REAL^-^-
-a^INTEGER^-^-
+Nombre^Tipo^Longitud^Valorni^INTEGER^-^-
 b^INTEGER^-^-
-c^INTEGER^-^-
-i^INTEGER^-^-
+a^INTEGER^-^-
 cadena^STRING^-^-
 s^STRING^-^-
 _1^CONST_INT^-^1
-_15^CONST_INT^-^15
-_99.99^CONST_REAL^-^99.99
-_7^CONST_INT^-^7
-_5^CONST_INT^-^5
-_4^CONST_INT^-^4
-_16^CONST_INT^-^16
-_2^CONST_INT^-^2
 _8^CONST_INT^-^8
+_5^CONST_INT^-^5
+_2^CONST_INT^-^2
+cteStr1^CONST_STR^22^"comienzo de Programa"
+cteStr2^CONST_STR^5^"asd"
+cteStr3^CONST_STR^15^"IF Afirmativo"
 _30^CONST_INT^-^30
-_3^CONST_INT^-^3
-cteStr1^CONST_STR^5^"ewr"
-cteStr2^CONST_STR^5^"ewr"
-cteStr3^CONST_STR^8^"@%asdr"
-cteStr4^CONST_STR^17^"@% > = FA <asdr"
+cteStr4^CONST_STR^17^"Fin de Programa"

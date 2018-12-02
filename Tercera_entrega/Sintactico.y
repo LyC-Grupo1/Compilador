@@ -496,7 +496,8 @@ entrada_salida:
 	READ{if(DEBUG){printf("\t\tREAD\n");} } ID { char sAux[5];
 									  sprintf(sAux,yylval.str_val); 
 									  insertarEnLista("READ"); insertarEnLista(sAux);
-										printf("\t\tREAD %s\n",sAux); }
+										//printf("\t\tREAD %s\n",sAux); 
+									}
 	|WRITE ID { char sAux[5];
 									    sprintf(sAux,yylval.str_val);
 										insertarEnLista("WRITE"); 
@@ -720,7 +721,7 @@ condicion:
          |comparacion op_and_ {sprintf(posCondDos, "%d", puntero_tokens);}  
 			comparacion {
 			 flagCondicion=1;
-			 printf("CONDICION AND DOBLE, FLAGWHILE==%d",flagWHILE);
+			 //printf("CONDICION AND DOBLE, FLAGWHILE==%d",flagWHILE);
 			 if(flagWHILE == TRUE){
 				flagWHILEAND = TRUE;
 				insertarEnLista("CMP");
@@ -759,7 +760,7 @@ condicion:
 					sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true				
 					//debugPila(PILA_WHILE,tope_pila_while);		
 				 }
-				printf("CONDICION DOBLE OR\n"); 
+				if(DEBUG){printf("CONDICION DOBLE OR\n");} 
 			}
 		 |OP_NOT CAR_PA comparacion OP_AND comparacion CAR_PC { if(DEBUG){printf("NOT CONDICION DOBLE AND\n");}}
 		 |OP_NOT CAR_PA comparacion OP_OR  comparacion  CAR_PC{ if(DEBUG){printf("NOT CONDICION DOBLE OR\n");}}
@@ -911,6 +912,13 @@ comparacion:
 																			{
 																				printf("\n\n[ERROR] - No puede comparar un %s con tipo %s\n\n",AuxTipoLI_condi,AuxTipoLD_condi);
 																				exit(1);	
+																			}
+																			
+																			if( (strcmp(AuxTipoLI_condi,"STRING")==0 || strcmp(AuxTipoLI_condi,"CONST_STR")==0) &&
+																					(strcmp(AuxTipoLD_condi,"STRING")!=0 && strcmp(AuxTipoLD_condi,"CONST_STR")!=0) )
+																			{
+																				printf("\n\n[ERROR EN CONDICIONAL] - No puede comparar un %s con un %s\n\n",AuxTipoLI_condi,AuxTipoLD_condi);
+																				exit(1);
 																			}
 																			
 																		
@@ -1137,10 +1145,10 @@ factor:
 			if(flagCondicion==1){
 				if(ladoDerCondi==0){
 					AuxTipoLI_condi = (char *) malloc(sizeof(char) * (strlen(yylval.str_val) + 1));
-					sprintf(AuxTipoLI_condi,"%s",recuperarValorTS(yylval.str_val));
+					sprintf(AuxTipoLI_condi,"%s","CONST_STR");
 				}else{
 					AuxTipoLD_condi = (char *) malloc(sizeof(char) * (strlen(yylval.str_val) + 1));
-					sprintf(AuxTipoLD_condi,"%s",recuperarValorTS(yylval.str_val));
+					sprintf(AuxTipoLD_condi,"%s","CONST_STR");
 				}
 			}
 			
