@@ -541,6 +541,7 @@ seleccion:
 				int x, i, iPosActual;
 				char sPosActual[5], sPosActualTrue[5], sPosActualFalse[5], sPosCondDos[5];
 				
+				
 				x=desapilar(PILA_IF); // Primero que desapilo -> apunta a la posicion actual
 				sprintf(sPosActual, "%d", puntero_tokens);
 				escribirEnLista(x,sPosActual);
@@ -568,7 +569,9 @@ seleccion:
 					escribirEnLista(x,sPosCondDos);
 					
 					x=desapilar(PILA_IF);// Quinto que desapilo -> apunta a la parte falsa
+					sprintf(sPosActualFalse, "%d", puntero_tokens);
 					escribirEnLista(x,sPosActualFalse);
+					
 				} else {
 					// NO HAGO NADA - IF DE CONDICION SIMPLE	
 				}
@@ -717,6 +720,7 @@ condicion:
          |comparacion op_and_ {sprintf(posCondDos, "%d", puntero_tokens);}  
 			comparacion {
 			 flagCondicion=1;
+			 printf("CONDICION AND DOBLE, FLAGWHILE==%d",flagWHILE);
 			 if(flagWHILE == TRUE){
 				flagWHILEAND = TRUE;
 				insertarEnLista("CMP");

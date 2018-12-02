@@ -1,0 +1,21 @@
+﻿program  
+DECVAR	
+ n : FLOAT 
+ i, a, b: INTEGER
+ cadena, s : STRING
+ENDDEC
+
+
+beginp 
+i:=1	
+b:=10
+
+-/ CONDICION 1 /-
+if (i=15 && a=4) THEN
+	i:=16
+ENDIF
+
+
+
+endp
+

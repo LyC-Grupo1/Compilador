@@ -7,7 +7,7 @@ ENDDEC
 
 beginp 
 i:=1	
-b:=10
+b:="jorge"
 i:=b:=8+5+2
 
 -/ i:=s /-

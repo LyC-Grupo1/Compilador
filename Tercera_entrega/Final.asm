@@ -30,27 +30,16 @@ INCLUDE number.asm		 ;incluye el asm para impresion de numeros
 	@aux14 dd ?
 	@aux15 dd ?
 	_n dd ?
+	_i dd ?
 	_a dd ?
 	_b dd ?
-	_c dd ?
-	_i dd ?
 	_cadena db MAXTEXTSIZE dup(?), '$'
 	_s db MAXTEXTSIZE dup(?), '$'
 	_1 dd 1
+	_10 dd 10
 	_15 dd 15
-	_99.99 dd 99.99
-	_7 dd 7
-	_5 dd 5
 	_4 dd 4
 	_16 dd 16
-	_2 dd 2
-	_8 dd 8
-	_30 dd 30
-	_3 dd 3
-	_cteStr1 db "ewr", '$', 5 dup(?)
-	_cteStr2 db "ewr", '$', 5 dup(?)
-	_cteStr3 db "@%asdr", '$', 8 dup(?)
-	_cteStr4 db "@% > = FA <asdr", '$', 17 dup(?)
 
 .CODE ;Comienzo de la zona de codigo
 START: 		 ;CÃ³digo assembler resultante de compilar el programa fuente.
@@ -97,7 +86,7 @@ _etiq24:
 	ffree st(0)
 	sahf
 
-	JNE _etiq,ý(
+	JNE _etiq43
 	JMP _etiq31
 _etiq31:
 	;CMP
@@ -126,7 +115,7 @@ _etiq43:
 	ffree st(0)
 	sahf
 
-	JNE _etiq,ý(
+	JNE _etiq62
 	JMP _etiq50
 _etiq50:
 	;CMP
@@ -155,7 +144,7 @@ _etiq62:
 	ffree st(0)
 	sahf
 
-	JNE _etiq,ý(
+	JNE _etiq81
 	JMP _etiq69
 _etiq69:
 	;CMP
@@ -531,22 +520,10 @@ _etiq310:
 	newLine 1
 
 	;WRITE
-	displayString _cteStr1
-	newLine 1
-
-	;WRITE
-	displayString _cteStr2
-	newLine 1
-
 	;WRITE
 	;WRITE
-	displayString _cteStr3
-	newLine 1
-
 	;WRITE
-	displayString _cteStr4
-	newLine 1
-
+	;WRITE
 
 TERMINAR: ;Fin de ejecuciÃ³n.
 	mov ax, 4C00h ; termina la ejecuciÃ³n.

@@ -25,7 +25,7 @@ endw
 
 
 -/ CONDICION 1 /-
-if (i=15 && a=4) THEN
+if (i=15 AND a=4) THEN
 	i:=16
 ENDIF
 
