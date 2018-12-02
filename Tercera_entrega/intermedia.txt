@@ -2,7 +2,7 @@ i
 1
 :=
 b
-s
+1
 :=
 i
 8
@@ -27,7 +27,7 @@ b
 :=
 WRITE
 cteStr1
-a
+v
 4
 CMP
 BNE

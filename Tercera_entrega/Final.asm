@@ -34,6 +34,7 @@ INCLUDE number.asm		 ;incluye el asm para impresion de numeros
 	_a dd ?
 	_cadena db MAXTEXTSIZE dup(?), '$'
 	_s db MAXTEXTSIZE dup(?), '$'
+	_v dd ?
 	_1 dd 1
 	_8 dd 8
 	_5 dd 5
@@ -52,7 +53,7 @@ START: 		 ;Código assembler resultante de compilar el programa fuente.
 	fld _1
 	fstp _i
 	;ASIGNACION
-	fld _s
+	fld _1
 	fstp _b
 	;SUMA
 	fld _5
@@ -99,7 +100,7 @@ START: 		 ;Código assembler resultante de compilar el programa fuente.
 
 	;CMP
 	fld _4
-	fld _a
+	fld _v
 	fxch
 	fcomp
 	fstsw ax

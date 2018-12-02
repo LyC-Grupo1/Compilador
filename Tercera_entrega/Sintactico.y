@@ -907,8 +907,8 @@ comparacion:
 																			}
 																			
 																			//real con otro tipo
-																			if( (strcmp(AuxTipoLI_condi,"CONST_REAL")==0 ) &&
-																					(strcmp(AuxTipoLD_condi,"CONST_REAL")!=0 ) )
+																			if( (strcmp(AuxTipoLI_condi,"CONST_REAL")==0 || strcmp(AuxTipoLI_condi,"REAL")==0 ) &&
+																					(strcmp(AuxTipoLD_condi,"CONST_REAL")!=0 && strcmp(AuxTipoLD_condi,"REAL") != 0) )
 																			{
 																				printf("\n\n[ERROR] - No puede comparar un %s con tipo %s\n\n",AuxTipoLI_condi,AuxTipoLD_condi);
 																				exit(1);	

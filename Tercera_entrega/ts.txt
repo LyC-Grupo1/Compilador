@@ -3,6 +3,7 @@ b^INTEGER^-^-
 a^INTEGER^-^-
 cadena^STRING^-^-
 s^STRING^-^-
+v^REAL^-^-
 _1^CONST_INT^-^1
 _8^CONST_INT^-^8
 _5^CONST_INT^-^5

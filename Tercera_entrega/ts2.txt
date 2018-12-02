@@ -23,6 +23,11 @@ STRING
 -
 -
 *****
+v
+REAL
+-
+-
+*****
 _1
 CONST_INT
 -
